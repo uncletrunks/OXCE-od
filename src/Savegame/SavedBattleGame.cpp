@@ -23,6 +23,7 @@
 #include "SavedBattleGame.h"
 #include "SavedGame.h"
 #include "Tile.h"
+#include "HitLog.h"
 #include "Node.h"
 #include "../Mod/MapDataSet.h"
 #include "../Mod/MCDPatch.h"

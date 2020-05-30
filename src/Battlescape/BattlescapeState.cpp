@@ -75,6 +75,7 @@
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/BattleItem.h"
+#include "../Savegame/HitLog.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/Ufo.h"
 #include "../Mod/RuleEnviroEffects.h"

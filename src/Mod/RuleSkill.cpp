@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "RuleSkill.h"
+#include "Mod.h"
 #include "../Engine/Collections.h"
 #include "../Engine/ScriptBind.h"
 #include "../Battlescape/BattlescapeGame.h"

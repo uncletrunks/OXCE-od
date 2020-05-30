@@ -24,7 +24,7 @@ namespace OpenXcom
 
 class MapDataSet;
 
-enum SpecialTileType{TILE=0,
+enum SpecialTileType : int {TILE=0,
 					START_POINT,
 					UFO_POWER_SOURCE,
 					UFO_NAVIGATION,

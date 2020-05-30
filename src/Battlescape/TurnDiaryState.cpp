@@ -25,6 +25,7 @@
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
+#include "../Mod/Mod.h"
 #include "../Savegame/HitLog.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/SavedGame.h"

@@ -35,6 +35,7 @@
 #include "../Savegame/Base.h"
 #include "../Savegame/Craft.h"
 #include "../Savegame/ItemContainer.h"
+#include "../Savegame/Soldier.h"
 #include "../Battlescape/BattlescapeGenerator.h"
 #include "../Battlescape/BriefingState.h"
 #include "../Savegame/Ufo.h"

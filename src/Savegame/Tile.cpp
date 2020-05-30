@@ -29,6 +29,7 @@
 #include "../Mod/Armor.h"
 #include "SerializationHelper.h"
 #include "../Battlescape/Particle.h"
+#include "../Battlescape/BattlescapeGame.h"
 #include "../fmath.h"
 #include "SavedBattleGame.h"
 

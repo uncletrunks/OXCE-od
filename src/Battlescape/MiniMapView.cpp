@@ -22,6 +22,8 @@
 #include "MiniMapState.h"
 #include "Pathfinding.h"
 #include "../Savegame/Tile.h"
+#include "../Savegame/BattleItem.h"
+#include "../Savegame/BattleUnit.h"
 #include "Camera.h"
 #include "../Engine/Action.h"
 #include "../Interface/Cursor.h"

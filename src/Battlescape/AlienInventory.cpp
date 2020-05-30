@@ -29,6 +29,7 @@
 #include "../Mod/Mod.h"
 #include "../Mod/RuleInventory.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/Armor.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Ufopaedia/Ufopaedia.h"
 

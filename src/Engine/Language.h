@@ -21,7 +21,6 @@
 #include <vector>
 #include <string>
 #include "LocalizedText.h"
-#include "../Savegame/Soldier.h"
 #include "FileMap.h"
 
 namespace OpenXcom
@@ -32,6 +31,8 @@ enum TextWrapping { WRAP_WORDS, WRAP_LETTERS };
 class TextList;
 class ExtraStrings;
 class LanguagePlurality;
+
+enum SoldierGender : char;
 
 /**
  * Contains strings used throughout the game for localization.

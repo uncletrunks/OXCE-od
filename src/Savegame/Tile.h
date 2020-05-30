@@ -23,8 +23,6 @@
 #include "../Engine/Surface.h"
 #include "../Battlescape/Position.h"
 #include "../Mod/MapData.h"
-#include "BattleUnit.h"
-#include "BattleItem.h"
 
 #include <SDL_types.h> // for Uint8
 

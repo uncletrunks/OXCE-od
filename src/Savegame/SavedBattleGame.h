@@ -21,9 +21,7 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include "Tile.h"
-#include "BattleUnit.h"
 #include "../Mod/AlienDeployment.h"
-#include "HitLog.h"
 
 namespace OpenXcom
 {
@@ -33,15 +31,19 @@ class SavedGame;
 class MapDataSet;
 class Node;
 class BattlescapeState;
+class BattlescapeGame;
 class Position;
 class Pathfinding;
 class TileEngine;
 class RuleEnviroEffects;
 class BattleItem;
+class BattleUnit;
 class Mod;
 class State;
 class ItemContainer;
 class RuleItem;
+class HitLog;
+enum HitLogEntryType : int;
 
 /**
  * The battlescape data that gets written to disk when the game is saved.

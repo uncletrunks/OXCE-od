@@ -18,6 +18,7 @@
  */
 #include "ScannerState.h"
 #include "ScannerView.h"
+#include "BattlescapeGame.h"
 #include "../Engine/InteractiveSurface.h"
 #include "../Engine/Game.h"
 #include "../Engine/Action.h"

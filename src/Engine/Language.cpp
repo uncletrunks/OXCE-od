@@ -29,6 +29,7 @@
 #include "LanguagePlurality.h"
 #include "Unicode.h"
 #include "../Mod/ExtraStrings.h"
+#include "../Savegame/Soldier.h"
 #include "FileMap.h"
 
 namespace OpenXcom

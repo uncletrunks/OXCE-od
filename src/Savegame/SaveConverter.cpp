@@ -47,6 +47,7 @@
 #include "Vehicle.h"
 #include "AlienStrategy.h"
 #include "AlienMission.h"
+#include "Soldier.h"
 #include "../Mod/RuleResearch.h"
 #include "../Mod/RuleRegion.h"
 #include "../Mod/ArticleDefinition.h"

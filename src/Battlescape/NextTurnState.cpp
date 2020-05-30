@@ -31,7 +31,9 @@
 #include "../Interface/Text.h"
 #include "../Engine/Action.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Savegame/HitLog.h"
 #include "BattlescapeState.h"
+#include "BattlescapeGame.h"
 #include "Map.h"
 
 namespace OpenXcom

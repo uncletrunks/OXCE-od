@@ -151,6 +151,8 @@ bool Mod::EXTENDED_RUNNING_COST;
 bool Mod::EXTENDED_HWP_LOAD_ORDER;
 int Mod::EXTENDED_MELEE_REACTIONS;
 
+constexpr size_t MaxDifficultyLevels = 5;
+
 /// Predefined name for first loaded mod that have all original data
 const std::string ModNameMaster = "master";
 /// Predefined name for current mod that is loading rulesets.
@@ -470,12 +472,13 @@ Mod::Mod() :
 	}
 
 	_converter = new RuleConverter();
+	_statAdjustment.resize(MaxDifficultyLevels);
 	_statAdjustment[0].aimAndArmorMultiplier = 0.5;
 	_statAdjustment[0].growthMultiplier = 0;
-	for (int i = 1; i != 5; ++i)
+	for (size_t i = 1; i != MaxDifficultyLevels; ++i)
 	{
 		_statAdjustment[i].aimAndArmorMultiplier = 1.0;
-		_statAdjustment[i].growthMultiplier = i;
+		_statAdjustment[i].growthMultiplier = (int)i;
 	}
 
 	// Setting default value for array
@@ -2323,7 +2326,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	if (doc["difficultyCoefficient"])
 	{
 		size_t num = 0;
-		for (YAML::const_iterator i = doc["difficultyCoefficient"].begin(); i != doc["difficultyCoefficient"].end() && num < 5; ++i)
+		for (YAML::const_iterator i = doc["difficultyCoefficient"].begin(); i != doc["difficultyCoefficient"].end() && num < MaxDifficultyLevels; ++i)
 		{
 			DIFFICULTY_COEFFICIENT[num] = (*i).as<int>(DIFFICULTY_COEFFICIENT[num]);
 			_statAdjustment[num].growthMultiplier = DIFFICULTY_COEFFICIENT[num];
@@ -2333,7 +2336,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	if (doc["difficultyBasedRetaliationDelay"])
 	{
 		size_t num = 0;
-		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < 5; ++i)
+		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < MaxDifficultyLevels; ++i)
 		{
 			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
 			++num;
@@ -2567,7 +2570,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		_commendations[type] = commendations;
 	}
 	size_t count = 0;
-	for (YAML::const_iterator i = doc["aimAndArmorMultipliers"].begin(); i != doc["aimAndArmorMultipliers"].end() && count < 5; ++i)
+	for (YAML::const_iterator i = doc["aimAndArmorMultipliers"].begin(); i != doc["aimAndArmorMultipliers"].end() && count < MaxDifficultyLevels; ++i)
 	{
 		_statAdjustment[count].aimAndArmorMultiplier = (*i).as<double>(_statAdjustment[count].aimAndArmorMultiplier);
 		++count;
@@ -2575,7 +2578,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 	if (doc["statGrowthMultipliers"])
 	{
 		_statAdjustment[0].statGrowth = doc["statGrowthMultipliers"].as<UnitStats>(_statAdjustment[0].statGrowth);
-		for (size_t i = 1; i != 5; ++i)
+		for (size_t i = 1; i != MaxDifficultyLevels; ++i)
 		{
 			_statAdjustment[i].statGrowth = _statAdjustment[0].statGrowth;
 		}
@@ -5217,9 +5220,9 @@ void Mod::createTransparencyLUT(Palette *pal)
 
 StatAdjustment *Mod::getStatAdjustment(int difficulty)
 {
-	if (difficulty >= 4)
+	if ((size_t)difficulty >= MaxDifficultyLevels)
 	{
-		return &_statAdjustment[4];
+		return &_statAdjustment[MaxDifficultyLevels - 1];
 	}
 	return &_statAdjustment[difficulty];
 }

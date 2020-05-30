@@ -25,7 +25,8 @@
 namespace OpenXcom
 {
 
-enum HitLogEntryType {
+enum HitLogEntryType : int
+{
 	HITLOG_EMPTY,
 	HITLOG_NEW_TURN,
 	HITLOG_NEW_TURN_WITH_MESSAGE,

@@ -17,6 +17,8 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include "Mod.h"
+#include "Armor.h"
 #include "Unit.h"
 #include "RuleItem.h"
 #include "RuleInventory.h"
@@ -29,8 +31,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/ScriptBind.h"
 #include "../Engine/RNG.h"
-#include "Mod.h"
-#include <algorithm>
+#include "../Battlescape/BattlescapeGame.h"
 
 namespace OpenXcom
 {

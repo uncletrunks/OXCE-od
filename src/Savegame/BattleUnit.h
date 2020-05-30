@@ -21,11 +21,7 @@
 #include <string>
 #include <unordered_set>
 #include "../Battlescape/Position.h"
-#include "../Battlescape/BattlescapeGame.h"
 #include "../Mod/RuleItem.h"
-#include "../Mod/Armor.h"
-#include "../Mod/Unit.h"
-#include "../Mod/MapData.h"
 #include "Soldier.h"
 #include "BattleItem.h"
 
@@ -34,11 +30,17 @@ namespace OpenXcom
 
 class Tile;
 class BattleItem;
+class Armor;
 class Unit;
+class BattlescapeGame;
+struct BattleAction;
+struct BattleActionCost;
+struct RuleItemUseCost;
 class SavedBattleGame;
 class Node;
 class Surface;
 class RuleInventory;
+class RuleEnviroEffects;
 class Soldier;
 class SavedGame;
 class Language;
@@ -49,6 +51,12 @@ class ScriptWorkerBlit;
 struct BattleUnitStatistics;
 struct StatAdjustment;
 
+enum SpecialTileType : int;
+enum MovementType : int;
+
+
+enum ForcedTorso : Uint8 { TORSO_USE_GENDER, TORSO_ALWAYS_MALE, TORSO_ALWAYS_FEMALE };
+enum UnitSide : Uint8 { SIDE_FRONT, SIDE_LEFT, SIDE_RIGHT, SIDE_REAR, SIDE_UNDER, SIDE_MAX };
 enum UnitStatus {STATUS_STANDING, STATUS_WALKING, STATUS_FLYING, STATUS_TURNING, STATUS_AIMING, STATUS_COLLAPSING, STATUS_DEAD, STATUS_UNCONSCIOUS, STATUS_PANICKING, STATUS_BERSERK, STATUS_IGNORE_ME};
 enum UnitFaction : int {FACTION_PLAYER, FACTION_HOSTILE, FACTION_NEUTRAL};
 enum UnitBodyPart {BODYPART_HEAD, BODYPART_TORSO, BODYPART_RIGHTARM, BODYPART_LEFTARM, BODYPART_RIGHTLEG, BODYPART_LEFTLEG, BODYPART_MAX};
@@ -437,8 +445,8 @@ public:
 	BattleItem *getWeaponForReactions(bool meleeOnly) const;
 
 	/// Check if this unit is in the exit area
-	bool isInExitArea(SpecialTileType stt = START_POINT) const;
-	bool liesInExitArea(Tile *tile, SpecialTileType stt = START_POINT) const;
+	bool isInExitArea(SpecialTileType stt) const;
+	bool liesInExitArea(Tile *tile, SpecialTileType stt) const;
 	/// Gets the unit height taking into account kneeling/standing.
 	int getHeight() const;
 	/// Gets the unit floating elevation.

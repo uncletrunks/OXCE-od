@@ -27,6 +27,7 @@
 #include "../Engine/Action.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "BattlescapeState.h"
+#include "BattlescapeGame.h"
 #include "../Engine/Options.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/Mod.h"

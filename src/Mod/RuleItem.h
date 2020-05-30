@@ -22,7 +22,6 @@
 #include <yaml-cpp/yaml.h>
 #include "RuleStatBonus.h"
 #include "RuleDamageType.h"
-#include "Unit.h"
 #include "ModScript.h"
 #include "RuleResearch.h"
 #include "RuleBaseFacilityFunctions.h"
@@ -59,6 +58,7 @@ enum BattleActionType : Uint8 { BA_NONE, BA_TURN, BA_WALK, BA_KNEEL, BA_PRIME, B
 struct BattleActionCost;
 class BattleItem;
 class RuleSkill;
+class Unit;
 class SurfaceSet;
 class Surface;
 class Mod;

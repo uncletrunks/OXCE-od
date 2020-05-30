@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 #include <yaml-cpp/yaml.h>
-#include "Mod.h"
 #include "RuleBaseFacilityFunctions.h"
 
 namespace OpenXcom
 {
+
+class Mod;
+
 /**
  * Represents one research project.
  * Dependency is the list of RuleResearchs which must be discovered before a RuleResearch became available.

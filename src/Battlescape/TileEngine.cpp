@@ -31,6 +31,7 @@
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/BattleUnitStatistics.h"
+#include "../Savegame/HitLog.h"
 #include "../Engine/RNG.h"
 #include "../Engine/GraphSubset.h"
 #include "BattlescapeState.h"

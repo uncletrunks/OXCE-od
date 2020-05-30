@@ -18,6 +18,7 @@
  */
 #include "BriefingState.h"
 #include "BattlescapeState.h"
+#include "BattlescapeGame.h"
 #include "AliensCrashState.h"
 #include "../Engine/Game.h"
 #include "../Engine/LocalizedText.h"

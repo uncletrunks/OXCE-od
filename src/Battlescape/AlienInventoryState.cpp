@@ -27,6 +27,7 @@
 #include "../Interface/BattlescapeButton.h"
 #include "../Interface/Text.h"
 #include "../Mod/Mod.h"
+#include "../Mod/Armor.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../Savegame/BattleUnit.h"

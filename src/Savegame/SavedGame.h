@@ -29,7 +29,6 @@
 #include "../Savegame/Craft.h"
 #include "../Mod/RuleManufacture.h"
 #include "../Mod/RuleBaseFacility.h"
-#include "../Mod/Mod.h"
 #include "../Engine/Script.h"
 
 namespace OpenXcom

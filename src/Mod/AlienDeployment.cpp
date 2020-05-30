@@ -18,6 +18,7 @@
  */
 #include "AlienDeployment.h"
 #include "../Engine/RNG.h"
+#include "../Mod/Mod.h"
 #include "../fmath.h"
 
 namespace YAML

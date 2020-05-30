@@ -32,6 +32,7 @@
 #include "OptionsBattlescapeState.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "../Battlescape/BattlescapeGame.h"
 
 namespace OpenXcom
 {

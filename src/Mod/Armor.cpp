@@ -17,9 +17,11 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Armor.h"
+#include "Unit.h"
 #include "../Engine/ScriptBind.h"
 #include "Mod.h"
 #include "RuleSoldier.h"
+#include "../Savegame/BattleUnit.h"
 
 namespace OpenXcom
 {

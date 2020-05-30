@@ -31,6 +31,7 @@ class Text;
 class ComboBox;
 class Timer;
 class DogfightState;
+class Craft;
 class Ufo;
 class MissionSite;
 class Base;

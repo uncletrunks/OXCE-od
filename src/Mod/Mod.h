@@ -29,7 +29,6 @@
 #include "../Engine/Collections.h"
 #include "../Savegame/GameTime.h"
 #include "RuleDamageType.h"
-#include "Unit.h"
 #include "RuleAlienMission.h"
 #include "RuleBaseFacilityFunctions.h"
 
@@ -264,7 +263,7 @@ private:
 	std::map<std::string, std::vector<int> > _selectUnitSound, _startMovingSound, _selectWeaponSound, _annoyedSound;
 	std::vector<int> _flagByKills;
 	int _pediaReplaceCraftFuelWithRangeType;
-	StatAdjustment _statAdjustment[5];
+	std::vector<StatAdjustment> _statAdjustment;
 
 	std::map<std::string, int> _ufopaediaSections;
 	std::vector<std::string> _countriesIndex, _extraGlobeLabelsIndex, _regionsIndex, _facilitiesIndex, _craftsIndex, _craftWeaponsIndex, _itemCategoriesIndex, _itemsIndex, _invsIndex, _ufosIndex;

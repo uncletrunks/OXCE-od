@@ -22,6 +22,7 @@
 #include "RuleResearch.h"
 #include "RuleCraft.h"
 #include "RuleItem.h"
+#include "Mod.h"
 #include "../Engine/Collections.h"
 
 namespace OpenXcom

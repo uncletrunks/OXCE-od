@@ -40,7 +40,6 @@
 #include "../Mod/RuleSkill.h"
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleSoldierBonus.h"
-#include "../Mod/Mod.h"
 #include "Soldier.h"
 #include "Tile.h"
 #include "SavedGame.h"

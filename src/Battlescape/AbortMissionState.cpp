@@ -26,6 +26,7 @@
 #include "../Interface/TextButton.h"
 #include "../Engine/Action.h"
 #include "../Savegame/SavedBattleGame.h"
+#include "BattlescapeGame.h"
 #include "BattlescapeState.h"
 #include "../Engine/Options.h"
 #include "../Mod/AlienDeployment.h"

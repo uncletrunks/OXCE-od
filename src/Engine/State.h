@@ -20,7 +20,6 @@
 #include <vector>
 #include <string>
 #include <SDL.h>
-#include "../Savegame/Soldier.h"
 #include "LocalizedText.h"
 
 namespace OpenXcom
@@ -33,6 +32,8 @@ class Window;
 class Action;
 class SavedBattleGame;
 class RuleInterface;
+
+enum SoldierGender : char;
 
 /**
  * A game state that receives user input and reacts accordingly.

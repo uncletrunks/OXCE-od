@@ -18,11 +18,12 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <yaml-cpp/yaml.h>
-#include "Unit.h"
 #include "StatStringCondition.h"
 
 namespace OpenXcom
 {
+
+struct UnitStats;
 
 /**
  * For adding statStrings to the game.
