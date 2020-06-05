@@ -1408,7 +1408,7 @@ template<typename T>
 static void afterLoadHelper(const char* name, Mod* mod, std::map<std::string, T*>& list, void (T::* func)(const Mod*))
 {
 	std::ostringstream errorStream;
-	int errorLimit = 10;
+	int errorLimit = 30;
 	int errorCount = 0;
 	for (auto& rule : list)
 	{
