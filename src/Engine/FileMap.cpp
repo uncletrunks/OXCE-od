@@ -1042,6 +1042,7 @@ void scanModDir(const std::string& dirname, const std::string& basename, bool pr
 		"XcomUtil_Always_Nighttime",
 		"XcomUtil_Always_Nighttime_TFTD",
 		"XcomUtil_Fighter_Transports",
+		"XcomUtil_Fighter_Transports_TFTD",
 		"XcomUtil_High_Explosive_Damage",
 		"XcomUtil_High_Explosive_Damage_TFTD",
 		"XcomUtil_Improved_Gauss",
@@ -1061,6 +1062,7 @@ void scanModDir(const std::string& dirname, const std::string& basename, bool pr
 		"XcomUtil_Starting_Improved_Base_TFTD",
 		"XcomUtil_Statstrings",
 		"XcomUtil_Statstrings_TFTD",
+		"XcomUtil_Triton_Weapon_Slot",
 		"XCOM_Damage"
 	};
 
