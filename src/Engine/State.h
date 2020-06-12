@@ -112,7 +112,7 @@ public:
 
 	/// Changes a set of colors on the state's 8bpp palette.
 	void setStatePalette(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
-	/// Changes a set of colors on the state's 8bpp palette.
+	/// Changes a set of colors on the state's 8bpp palette of helper surfaces.
 	void setModPalette();
 
 	/// Changes the state's 8bpp palette with certain resources.

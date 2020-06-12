@@ -396,8 +396,6 @@ public:
 	const std::map<std::string, Palette*> &getPalettes() const { return _palettes; }
 	/// Gets a particular palette.
 	Palette *getPalette(const std::string &name, bool error = true) const;
-	/// Sets a new palette.
-	void setPaletteForAllResources(const SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Gets list of voxel data.
 	std::vector<Uint16> *getVoxelData();
 	/// Returns a specific sound from either the land or underwater sound set.

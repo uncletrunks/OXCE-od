@@ -946,33 +946,6 @@ Palette *Mod::getPalette(const std::string &name, bool error) const
 }
 
 /**
- * Changes the palette of all the graphics in the mod.
- * @param colors Pointer to the set of colors.
- * @param firstcolor Offset of the first color to replace.
- * @param ncolors Amount of colors to replace.
- */
-void Mod::setPaletteForAllResources(const SDL_Color *colors, int firstcolor, int ncolors)
-{
-	_statePalette = colors;
-	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
-	{
-		i->second->setPalette(colors, firstcolor, ncolors);
-	}
-	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
-	{
-		if (CrossPlatform::compareExt(i->first, "LBM"))
-			continue;
-		if (i->first.find("_CPAL") != std::string::npos)
-			continue;
-		i->second->setPalette(colors, firstcolor, ncolors);
-	}
-	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
-	{
-		i->second->setPalette(colors, firstcolor, ncolors);
-	}
-}
-
-/**
  * Returns the list of voxeldata in the mod.
  * @return Pointer to the list of voxeldata.
  */

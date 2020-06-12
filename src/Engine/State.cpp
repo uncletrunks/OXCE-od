@@ -263,10 +263,7 @@ void State::init()
 	_game->getFpsCounter()->setPalette(_palette);
 	_game->getFpsCounter()->setColor(_cursorColor);
 	_game->getFpsCounter()->draw();
-	if (_game->getMod() != 0)
-	{
-		_game->getMod()->setPaletteForAllResources(_palette);
-	}
+
 	for (std::vector<Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
 	{
 		Window* window = dynamic_cast<Window*>(*i);
@@ -516,8 +513,7 @@ void State::setStatePalette(const SDL_Color *colors, int firstcolor, int ncolors
 }
 
 /**
- * FIXME: Try to remove this method completely!
- * Same (and very expensive!) functionality is performed twice, once in the State constructor when setting the palette and second time in State::init()
+ * Set palette for helper surfaces like cursor or fps counter.
  */
 void State::setModPalette()
 {
@@ -526,10 +522,6 @@ void State::setModPalette()
 		_game->getCursor()->draw();
 		_game->getFpsCounter()->setPalette(_palette);
 		_game->getFpsCounter()->draw();
-		if (_game->getMod() != 0)
-		{
-			_game->getMod()->setPaletteForAllResources(_palette);
-		}
 	}
 }
 
