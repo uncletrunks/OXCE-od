@@ -25,6 +25,8 @@
 namespace OpenXcom
 {
 
+const SDL_Color Font::TerminalColors[2] = {{0, 0, 0, 0}, {185, 185, 185, 255}};
+
 /**
  * Initializes the font with a blank surface.
  */
@@ -82,8 +84,7 @@ void Font::loadTerminal()
 	SDL_RWops *rw = SDL_RWFromConstMem(dosFont, DOSFONT_SIZE);
 	SDL_Surface *s = SDL_LoadBMP_RW(rw, SDL_TRUE);
 	image.surface = new Surface(s->w, s->h);
-	SDL_Color terminal[2] = {{0, 0, 0, 0}, {185, 185, 185, 255}};
-	image.surface->setPalette(terminal, 0, 2);
+	image.surface->setPalette(TerminalColors, 0, std::size(TerminalColors));
 	SDL_BlitSurface(s, 0, image.surface->getSurface(), 0);
 	SDL_FreeSurface(s);
 	_images.push_back(image);
@@ -167,12 +168,13 @@ void Font::init(size_t index, const UString &str)
  * @return Pointer to the font's surface with the respective
  * cropping rectangle set up.
  */
-SurfaceCrop Font::getChar(UCode c)
+SurfaceCrop Font::getChar(UCode c) const
 {
-	if (_chars.find(c) == _chars.end())
-		c = '?';
-	auto surfaceCrop = _images[_chars[c].first].surface->getCrop();
-	*surfaceCrop.getCrop() = _chars[c].second;
+	auto f = _chars.find(c);
+	if (f == _chars.end())
+		f = _chars.find('?');
+	auto surfaceCrop = _images[f->second.first].surface->getCrop();
+	*surfaceCrop.getCrop() = f->second.second;
 	return surfaceCrop;
 }
 
@@ -210,17 +212,18 @@ int Font::getSpacing() const
  * @param c Font character.
  * @return Width and Height dimensions (X and Y are ignored).
  */
-SDL_Rect Font::getCharSize(UCode c)
+SDL_Rect Font::getCharSize(UCode c) const
 {
 	SDL_Rect size = { 0, 0, 0, 0 };
 	if (Unicode::isPrintable(c))
 	{
-		if (_chars.find(c) == _chars.end())
-			c = '?';
+		auto f = _chars.find(c);
+		if (f == _chars.end())
+			f = _chars.find('?');
 
-		FontImage *image = &_images[_chars[c].first];
-		size.w = _chars[c].second.w + image->spacing;
-		size.h = _chars[c].second.h + image->spacing;
+		const FontImage *image = &_images[f->second.first];
+		size.w = f->second.second.w + image->spacing;
+		size.h = f->second.second.h + image->spacing;
 	}
 	else
 	{
@@ -238,29 +241,6 @@ SDL_Rect Font::getCharSize(UCode c)
 	size.x = size.w;
 	size.y = size.h;
 	return size;
-}
-
-/**
- * Returns the font's 8bpp palette.
- * @return Pointer to the palette's colors.
- */
-SDL_Color *Font::getPalette() const
-{
-	return _images[0].surface->getPalette();
-}
-
-/**
- * Replaces a certain amount of colors in the font's palette.
- * @param colors Pointer to the set of colors.
- * @param firstcolor Offset of the first color to replace.
- * @param ncolors Amount of colors to replace.
- */
-void Font::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
-{
-	for (std::vector<FontImage>::iterator i = _images.begin(); i != _images.end(); ++i)
-	{
-		(*i).surface->setPalette(colors, firstcolor, ncolors);
-	}
 }
 
 }

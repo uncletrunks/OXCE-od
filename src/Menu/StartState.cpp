@@ -73,7 +73,7 @@ StartState::StartState() : _anim(0)
 	_cursor = new Text(_font->getWidth(), _font->getHeight(), 0, 0);
 	_timer = new Timer(150);
 
-	setStatePalette(_font->getPalette(), 0, 2);
+	setStatePalette(Font::TerminalColors, 0, std::size(Font::TerminalColors));
 
 	add(_text);
 	add(_cursor);

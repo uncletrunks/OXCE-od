@@ -55,6 +55,9 @@ private:
 	void init(size_t index, const UString &str);
 public:
 
+	/// Default palette for termial text.
+	static const SDL_Color TerminalColors[2];
+
 	/// Creates a blank font.
 	Font();
 	/// Cleans up the font.
@@ -64,7 +67,7 @@ public:
 	/// Generate the terminal font.
 	void loadTerminal();
 	/// Gets a particular character from the font, with its real size.
-	SurfaceCrop getChar(UCode c);
+	SurfaceCrop getChar(UCode c) const;
 	/// Gets the font's character width.
 	int getWidth() const;
 	/// Gets the font's character height.
@@ -72,11 +75,7 @@ public:
 	/// Gets the spacing between characters.
 	int getSpacing() const;
 	/// Gets the size of a particular character;
-	SDL_Rect getCharSize(UCode c);
-	/// Gets the font's palette.
-	SDL_Color *getPalette() const;
-	/// Sets the font's palette.
-	void setPalette(const SDL_Color *colors, int firstcolor, int ncolors);
+	SDL_Rect getCharSize(UCode c) const;
 };
 
 }
