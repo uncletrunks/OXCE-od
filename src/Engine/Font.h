@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <utility>
 #include <string>
@@ -49,7 +49,7 @@ class Font
 {
 private:
 	std::vector<FontImage> _images;
-	std::map< UCode, std::pair<size_t, SDL_Rect> > _chars;
+	std::unordered_map< UCode, std::pair<size_t, SDL_Rect> > _chars;
 	bool _monospace;
 	/// Determines the size and position of each character in the font.
 	void init(size_t index, const UString &str);

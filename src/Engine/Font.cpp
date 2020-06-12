@@ -107,6 +107,9 @@ void Font::init(size_t index, const UString &str)
 	Surface *surface = image->surface;
 	surface->lock();
 	int length = (surface->getWidth() / image->width);
+
+	_chars.reserve(_chars.size() + str.size());
+
 	if (_monospace)
 	{
 		for (size_t i = 0; i < str.length(); ++i)
