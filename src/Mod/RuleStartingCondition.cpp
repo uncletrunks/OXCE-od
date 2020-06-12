@@ -54,7 +54,7 @@ void RuleStartingCondition::load(const YAML::Node& node, Mod *mod)
 		load(parent, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
-	_defaultArmor = node["defaultArmor"].as< std::map<std::string, std::map<std::string, int> > >(_defaultArmor);
+	mod->loadUnorderedNamesToNamesToInt(_type, _defaultArmor, node["defaultArmor"]);
 	mod->loadUnorderedNames(_type, _allowedArmors, node["allowedArmors"]);
 	mod->loadUnorderedNames(_type, _forbiddenArmors, node["forbiddenArmors"]);
 	mod->loadUnorderedNames(_type, _allowedVehicles, node["allowedVehicles"]);
@@ -67,7 +67,7 @@ void RuleStartingCondition::load(const YAML::Node& node, Mod *mod)
 	mod->loadUnorderedNames(_type, _forbiddenCraft, node["forbiddenCraft"]);
 	mod->loadUnorderedNames(_type, _allowedSoldierTypes, node["allowedSoldierTypes"]);
 	mod->loadUnorderedNames(_type, _forbiddenSoldierTypes, node["forbiddenSoldierTypes"]);
-	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
+	mod->loadUnorderedNamesToInt(_type, _requiredItems, node["requiredItems"]);
 	_destroyRequiredItems = node["destroyRequiredItems"].as<bool>(_destroyRequiredItems);
 
 	if (node["environmentalConditions"] || node["paletteTransformations"] || node["armorTransformations"]

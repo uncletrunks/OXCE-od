@@ -70,8 +70,8 @@ void RuleSoldierTransformation::load(const YAML::Node &node, Mod* mod, int listO
 	mod->loadUnorderedNames(_name, _forbiddenPreviousTransformations, node["forbiddenPreviousTransformations"]);
 	_includeBonusesForMinStats = node["includeBonusesForMinStats"].as<bool >(_includeBonusesForMinStats);
 	_requiredMinStats = node["requiredMinStats"].as<UnitStats >(_requiredMinStats);
-	_requiredItems = node["requiredItems"].as< std::map<std::string, int> >(_requiredItems);
-	_requiredCommendations = node["requiredCommendations"].as< std::map<std::string, int> >(_requiredCommendations);
+	mod->loadUnorderedNamesToInt(_name, _requiredItems, node["requiredItems"]);
+	mod->loadUnorderedNamesToInt(_name, _requiredCommendations, node["requiredCommendations"]);
 	_cost = node["cost"].as<int>(_cost);
 	_transferTime = node["transferTime"].as<int>(_transferTime);
 	_recoveryTime = node["recoveryTime"].as<int>(_recoveryTime);

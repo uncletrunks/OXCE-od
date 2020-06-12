@@ -991,16 +991,19 @@ int Mod::getModOffset() const
 namespace
 {
 
+const std::string YamlTagSeqShort = "!!seq";
 const std::string YamlTagSeq = "tag:yaml.org,2002:seq";
+const std::string YamlTagMapShort = "!!map";
 const std::string YamlTagMap = "tag:yaml.org,2002:map";
 const std::string YamlTagNonSpecific = "?";
 
+const std::string InfoTag = "!info";
 const std::string AddTag = "!add";
 const std::string RemoveTag = "!remove";
 
 bool isListHelper(const YAML::Node &node)
 {
-	return node.IsSequence() == true && (node.Tag() == YamlTagSeq || node.Tag() == YamlTagNonSpecific);
+	return node.IsSequence() == true && (node.Tag() == YamlTagSeq || node.Tag() == YamlTagNonSpecific || node.Tag() == InfoTag);
 }
 
 bool isListAddTagHelper(const YAML::Node &node)
@@ -1015,7 +1018,12 @@ bool isListRemoveTagHelper(const YAML::Node &node)
 
 bool isMapHelper(const YAML::Node &node)
 {
-	return node.IsMap() == true && (node.Tag() == YamlTagMap || node.Tag() == YamlTagNonSpecific);
+	return node.IsMap() == true && (node.Tag() == YamlTagMap || node.Tag() == YamlTagNonSpecific || node.Tag() == InfoTag);
+}
+
+bool isMapAddTagHelper(const YAML::Node &node)
+{
+	return node.IsMap() == true && node.Tag() == AddTag;
 }
 
 void throwOnBadListHelper(const std::string &parent, const YAML::Node &node)
@@ -1033,14 +1041,78 @@ void throwOnBadListHelper(const std::string &parent, const YAML::Node &node)
 	throw LoadRuleException(parent, node, err.str());
 }
 
-template<typename T>
-void loadVectorHelper(const std::string &parent, std::vector<T>& v, const YAML::Node &node)
+void throwOnBadMapHelper(const std::string &parent, const YAML::Node &node)
+{
+	std::ostringstream err;
+	if (node.IsMap())
+	{
+		//is sequence but still could not be loaded, this mean tag is wrong
+		err << "unsupported node tag '" << node.Tag() << "'";
+	}
+	else
+	{
+		err << "wrong node type, expected map";
+	}
+	throw LoadRuleException(parent, node, err.str());
+}
+
+template<typename... T>
+void showInfo(const std::string &parent, const YAML::Node &node, T... names)
+{
+	if (node.Tag() == InfoTag)
+	{
+		Logger info;
+		info.get() << " Options aviable for " << parent << " at line " << node.Mark().line << " are:";
+		((info.get() << " " << names), ...);
+	}
+}
+
+/**
+ * Tag dispatch struct representing normal load logic.
+ */
+struct LoadFuncStandard
+{
+	auto funcTagForNew() -> LoadFuncStandard { return { }; }
+};
+
+/**
+ * Tag dispatch struct representing special function that allow adding and removing elements.
+ */
+struct LoadFuncEditable
+{
+	auto funcTagForNew() -> LoadFuncStandard { return { }; }
+};
+
+/**
+ * Termial function loading integer
+ */
+void loadHelper(const std::string &parent, int& v, const YAML::Node &node)
+{
+	v = node.as<int>();
+}
+/**
+ * Termial function loading string
+ */
+void loadHelper(const std::string &parent, std::string& v, const YAML::Node &node)
+{
+	v = node.as<std::string>();
+}
+
+template<typename T, typename... LoadFuncTag>
+void loadHelper(const std::string &parent, std::vector<T>& v, const YAML::Node &node, LoadFuncStandard, LoadFuncTag... rest)
 {
 	if (node)
 	{
+		showInfo(parent, node, YamlTagSeqShort);
+
 		if (isListHelper(node))
 		{
-			v = node.as< std::vector<T> >();
+			v.clear();
+			v.reserve(node.size());
+			for (const YAML::Node& n : node)
+			{
+				loadHelper(parent, v.emplace_back(), n, rest.funcTagForNew()...);
+			}
 		}
 		else
 		{
@@ -1049,21 +1121,28 @@ void loadVectorHelper(const std::string &parent, std::vector<T>& v, const YAML::
 	}
 }
 
-template<typename T>
-void loadUnorderedVectorHelper(const std::string &parent, std::vector<T>& v, const YAML::Node &node)
+template<typename T, typename... LoadFuncTag>
+void loadHelper(const std::string &parent, std::vector<T>& v, const YAML::Node &node, LoadFuncEditable, LoadFuncTag... rest)
 {
 	if (node)
 	{
+		showInfo(parent, node, YamlTagSeqShort, AddTag, RemoveTag);
+
 		if (isListHelper(node))
 		{
-			v = node.as< std::vector<T> >();
+			v.clear();
+			v.reserve(node.size());
+			for (const YAML::Node& n : node)
+			{
+				loadHelper(parent, v.emplace_back(), n, rest.funcTagForNew()...);
+			}
 		}
 		else if (isListAddTagHelper(node))
 		{
 			v.reserve(v.size() + node.size());
 			for (const YAML::Node& n : node)
 			{
-				v.push_back(n.as<T>());
+				loadHelper(parent, v.emplace_back(), n, rest...);
 			}
 		}
 		else if (isListRemoveTagHelper(node))
@@ -1079,6 +1158,70 @@ void loadUnorderedVectorHelper(const std::string &parent, std::vector<T>& v, con
 		else
 		{
 			throwOnBadListHelper(parent, node);
+		}
+	}
+}
+
+template<typename K, typename V, typename... LoadFuncTag>
+void loadHelper(const std::string &parent, std::map<K, V>& v, const YAML::Node &node, LoadFuncStandard, LoadFuncTag... rest)
+{
+	if (node)
+	{
+		showInfo(parent, node, YamlTagMapShort);
+
+		if (isMapHelper(node))
+		{
+			v.clear();
+			for (const std::pair<YAML::Node, YAML::Node>& n : node)
+			{
+				auto key = n.first.as<K>();
+
+				loadHelper(parent, v[key], n.second, rest.funcTagForNew()...);
+			}
+		}
+		else
+		{
+			throwOnBadMapHelper(parent, node);
+		}
+	}
+}
+
+template<typename K, typename V, typename... LoadFuncTag>
+void loadHelper(const std::string &parent, std::map<K, V>& v, const YAML::Node &node, LoadFuncEditable, LoadFuncTag... rest)
+{
+	if (node)
+	{
+		showInfo(parent, node, YamlTagMapShort, AddTag, RemoveTag);
+
+		if (isMapHelper(node))
+		{
+			v.clear();
+			for (const std::pair<YAML::Node, YAML::Node>& n : node)
+			{
+				auto key = n.first.as<K>();
+
+				loadHelper(parent, v[key], n.second, rest.funcTagForNew()...);
+			}
+		}
+		else if (isMapAddTagHelper(node))
+		{
+			for (const std::pair<YAML::Node, YAML::Node>& n : node)
+			{
+				auto key = n.first.as<K>();
+
+				loadHelper(parent, v[key], n.second, rest...);
+			}
+		}
+		else if (isListRemoveTagHelper(node)) //we use list there as we only need key
+		{
+			for (const YAML::Node& n : node)
+			{
+				v.erase(n.as<K>());
+			}
+		}
+		else
+		{
+			throwOnBadMapHelper(parent, node);
 		}
 	}
 }
@@ -1344,37 +1487,63 @@ std::vector<std::string> Mod::getBaseFunctionNames(RuleBaseFacilityFunctions f) 
  * Gets list of ints.
  * Another mod can only override whole list, no partial edits of it.
  */
-void Mod::loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node)
+void Mod::loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const
 {
-	loadVectorHelper(parent, ints, node);
+	loadHelper(parent, ints, node, LoadFuncStandard{});
 }
 
 /**
  * Gets list of ints where order do not matter.
  * Another mod can remove or add new values without altering whole list.
  */
-void Mod::loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node)
+void Mod::loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const
 {
-	loadUnorderedVectorHelper(parent, ints, node);
+	loadHelper(parent, ints, node, LoadFuncEditable{});
 }
 
 /**
  * Gets list of names.
  * Another mod can only override whole list, no partial edits of it.
  */
-void Mod::loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node)
+void Mod::loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const
 {
-	loadVectorHelper(parent, names, node);
+	loadHelper(parent, names, node, LoadFuncStandard{});
 }
 
 /**
  * Gets list of names where order do not matter.
  * Another mod can remove or add new values without altering whole list.
  */
-void Mod::loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node)
+void Mod::loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const
 {
-	loadUnorderedVectorHelper(parent, names, node);
+	loadHelper(parent, names, node, LoadFuncEditable{});
 }
+
+
+/**
+ * Gets map from names to names.
+ */
+void Mod::loadUnorderedNamesToNames(const std::string &parent, std::map<std::string, std::string>& names, const YAML::Node &node) const
+{
+	loadHelper(parent, names, node, LoadFuncEditable{});
+}
+
+/**
+ * Gets map from names to ints.
+ */
+void Mod::loadUnorderedNamesToInt(const std::string &parent, std::map<std::string, int>& names, const YAML::Node &node) const
+{
+	loadHelper(parent, names, node, LoadFuncEditable{});
+}
+
+/**
+ * Gets map from names to names to int.
+ */
+void Mod::loadUnorderedNamesToNamesToInt(const std::string &parent, std::map<std::string, std::map<std::string, int>>& names, const YAML::Node &node) const
+{
+	loadHelper(parent, names, node, LoadFuncEditable{}, LoadFuncEditable{});
+}
+
 
 
 template<typename T>
@@ -1978,7 +2147,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		RuleEnviroEffects* rule = loadRule(*i, &_enviroEffects, &_enviroEffectsIndex);
 		if (rule != 0)
 		{
-			rule->load(*i);
+			rule->load(*i, this);
 		}
 	}
 	for (YAML::const_iterator i = doc["startingConditions"].begin(); i != doc["startingConditions"].end(); ++i)

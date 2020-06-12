@@ -62,8 +62,8 @@ void RuleManufacture::load(const YAML::Node &node, Mod* mod, int listOrder)
 	_time = node["time"].as<int>(_time);
 	_cost = node["cost"].as<int>(_cost);
 	_refund = node["refund"].as<bool>(_refund);
-	_requiredItemsNames = node["requiredItems"].as< std::map<std::string, int> >(_requiredItemsNames);
-	_producedItemsNames = node["producedItems"].as< std::map<std::string, int> >(_producedItemsNames);
+	mod->loadUnorderedNamesToInt(_name, _requiredItemsNames, node["requiredItems"]);
+	mod->loadUnorderedNamesToInt(_name, _producedItemsNames, node["producedItems"]);
 	_randomProducedItemsNames = node["randomProducedItems"].as< std::vector<std::pair<int, std::map<std::string, int> > > >(_randomProducedItemsNames);
 	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
 	_spawnedPersonName = node["spawnedPersonName"].as<std::string>(_spawnedPersonName);

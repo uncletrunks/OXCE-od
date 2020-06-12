@@ -82,16 +82,16 @@ RuleEnviroEffects::~RuleEnviroEffects()
  * Loads the EnviroEffects from a YAML file.
  * @param node YAML node.
  */
-void RuleEnviroEffects::load(const YAML::Node& node)
+void RuleEnviroEffects::load(const YAML::Node& node, const Mod* mod)
 {
 	if (const YAML::Node& parent = node["refNode"])
 	{
-		load(parent);
+		load(parent, mod);
 	}
 	_type = node["type"].as<std::string>(_type);
 	_environmentalConditions = node["environmentalConditions"].as< std::map<std::string, EnvironmentalCondition> >(_environmentalConditions);
-	_paletteTransformations = node["paletteTransformations"].as< std::map<std::string, std::string> >(_paletteTransformations);
-	_armorTransformationsName = node["armorTransformations"].as< std::map<std::string, std::string> >(_armorTransformationsName);
+	mod->loadUnorderedNamesToNames(_type, _paletteTransformations, node["paletteTransformations"]);
+	mod->loadUnorderedNamesToNames(_type, _armorTransformationsName, node["armorTransformations"]);
 	_mapBackgroundColor = node["mapBackgroundColor"].as<int>(_mapBackgroundColor);
 	_inventoryShockIndicator = node["inventoryShockIndicator"].as<std::string>(_inventoryShockIndicator);
 	_mapShockIndicator = node["mapShockIndicator"].as<std::string>(_mapShockIndicator);

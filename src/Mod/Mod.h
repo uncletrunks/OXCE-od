@@ -424,14 +424,22 @@ public:
 	std::vector<std::string> getBaseFunctionNames(RuleBaseFacilityFunctions f) const;
 
 	/// Gets list of ints.
-	void loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node);
+	void loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const;
 	/// Gets list of ints where order do not matter.
-	void loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node);
+	void loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const;
 
 	/// Gets list of names.
-	void loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
+	void loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const;
 	/// Gets list of names where order do not matter.
-	void loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node);
+	void loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const;
+
+	/// Gets map from names to names.
+	void loadUnorderedNamesToNames(const std::string &parent, std::map<std::string, std::string>& names, const YAML::Node &node) const;
+	/// Gets map from names to ints.
+	void loadUnorderedNamesToInt(const std::string &parent, std::map<std::string, int>& names, const YAML::Node &node) const;
+	/// Gets map from names to names to int.
+	void loadUnorderedNamesToNamesToInt(const std::string &parent, std::map<std::string, std::map<std::string, int>>& names, const YAML::Node &node) const;
+
 
 	/// Convert names to correct rule objects
 	template<typename T>

@@ -59,7 +59,7 @@ public:
 	/// Cleans up the EnviroEffects ruleset.
 	~RuleEnviroEffects();
 	/// Loads EnviroEffects data from YAML.
-	void load(const YAML::Node& node);
+	void load(const YAML::Node& node, const Mod* mod);
 	/// Cross link with other rules.
 	void afterLoad(const Mod* mod);
 	/// Gets the EnviroEffects's type.

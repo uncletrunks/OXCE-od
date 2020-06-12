@@ -169,7 +169,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_height = node["height"].as<int>(_height);
 	_civilians = node["civilians"].as<int>(_civilians);
 	_civilianSpawnNodeRank = node["civilianSpawnNodeRank"].as<int>(_civilianSpawnNodeRank);
-	_civiliansByType = node["civiliansByType"].as<std::map<std::string, int> >(_civiliansByType);
+	mod->loadUnorderedNamesToInt(_type, _civiliansByType, node["civiliansByType"]);
 	_terrains = node["terrains"].as<std::vector<std::string> >(_terrains);
 	_shade = node["shade"].as<int>(_shade);
 	_minShade = node["minShade"].as<int>(_minShade);
