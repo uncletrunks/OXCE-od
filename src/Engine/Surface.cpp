@@ -18,6 +18,7 @@
  */
 #include "Surface.h"
 #include "ShaderDraw.h"
+#include "ShaderMove.h"
 #include <vector>
 #include <algorithm>
 #include <SDL_gfxPrimitives.h>
@@ -886,7 +887,7 @@ bool Surface::getVisible() const
  * Returns the cropping rectangle for this surface.
  * @return Pointer to the cropping rectangle.
  */
-SurfaceCrop Surface::getCrop()
+SurfaceCrop Surface::getCrop() const
 {
 	return SurfaceCrop{ this };
 }
@@ -1061,21 +1062,19 @@ void Surface::setHeight(int height)
  */
 void SurfaceCrop::blit(Surface* dest)
 {
-	SDL_Rect* cropper;
-	SDL_Rect target{ };
-	if (_crop.w == 0 && _crop.h == 0)
-	{
-		cropper = 0;
-	}
-	else
-	{
-		cropper = &_crop;
-	}
 	if (_surface)
 	{
-		target.x = _x;
-		target.y = _y;
-		SDL_BlitSurface(_surface->getSurface(), cropper, dest->getSurface(), &target);
+		auto srcShader = ShaderCrop(*this, _x, _y);
+		auto destShader = ShaderMove<Uint8>(dest, 0, 0);
+
+		ShaderDrawFunc(
+			[](Uint8& d, Uint8 s)
+			{
+				d = s;
+			},
+			destShader,
+			srcShader
+		);
 	}
 }
 

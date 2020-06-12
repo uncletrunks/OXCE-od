@@ -75,7 +75,7 @@ Window::~Window()
  * Changes the surface used to draw the background of the window.
  * @param bg New background.
  */
-void Window::setBackground(Surface *bg)
+void Window::setBackground(const Surface *bg)
 {
 	_bg = bg;
 	_redraw = true;

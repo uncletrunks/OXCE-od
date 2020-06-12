@@ -418,7 +418,7 @@ namespace
 
 struct PaletteShift
 {
-	static inline void func(Uint8& dest, Uint8& src, int off, int mul, int mid)
+	static inline void func(Uint8& dest, const Uint8& src, int off, int mul, int mid)
 	{
 		if(src)
 		{

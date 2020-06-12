@@ -42,7 +42,7 @@ class Window : public Surface
 private:
 	static const double POPUP_SPEED;
 	int _dx, _dy;
-	Surface *_bg;
+	const Surface *_bg;
 	Uint8 _color;
 	WindowPopup _popup;
 	double _popupStep;
@@ -57,7 +57,7 @@ public:
 	/// Cleans up the window.
 	~Window();
 	/// Sets the background surface.
-	void setBackground(Surface *bg);
+	void setBackground(const Surface *bg);
 	/// Sets the border color.
 	void setColor(Uint8 color) override;
 	/// Gets the border color.

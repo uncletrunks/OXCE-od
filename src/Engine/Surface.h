@@ -196,7 +196,7 @@ public:
 	/// Gets the surface's visibility.
 	bool getVisible() const;
 	/// Gets the cropping rectangle for the surface.
-	SurfaceCrop getCrop();
+	SurfaceCrop getCrop() const;
 	/**
 	 * Changes the color of a pixel in the surface, relative to
 	 * the top-left corner of the surface. Invalid positions are ignored.
@@ -250,7 +250,17 @@ public:
 	 * @param y Y position of the pixel.
 	 * @return Pointer to the pixel.
 	 */
-	Uint8 *getRaw(int x, int y) const
+	const Uint8 *getRaw(int x, int y) const
+	{
+		return (Uint8 *)_surface->pixels + (y * _surface->pitch + x * _surface->format->BytesPerPixel);
+	}
+	/**
+	 * Returns the pointer to a specified pixel in the surface.
+	 * @param x X position of the pixel.
+	 * @param y Y position of the pixel.
+	 * @return Pointer to the pixel.
+	 */
+	Uint8 *getRaw(int x, int y)
 	{
 		return (Uint8 *)_surface->pixels + (y * _surface->pitch + x * _surface->format->BytesPerPixel);
 	}
@@ -258,7 +268,7 @@ public:
 	 * Returns the internal SDL_Surface for SDL calls.
 	 * @return Pointer to the surface.
 	 */
-	SDL_Surface *getSurface() const
+	SDL_Surface *getSurface()
 	{
 		return _surface.get();
 	}
@@ -465,7 +475,7 @@ public:
  */
 class SurfaceCrop
 {
-	Surface* _surface;
+	const Surface* _surface;
 	SDL_Rect _crop;
 	int _x, _y;
 
@@ -477,7 +487,7 @@ public:
 	}
 
 	/// Constructor
-	SurfaceCrop(Surface* surf) : _surface{ surf }, _crop{ }, _x{ surf->getX() }, _y{ surf->getY() }
+	SurfaceCrop(const Surface* surf) : _surface{ surf }, _crop{ }, _x{ surf->getX() }, _y{ surf->getY() }
 	{
 
 	}
@@ -489,7 +499,7 @@ public:
 	}
 
 	/// Get Surface.
-	Surface* getSurface()
+	const Surface* getSurface()
 	{
 		return _surface;
 	}
