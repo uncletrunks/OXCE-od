@@ -1421,7 +1421,7 @@ int Mod::getOffset(int id, int max) const
 /**
  * Load base functions to bit set.
  */
-void Mod::loadBaseFunction(const std::string& parent, std::bitset<128>& f, const YAML::Node& node)
+void Mod::loadBaseFunction(const std::string& parent, RuleBaseFacilityFunctions& f, const YAML::Node& node)
 {
 	if (node)
 	{
