@@ -55,7 +55,7 @@ private:
 	void init(size_t index, const UString &str);
 public:
 
-	/// Default palette for termial text.
+	/// Default palette for terminal text.
 	static const SDL_Color TerminalColors[2];
 
 	/// Creates a blank font.

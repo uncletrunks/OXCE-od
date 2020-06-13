@@ -1031,12 +1031,12 @@ void throwOnBadListHelper(const std::string &parent, const YAML::Node &node)
 	std::ostringstream err;
 	if (node.IsSequence())
 	{
-		//is sequence but still could not be loaded, this mean tag is wrong
+		// it is a sequence, but it could not be loaded... this means the tag is not supported
 		err << "unsupported node tag '" << node.Tag() << "'";
 	}
 	else
 	{
-		err << "wrong node type, expected list";
+		err << "wrong node type, expected a list";
 	}
 	throw LoadRuleException(parent, node, err.str());
 }
@@ -1046,12 +1046,12 @@ void throwOnBadMapHelper(const std::string &parent, const YAML::Node &node)
 	std::ostringstream err;
 	if (node.IsMap())
 	{
-		//is sequence but still could not be loaded, this mean tag is wrong
+		// it is a map, but it could not be loaded... this means the tag is not supported
 		err << "unsupported node tag '" << node.Tag() << "'";
 	}
 	else
 	{
-		err << "wrong node type, expected map";
+		err << "wrong node type, expected a map";
 	}
 	throw LoadRuleException(parent, node, err.str());
 }
@@ -1062,7 +1062,7 @@ void showInfo(const std::string &parent, const YAML::Node &node, T... names)
 	if (node.Tag() == InfoTag)
 	{
 		Logger info;
-		info.get() << " Options aviable for " << parent << " at line " << node.Mark().line << " are:";
+		info.get() << "Options available for " << parent << " at line " << node.Mark().line << " are: ";
 		((info.get() << " " << names), ...);
 	}
 }
@@ -1076,7 +1076,7 @@ struct LoadFuncStandard
 };
 
 /**
- * Tag dispatch struct representing special function that allow adding and removing elements.
+ * Tag dispatch struct representing special function that allows adding and removing elements.
  */
 struct LoadFuncEditable
 {
@@ -1084,14 +1084,14 @@ struct LoadFuncEditable
 };
 
 /**
- * Termial function loading integer
+ * Terminal function loading integer
  */
 void loadHelper(const std::string &parent, int& v, const YAML::Node &node)
 {
 	v = node.as<int>();
 }
 /**
- * Termial function loading string
+ * Terminal function loading string
  */
 void loadHelper(const std::string &parent, std::string& v, const YAML::Node &node)
 {
@@ -1212,7 +1212,7 @@ void loadHelper(const std::string &parent, std::map<K, V>& v, const YAML::Node &
 				loadHelper(parent, v[key], n.second, rest...);
 			}
 		}
-		else if (isListRemoveTagHelper(node)) //we use list there as we only need key
+		else if (isListRemoveTagHelper(node)) // we use a list here as we only need the keys
 		{
 			for (const YAML::Node& n : node)
 			{
@@ -1484,8 +1484,8 @@ std::vector<std::string> Mod::getBaseFunctionNames(RuleBaseFacilityFunctions f) 
 }
 
 /**
- * Gets list of ints.
- * Another mod can only override whole list, no partial edits of it.
+ * Loads a list of ints.
+ * Another mod can only override the whole list, no partial edits allowed.
  */
 void Mod::loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const
 {
@@ -1493,8 +1493,8 @@ void Mod::loadInts(const std::string &parent, std::vector<int>& ints, const YAML
 }
 
 /**
- * Gets list of ints where order do not matter.
- * Another mod can remove or add new values without altering whole list.
+ * Loads a list of ints where order of items does not matter.
+ * Another mod can remove or add new values without altering the whole list.
  */
 void Mod::loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const
 {
@@ -1502,8 +1502,8 @@ void Mod::loadUnorderedInts(const std::string &parent, std::vector<int>& ints, c
 }
 
 /**
- * Gets list of names.
- * Another mod can only override whole list, no partial edits of it.
+ * Loads a list of names.
+ * Another mod can only override the whole list, no partial edits allowed.
  */
 void Mod::loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const
 {
@@ -1511,8 +1511,8 @@ void Mod::loadNames(const std::string &parent, std::vector<std::string>& names, 
 }
 
 /**
- * Gets list of names where order do not matter.
- * Another mod can remove or add new values without altering whole list.
+ * Loads a list of names where order of items does not matter.
+ * Another mod can remove or add new values without altering the whole list.
  */
 void Mod::loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const
 {
@@ -1521,7 +1521,7 @@ void Mod::loadUnorderedNames(const std::string &parent, std::vector<std::string>
 
 
 /**
- * Gets map from names to names.
+ * Loads a map from names to names.
  */
 void Mod::loadUnorderedNamesToNames(const std::string &parent, std::map<std::string, std::string>& names, const YAML::Node &node) const
 {
@@ -1529,7 +1529,7 @@ void Mod::loadUnorderedNamesToNames(const std::string &parent, std::map<std::str
 }
 
 /**
- * Gets map from names to ints.
+ * Loads a map from names to ints.
  */
 void Mod::loadUnorderedNamesToInt(const std::string &parent, std::map<std::string, int>& names, const YAML::Node &node) const
 {
@@ -1537,7 +1537,7 @@ void Mod::loadUnorderedNamesToInt(const std::string &parent, std::map<std::strin
 }
 
 /**
- * Gets map from names to names to int.
+ * Loads a map from names to names to int.
  */
 void Mod::loadUnorderedNamesToNamesToInt(const std::string &parent, std::map<std::string, std::map<std::string, int>>& names, const YAML::Node &node) const
 {

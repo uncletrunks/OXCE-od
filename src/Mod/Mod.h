@@ -120,7 +120,7 @@ struct ModData
 };
 
 /**
- * Helper exception represent finall error with all required context for end user to fix error in rulesets
+ * Helper exception representing the final message with all the required context for the end user to fix the errors in rulesets
  */
 struct LoadRuleException : Exception
 {
@@ -423,21 +423,21 @@ public:
 	/// Get names of function names in given bitset.
 	std::vector<std::string> getBaseFunctionNames(RuleBaseFacilityFunctions f) const;
 
-	/// Gets list of ints.
+	/// Loads a list of ints.
 	void loadInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const;
-	/// Gets list of ints where order do not matter.
+	/// Loads a list of ints where order of items does not matter.
 	void loadUnorderedInts(const std::string &parent, std::vector<int>& ints, const YAML::Node &node) const;
 
-	/// Gets list of names.
+	/// Loads a list of names.
 	void loadNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const;
-	/// Gets list of names where order do not matter.
+	/// Loads a list of names where order of items does not matter.
 	void loadUnorderedNames(const std::string &parent, std::vector<std::string>& names, const YAML::Node &node) const;
 
-	/// Gets map from names to names.
+	/// Loads a map from names to names.
 	void loadUnorderedNamesToNames(const std::string &parent, std::map<std::string, std::string>& names, const YAML::Node &node) const;
-	/// Gets map from names to ints.
+	/// Loads a map from names to ints.
 	void loadUnorderedNamesToInt(const std::string &parent, std::map<std::string, int>& names, const YAML::Node &node) const;
-	/// Gets map from names to names to int.
+	/// Loads a map from names to names to int.
 	void loadUnorderedNamesToNamesToInt(const std::string &parent, std::map<std::string, std::map<std::string, int>>& names, const YAML::Node &node) const;
 
 

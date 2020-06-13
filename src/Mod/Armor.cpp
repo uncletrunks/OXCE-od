@@ -267,23 +267,23 @@ void Armor::afterLoad(const Mod* mod)
 	{
 		if (_corpseBattle.size() != 0)
 		{
-			throw Exception("Number of battle corpse items do not match armor size");
+			throw Exception("Number of battle corpse items does not match the armor size.");
 		}
 		else
 		{
-			throw Exception("Missed missing battle corpse item");
+			throw Exception("Missing battle corpse item(s).");
 		}
 	}
 	for (auto& c : _corpseBattle)
 	{
 		if (!c)
 		{
-			throw Exception("Missed some battle corpse item defintion");
+			throw Exception("Battle corpse item(s) cannot be empty.");
 		}
 	}
 	if (!_corpseGeo)
 	{
-		throw Exception("Missed geo corpse item defintion");
+		throw Exception("Geo corpse item cannot be empty.");
 	}
 
 	Collections::sortVector(_units);
@@ -922,7 +922,7 @@ const std::vector<const RuleSoldier*> &Armor::getUnits() const
 }
 
 /**
- * Check if soldier can use this armor.
+ * Check if a soldier can use this armor.
  */
 bool Armor::getCanBeUsedBy(const RuleSoldier* soldier) const
 {

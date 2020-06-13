@@ -290,7 +290,7 @@ public:
 
 	/// Gets the armor's units.
 	const std::vector<const RuleSoldier*> &getUnits() const;
-	/// Check if soldier can use this armor.
+	/// Check if a soldier can use this armor.
 	bool getCanBeUsedBy(const RuleSoldier* soldier) const;
 
 
