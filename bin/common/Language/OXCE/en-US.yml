@@ -95,7 +95,7 @@ en-US:
 #SoldierInfoState.cpp
   STR_MANA_RECOVERY: "MANA RECOVERY> {ALT}{0}"
   STR_HEALTH_RECOVERY: "HEALTH RECOVERY> {ALT}{0}"
-  STR_BONUSES_BUTTON: " "
+  STR_BONUSES_BUTTON: "+"
 #SoldierDiaryOverviewState.cpp
   STR_KILLER_AND_WEAPON: "{0}, {1}"
 #SoldiersState.h
