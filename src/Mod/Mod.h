@@ -243,6 +243,7 @@ private:
 	int _shortRadarRange;
 	int _buildTimeReductionScaling;
 	int _defeatScore, _defeatFunds;
+	bool _difficultyDemigod;
 	std::pair<std::string, int> _alienFuel;
 	std::string _fontName, _finalResearch, _psiUnlockResearch, _fakeUnderwaterBaseUnlockResearch;
 
@@ -926,6 +927,7 @@ public:
 	StatAdjustment *getStatAdjustment(int difficulty);
 	int getDefeatScore() const;
 	int getDefeatFunds() const;
+	bool isDemigod() const;
 };
 
 }

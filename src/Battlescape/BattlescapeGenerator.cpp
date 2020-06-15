@@ -1460,9 +1460,8 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
 	}
 	else
 	{
-		// ASSASSINATION CHALLENGE SPECIAL: screw the player, just because we didn't find a node,
-		// doesn't mean we can't ruin Tornis's day: spawn as many aliens as possible.
-		if (_game->getSavedGame()->getDifficulty() >= DIFF_SUPERHUMAN && placeUnitNearFriend(unit))
+		// DEMIGOD DIFFICULTY: screw the player: spawn as many aliens as possible.
+		if (_game->getMod()->isDemigod() && placeUnitNearFriend(unit))
 		{
 			unit->setAIModule(new AIModule(_game->getSavedGame()->getSavedBattle(), unit, 0));
 			unit->setRankInt(alienRank);

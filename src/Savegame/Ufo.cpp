@@ -153,11 +153,11 @@ void Ufo::load(const YAML::Node &node, const Mod &mod, SavedGame &game)
 	}
 	else
 	{
-		if (_damage >= _stats.damageMax)
+		if (isDestroyed())
 		{
 			_status = DESTROYED;
 		}
-		else if (_damage >= _stats.damageMax / 2)
+		else if (isCrashed())
 		{
 			_status = CRASHED;
 		}
@@ -479,11 +479,11 @@ void Ufo::setDamage(int damage, const Mod *mod)
 	{
 		_damage = 0;
 	}
-	if (_damage >= _stats.damageMax)
+	if (isDestroyed())
 	{
 		_status = DESTROYED;
 	}
-	else if (_damage >= _stats.damageMax / 2)
+	else if (isCrashed())
 	{
 		if (_huntBehavior == 1 || _rules->isUnmanned())
 		{
