@@ -144,7 +144,6 @@ int Mod::FIRE_DAMAGE_RANGE[2];
 std::string Mod::DEBRIEF_MUSIC_GOOD;
 std::string Mod::DEBRIEF_MUSIC_BAD;
 int Mod::DIFFICULTY_COEFFICIENT[5];
-int Mod::DIFFICULTY_BASED_RETAL_DELAY[5];
 int Mod::UNIT_RESPONSE_SOUNDS_FREQUENCY[4];
 bool Mod::EXTENDED_ITEM_RELOAD_COST;
 bool Mod::EXTENDED_RUNNING_COST;
@@ -217,12 +216,6 @@ void Mod::resetGlobalStatics()
 	DIFFICULTY_COEFFICIENT[2] = 2;
 	DIFFICULTY_COEFFICIENT[3] = 3;
 	DIFFICULTY_COEFFICIENT[4] = 4;
-
-	DIFFICULTY_BASED_RETAL_DELAY[0] = 0;
-	DIFFICULTY_BASED_RETAL_DELAY[1] = 0;
-	DIFFICULTY_BASED_RETAL_DELAY[2] = 0;
-	DIFFICULTY_BASED_RETAL_DELAY[3] = 0;
-	DIFFICULTY_BASED_RETAL_DELAY[4] = 0;
 
 	UNIT_RESPONSE_SOUNDS_FREQUENCY[0] = 100; // select unit
 	UNIT_RESPONSE_SOUNDS_FREQUENCY[1] = 100; // start moving
@@ -2474,15 +2467,6 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		{
 			DIFFICULTY_COEFFICIENT[num] = (*i).as<int>(DIFFICULTY_COEFFICIENT[num]);
 			_statAdjustment[num].growthMultiplier = DIFFICULTY_COEFFICIENT[num];
-			++num;
-		}
-	}
-	if (doc["difficultyBasedRetaliationDelay"])
-	{
-		size_t num = 0;
-		for (YAML::const_iterator i = doc["difficultyBasedRetaliationDelay"].begin(); i != doc["difficultyBasedRetaliationDelay"].end() && num < MaxDifficultyLevels; ++i)
-		{
-			DIFFICULTY_BASED_RETAL_DELAY[num] = (*i).as<int>(DIFFICULTY_BASED_RETAL_DELAY[num]);
 			++num;
 		}
 	}
