@@ -36,6 +36,7 @@ class ComboBox;
 class Timer;
 class Base;
 class DebriefingState;
+class RuleItem;
 
 /**
  * Sell/Sack screen that lets the player sell
@@ -55,7 +56,7 @@ private:
 	std::vector<TransferRow> _items;
 	std::vector<int> _rows;
 	std::vector<std::string> _cats;
-	std::set<std::string> _craftWeapons, _armors;
+	std::set<const RuleItem*> _craftWeapons, _armors;
 	size_t _sel;
 	int _total;
 	double _spaceChange;
