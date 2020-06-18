@@ -70,6 +70,7 @@ private:
 	const RuleItem* _storeItem = nullptr;
 	const RuleItem* _specWeapon = nullptr;
 
+	bool _infiniteSupply;
 	int _frontArmor, _sideArmor, _leftArmorDiff, _rearArmor, _underArmor, _drawingRoutine;
 	bool _drawBubbles;
 	MovementType _movementType;
@@ -112,6 +113,8 @@ public:
 	void load(const YAML::Node& node, const ModScript& parsers, Mod *mod);
 	/// Cross link with other rules.
 	void afterLoad(const Mod* mod);
+	/// Gets whether or not there is an infinite supply of this armor.
+	bool hasInfiniteSupply() const { return _infiniteSupply; }
 
 	/// Gets the armor's type.
 	const std::string& getType() const;

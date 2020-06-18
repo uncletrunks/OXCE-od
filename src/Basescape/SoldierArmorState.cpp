@@ -130,7 +130,7 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 			continue;
 		if (!a->getCanBeUsedBy(s->getRules()))
 			continue;
-		if (a->getStoreItem() == nullptr)
+		if (a->hasInfiniteSupply())
 		{
 			_armors.push_back(ArmorItem(a->getType(), tr(a->getType()), ""));
 		}
