@@ -250,6 +250,14 @@ public:
 	{
 		return std::binary_search(vec.begin(), vec.end(), v, std::less<>());
 	}
+	/**
+	 * Remove duplicates from sort vector.
+	 */
+	template<typename T>
+	static void sortVectorMakeUnique(std::vector<T>& vec)
+	{
+		vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+	}
 
 	////////////////////////////////////////////////////////////
 	//						Range

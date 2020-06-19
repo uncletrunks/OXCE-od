@@ -31,6 +31,7 @@
 #include "RuleDamageType.h"
 #include "RuleAlienMission.h"
 #include "RuleBaseFacilityFunctions.h"
+#include "RuleItem.h"
 
 namespace OpenXcom
 {
@@ -278,7 +279,12 @@ private:
 	std::vector<ModData> _modData;
 	ModData* _modCurrent;
 	const SDL_Color *_statePalette;
+
 	std::vector<std::string> _psiRequirements; // it's a cache for psiStrengthEval
+	std::vector<const Armor*> _armorsForSoldiersCache;
+	std::vector<const RuleItem*> _armorStorageItemsCache;
+	std::vector<const RuleItem*> _craftWeaponStorageItemsCache;
+
 	size_t _surfaceOffsetBigobs = 0;
 	size_t _surfaceOffsetFloorob = 0;
 	size_t _surfaceOffsetHandob = 0;
@@ -543,10 +549,14 @@ public:
 	RuleCraft *getCraft(const std::string &id, bool error = false) const;
 	/// Gets the available crafts.
 	const std::vector<std::string> &getCraftsList() const;
+
 	/// Gets the ruleset for a craft weapon type.
 	RuleCraftWeapon *getCraftWeapon(const std::string &id, bool error = false) const;
 	/// Gets the available craft weapons.
 	const std::vector<std::string> &getCraftWeaponsList() const;
+	/// Is given item a launcher or ammo for craft weapon.
+	bool isCraftWeaponStorageItem(const RuleItem* item) const;
+
 	/// Gets the ruleset for an item category type.
 	RuleItemCategory *getItemCategory(const std::string &id, bool error = false) const;
 	/// Gets the available item categories.
@@ -593,10 +603,16 @@ public:
 	AlienDeployment *getDeployment(const std::string &name, bool error = false) const;
 	/// Gets the available alien deployments.
 	const std::vector<std::string> &getDeploymentsList() const;
+
 	/// Gets armor rules.
 	Armor *getArmor(const std::string &name, bool error = false) const;
-	/// Gets the available armors.
+	/// Gets the all armors.
 	const std::vector<std::string> &getArmorsList() const;
+	/// Gets the available armors for soldiers.
+	const std::vector<const Armor*> &getArmorsForSoldiers() const;
+	/// Check if item is used for armor storage.
+	bool isArmorStorageItem(const RuleItem* item) const;
+
 	/// Gets Ufopaedia article definition.
 	ArticleDefinition *getUfopaediaArticle(const std::string &name, bool error = false) const;
 	/// Gets the available articles.

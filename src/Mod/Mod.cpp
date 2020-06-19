@@ -1729,6 +1729,8 @@ void Mod::loadAll()
 		}
 	}
 
+	// cross link rule objects
+
 	afterLoadHelper("research", this, _research, &RuleResearch::afterLoad);
 	afterLoadHelper("items", this, _items, &RuleItem::afterLoad);
 	afterLoadHelper("manufacture", this, _manufacture, &RuleManufacture::afterLoad);
@@ -1739,6 +1741,43 @@ void Mod::loadAll()
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
 	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
 	afterLoadHelper("skills", this, _skills, &RuleSkill::afterLoad);
+
+	for (auto& a : _armors)
+	{
+		if (a.second->hasInfiniteSupply())
+		{
+			_armorsForSoldiersCache.push_back(a.second);
+		}
+		else if (a.second->getStoreItem())
+		{
+			_armorsForSoldiersCache.push_back(a.second);
+			_armorStorageItemsCache.push_back(a.second->getStoreItem());
+		}
+	}
+	Collections::sortVector(_armorsForSoldiersCache);
+	Collections::sortVector(_armorStorageItemsCache);
+	Collections::sortVectorMakeUnique(_armorStorageItemsCache);
+
+
+	for (auto& c : _craftWeapons)
+	{
+		const RuleItem* item = nullptr;
+
+		item = getItem(c.second->getLauncherItem(), false);
+		if (item)
+		{
+			_craftWeaponStorageItemsCache.push_back(item);
+		}
+
+		item = getItem(c.second->getClipItem(), false);
+		if (item)
+		{
+			_craftWeaponStorageItemsCache.push_back(item);
+		}
+	}
+	Collections::sortVector(_craftWeaponStorageItemsCache);
+	Collections::sortVectorMakeUnique(_craftWeaponStorageItemsCache);
+
 
 	// check unique listOrder
 	{
@@ -3071,6 +3110,13 @@ const std::vector<std::string> &Mod::getCraftWeaponsList() const
 {
 	return _craftWeaponsIndex;
 }
+/**
+ * Is given item a launcher or ammo for craft weapon.
+ */
+bool Mod::isCraftWeaponStorageItem(const RuleItem* item) const
+{
+	return Collections::sortVectorHave(_craftWeaponStorageItemsCache, item);
+}
 
 /**
 * Returns the rules for the specified item category.
@@ -3318,6 +3364,7 @@ const std::vector<std::string> &Mod::getDeploymentsList() const
 	return _deploymentsIndex;
 }
 
+
 /**
  * Returns the info about a specific armor.
  * @param name Armor name.
@@ -3337,6 +3384,23 @@ const std::vector<std::string> &Mod::getArmorsList() const
 {
 	return _armorsIndex;
 }
+
+/**
+ * Gets the available armors for soldiers.
+ */
+const std::vector<const Armor*> &Mod::getArmorsForSoldiers() const
+{
+	return _armorsForSoldiersCache;
+}
+
+/**
+ * Check if item is used for armor storage.
+ */
+bool Mod::isArmorStorageItem(const RuleItem* item) const
+{
+	return Collections::sortVectorHave(_armorStorageItemsCache, item);
+}
+
 
 /**
  * Returns the hiring cost of an individual engineer.

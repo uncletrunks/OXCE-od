@@ -122,10 +122,9 @@ SoldierArmorState::SoldierArmorState(Base *base, size_t soldier, SoldierArmorOri
 	_sortName->setX(_sortName->getX() + _txtType->getTextWidth() + 4);
 	_sortName->onMouseClick((ActionHandler)&SoldierArmorState::sortNameClick);
 
-	const std::vector<std::string> &armors = _game->getMod()->getArmorsList();
-	for (std::vector<std::string>::const_iterator i = armors.begin(); i != armors.end(); ++i)
+	const auto &armors = _game->getMod()->getArmorsForSoldiers();
+	for (auto* a : armors)
 	{
-		Armor *a = _game->getMod()->getArmor(*i);
 		if (a->getRequiredResearch() && !_game->getSavedGame()->isResearched(a->getRequiredResearch()))
 			continue;
 		if (!a->getCanBeUsedBy(s->getRules()))

@@ -159,20 +159,6 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 
 	_cats.push_back("STR_ALL_ITEMS");
 
-	const std::vector<std::string> &cw = _game->getMod()->getCraftWeaponsList();
-	for (std::vector<std::string>::const_iterator i = cw.begin(); i != cw.end(); ++i)
-	{
-		RuleCraftWeapon *rule = _game->getMod()->getCraftWeapon(*i);
-		_craftWeapons.insert(_game->getMod()->getItem(rule->getLauncherItem(), false));
-		_craftWeapons.insert(_game->getMod()->getItem(rule->getClipItem(), false));
-	}
-	const std::vector<std::string> &ar = _game->getMod()->getArmorsList();
-	for (std::vector<std::string>::const_iterator i = ar.begin(); i != ar.end(); ++i)
-	{
-		Armor *rule = _game->getMod()->getArmor(*i);
-		_armors.insert(rule->getStoreItem());
-	}
-
 	for (std::vector<Soldier*>::iterator i = _base->getSoldiers()->begin(); i != _base->getSoldiers()->end(); ++i)
 	{
 		if (_debriefingState) break;
@@ -383,11 +369,11 @@ std::string SellState::getCategory(int sel) const
 		}
 		if (rule->getBattleType() == BT_NONE)
 		{
-			if (_craftWeapons.find(rule) != _craftWeapons.end())
+			if (_game->getMod()->isCraftWeaponStorageItem(rule))
 			{
 				return "STR_CRAFT_ARMAMENT";
 			}
-			if (_armors.find(rule) != _armors.end())
+			if (_game->getMod()->isArmorStorageItem(rule))
 			{
 				return "STR_EQUIPMENT";
 			}
