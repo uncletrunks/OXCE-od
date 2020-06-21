@@ -586,11 +586,15 @@ void ProjectileFlyBState::think()
 			&& _ammo->getAmmoQuantity() != 0
 			&& (hasFloor || unitCanFly))
 		{
-			createNewProjectile();
+			bool success = createNewProjectile();
 			if (_action.cameraPosition.z != -1)
 			{
 				_parent->getMap()->getCamera()->setMapOffset(_action.cameraPosition);
 				_parent->getMap()->invalidate();
+			}
+			if (!success)
+			{
+				_parent->getMap()->setFollowProjectile(true); // turn back on when done shooting
 			}
 		}
 		else

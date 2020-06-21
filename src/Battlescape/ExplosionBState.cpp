@@ -247,7 +247,10 @@ void ExplosionBState::init()
 			_parent->setStateInterval(std::max(1, explosionSpeed));
 			// explosion sound
 			_parent->playSound(sound);
-			_parent->getMap()->getCamera()->centerOnPosition(_center.toTile(), false);
+			if (_parent->getMap()->getFollowProjectile() || _explosionCounter > 0)
+			{
+				_parent->getMap()->getCamera()->centerOnPosition(_center.toTile(), false);
+			}
 		}
 		else
 		{
