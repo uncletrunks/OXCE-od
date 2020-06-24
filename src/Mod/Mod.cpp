@@ -1754,7 +1754,7 @@ void Mod::loadAll()
 			_armorStorageItemsCache.push_back(a.second->getStoreItem());
 		}
 	}
-	Collections::sortVector(_armorsForSoldiersCache);
+	//_armorsForSoldiersCache sorted in sortList()
 	Collections::sortVector(_armorStorageItemsCache);
 	Collections::sortVectorMakeUnique(_armorStorageItemsCache);
 
@@ -3898,6 +3898,11 @@ struct compareRule<Armor>
 	{
 		Armor* armor1 = _mod->getArmor(r1);
 		Armor* armor2 = _mod->getArmor(r2);
+		return operator()(armor1, armor2);
+	}
+
+	bool operator()(const Armor* armor1, const Armor* armor2) const
+	{
 		const RuleItem *rule1 = armor1->getStoreItem();
 		const RuleItem *rule2 = armor2->getStoreItem();
 		if (!rule1 && !rule2)
@@ -3994,6 +3999,7 @@ void Mod::sortLists()
 	// special cases
 	std::sort(_craftWeaponsIndex.begin(), _craftWeaponsIndex.end(), compareRule<RuleCraftWeapon>(this));
 	std::sort(_armorsIndex.begin(), _armorsIndex.end(), compareRule<Armor>(this));
+	std::sort(_armorsForSoldiersCache.begin(), _armorsForSoldiersCache.end(), compareRule<Armor>(this));
 	_ufopaediaSections[UFOPAEDIA_NOT_AVAILABLE] = 0;
 	std::sort(_ufopaediaIndex.begin(), _ufopaediaIndex.end(), compareRule<ArticleDefinition>(this));
 	std::sort(_ufopaediaCatIndex.begin(), _ufopaediaCatIndex.end(), compareSection(this));
