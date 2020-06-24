@@ -1070,7 +1070,7 @@ void SurfaceCrop::blit(Surface* dest)
 		ShaderDrawFunc(
 			[](Uint8& d, Uint8 s)
 			{
-				d = s;
+				if (s) d = s;
 			},
 			destShader,
 			srcShader
