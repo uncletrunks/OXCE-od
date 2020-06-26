@@ -1178,12 +1178,12 @@ struct Bind : BindBase
 
 	Bind(ScriptParserBase* p, std::string r) : BindBase{ p }, prefix{ r }
 	{
-		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set", "arg1 = arg2");
-		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set", "arg1 = arg2");
-		parser->addParser<helper::FuncGroup<helper::BindSwap<T*>>>("swap", "Swap value of arg1 and arg2");
-		parser->addParser<helper::FuncGroup<helper::BindSwap<const T*>>>("swap", "Swap value of arg1 and arg2");
-		parser->addParser<helper::FuncGroup<helper::BindClear<T*>>>("clear", "arg1 = null");
-		parser->addParser<helper::FuncGroup<helper::BindClear<const T*>>>("clear", "arg1 = null");
+		parser->addParser<helper::FuncGroup<helper::BindSet<T*>>>("set", BindBase::functionInvisible);
+		parser->addParser<helper::FuncGroup<helper::BindSet<const T*>>>("set", BindBase::functionInvisible);
+		parser->addParser<helper::FuncGroup<helper::BindSwap<T*>>>("swap", BindBase::functionInvisible);
+		parser->addParser<helper::FuncGroup<helper::BindSwap<const T*>>>("swap", BindBase::functionInvisible);
+		parser->addParser<helper::FuncGroup<helper::BindClear<T*>>>("clear", BindBase::functionInvisible);
+		parser->addParser<helper::FuncGroup<helper::BindClear<const T*>>>("clear", BindBase::functionInvisible);
 		parser->addParser<helper::FuncGroup<helper::BindEq<const T*>>>("test_eq", BindBase::functionInvisible);
 	}
 
@@ -1231,9 +1231,9 @@ struct Bind : BindBase
 				throw Exception("Errow with adding script tag to unknow type");
 			}
 			parser->addType<Tag>(conf->name.toString() + ".Tag");
-			parser->addParser<helper::FuncGroup<helper::BindSet<Tag>>>("set", "arg1 = arg2");
-			parser->addParser<helper::FuncGroup<helper::BindSwap<Tag>>>("swap", "Swap value of arg1 and arg2");
-			parser->addParser<helper::FuncGroup<helper::BindClear<Tag>>>("clear", "arg1 = null");
+			parser->addParser<helper::FuncGroup<helper::BindSet<Tag>>>("set", BindBase::functionInvisible);
+			parser->addParser<helper::FuncGroup<helper::BindSwap<Tag>>>("swap", BindBase::functionInvisible);
+			parser->addParser<helper::FuncGroup<helper::BindClear<Tag>>>("clear", BindBase::functionInvisible);
 			parser->addParser<helper::FuncGroup<helper::BindEq<Tag>>>("test_eq", BindBase::functionInvisible);
 		}
 	}
