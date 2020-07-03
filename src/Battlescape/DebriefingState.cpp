@@ -2477,7 +2477,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
  * Gets the number of recovered items of certain type.
  * @param rule Type of item.
  */
-int DebriefingState::getRecoveredItemCount(RuleItem *rule)
+int DebriefingState::getRecoveredItemCount(const RuleItem *rule)
 {
 	auto it = _recoveredItems.find(rule);
 	if (it != _recoveredItems.end())
@@ -2504,12 +2504,12 @@ int DebriefingState::getTotalRecoveredItemCount()
  * @param rule Type of item.
  * @param amount Number of items sold or transferred.
  */
-void DebriefingState::decreaseRecoveredItemCount(RuleItem *rule, int amount)
+void DebriefingState::decreaseRecoveredItemCount(const RuleItem *rule, int amount)
 {
 	auto it = _recoveredItems.find(rule);
 	if (it != _recoveredItems.end())
 	{
-		_recoveredItems[rule] = std::max(0, _recoveredItems[rule] - amount);
+		it->second = std::max(0, it->second - amount);
 	}
 }
 

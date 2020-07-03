@@ -123,11 +123,11 @@ public:
 	/// Handler for hiding tooltip.
 	void txtTooltipOut(Action *action);
 	// Gets the number of recovered items of certain type.
-	int getRecoveredItemCount(RuleItem *rule);
+	int getRecoveredItemCount(const RuleItem *rule);
 	// Gets the total number of recovered items.
 	int getTotalRecoveredItemCount();
 	// Decreases the number of recovered items by the sold/transferred amount.
-	void decreaseRecoveredItemCount(RuleItem *rule, int amount);
+	void decreaseRecoveredItemCount(const RuleItem *rule, int amount);
 	// Hides the SELL and TRANSFER buttons.
 	void hideSellTransferButtons();
 };
