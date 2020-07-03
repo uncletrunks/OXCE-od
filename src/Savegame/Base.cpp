@@ -788,11 +788,7 @@ double Base::getUsedStores() const
 	double total = _items->getTotalSize(_mod);
 	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
 	{
-		total += (*i)->getItems()->getTotalSize(_mod);
-		for (std::vector<Vehicle*>::const_iterator j = (*i)->getVehicles()->begin(); j != (*i)->getVehicles()->end(); ++j)
-		{
-			total += (*j)->getRules()->getSize();
-		}
+		total += (*i)->getTotalItemStorageSize(_mod);
 	}
 	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
 	{
@@ -803,10 +799,9 @@ double Base::getUsedStores() const
 		else if ((*i)->getType() == TRANSFER_CRAFT)
 		{
 			Craft *craft = (*i)->getCraft();
-			total += craft->getItems()->getTotalSize(_mod);
+			total += craft->getTotalItemStorageSize(_mod);
 		}
 	}
-	total -= getIgnoredStores();
 	return total;
 }
 
@@ -842,40 +837,6 @@ int Base::getAvailableStores() const
 		}
 	}
 	return total;
-}
-
-/**
- * Determines space taken up by ammo clips about to rearm craft.
- * @return Ignored storage space.
- */
-double Base::getIgnoredStores() const
-{
-	double space = 0;
-	for (auto c : *getCrafts())
-	{
-		if (c->getStatus() == "STR_REARMING")
-		{
-			for (auto w : *c->getWeapons())
-			{
-				if (w != nullptr && w->isRearming())
-				{
-					auto clip = w->getRules()->getClipItem();
-					int available = getStorageItems()->getItem(clip);
-					if (clip && available > 0)
-					{
-						int clipSize = clip->getClipSize();
-						int needed = 0;
-						if (clipSize > 0)
-						{
-							needed = (w->getRules()->getAmmoMax() - w->getAmmo()) / clipSize;
-						}
-						space += std::min(available, needed) * clip->getSize();
-					}
-				}
-			}
-		}
-	}
-	return space;
 }
 
 /**

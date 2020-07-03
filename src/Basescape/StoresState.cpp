@@ -291,45 +291,12 @@ void StoresState::initList(bool grandTotal)
 			for (std::vector<Base*>::iterator base = _game->getSavedGame()->getBases()->begin(); base != _game->getSavedGame()->getBases()->end(); ++base)
 			{
 				// 1. items in base stores
-				qty += (*base)->getStorageItems()->getItem(*item);
+				qty += (*base)->getStorageItems()->getItem(rule);
 
 				// 2. items from craft
 				for (std::vector<Craft*>::iterator craft = (*base)->getCrafts()->begin(); craft != (*base)->getCrafts()->end(); ++craft)
 				{
-					// 2a. craft equipment
-					qty += (*craft)->getItems()->getItem(*item);
-
-					// 2b. craft weapons + ammo
-					for (std::vector<CraftWeapon*>::iterator craftWeapon = (*craft)->getWeapons()->begin(); craftWeapon != (*craft)->getWeapons()->end(); ++craftWeapon)
-					{
-						if (*craftWeapon)
-						{
-							if ((*craftWeapon)->getRules()->getLauncherItem() == rule)
-							{
-								qty += 1;
-							}
-							else if ((*craftWeapon)->getRules()->getClipItem() == rule)
-							{
-								qty += (*craftWeapon)->getClipsLoaded();
-							}
-						}
-					}
-
-					// 2c. craft vehicles + ammo
-					for (std::vector<Vehicle*>::iterator vehicle = (*craft)->getVehicles()->begin(); vehicle != (*craft)->getVehicles()->end(); ++vehicle)
-					{
-						if ((*vehicle)->getRules()->getType() == (*item))
-						{
-							qty += 1;
-						}
-						else if (!(*vehicle)->getRules()->getPrimaryCompatibleAmmo()->empty())
-						{
-							if ((*vehicle)->getRules()->getPrimaryCompatibleAmmo()->front() == (*item))
-							{
-								qty += (*vehicle)->getAmmo();
-							}
-						}
-					}
+					qty += (*craft)->getTotalItemCount(rule);
 				}
 
 				// 3. armor in use (worn by soldiers)
@@ -360,44 +327,12 @@ void StoresState::initList(bool grandTotal)
 					Craft *craft2 = (*transfer)->getCraft();
 					if (craft2)
 					{
-						// 5a. craft equipment
-						qty += craft2->getItems()->getItem(*item);
-
-						// 5b. craft weapons + ammo
-						for (std::vector<CraftWeapon*>::iterator craftWeapon = craft2->getWeapons()->begin(); craftWeapon != craft2->getWeapons()->end(); ++craftWeapon)
-						{
-							if (*craftWeapon)
-							{
-								if ((*craftWeapon)->getRules()->getLauncherItem() == rule)
-								{
-									qty += 1;
-								}
-								else if ((*craftWeapon)->getRules()->getClipItem() == rule)
-								{
-									qty += (*craftWeapon)->getClipsLoaded();
-								}
-							}
-						}
-
-						// 5c. craft vehicles + ammo
-						for (std::vector<Vehicle*>::iterator vehicle = craft2->getVehicles()->begin(); vehicle != craft2->getVehicles()->end(); ++vehicle)
-						{
-							if ((*vehicle)->getRules() == rule)
-							{
-								qty += 1;
-							}
-							else if (!(*vehicle)->getRules()->getPrimaryCompatibleAmmo()->empty())
-							{
-								if ((*vehicle)->getRules()->getPrimaryCompatibleAmmo()->front() == (*item))
-								{
-									qty += (*vehicle)->getAmmo();
-								}
-							}
-						}
+						// 5a. craft equipment, weapons, vehicles
+						qty += craft2->getTotalItemCount(rule);
 					}
 					else if ((*transfer)->getItems() == (*item))
 					{
-						// 5d. items in transfer
+						// 5b. items in transfer
 						qty += (*transfer)->getQuantity();
 					}
 				}

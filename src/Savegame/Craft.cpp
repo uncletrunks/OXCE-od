@@ -609,6 +609,81 @@ std::vector<Vehicle*> *Craft::getVehicles()
 }
 
 /**
+ * Gets total storage size of all items and vehicles in craft.
+ */
+double Craft::getTotalItemStorageSize(const Mod* mod) const
+{
+	double total = _items->getTotalSize(mod);
+
+	for (const auto* v : _vehicles)
+	{
+		total += v->getRules()->getSize();
+
+		auto* clip = v->getRules()->getVehicleClipAmmo();
+		if (clip)
+		{
+			total += clip->getSize() *  v->getRules()->getVehicleClipsLoaded();
+		}
+	}
+
+	for (const auto* w : _weapons)
+	{
+		if (w)
+		{
+			total += w->getRules()->getLauncherItem()->getSize();
+
+			auto* clip = w->getRules()->getClipItem();
+			if (clip)
+			{
+				total += clip->getSize() * w->getClipsLoaded();
+			}
+		}
+	}
+
+	return total;
+}
+
+/**
+ * Gets total number of selected item type.
+ */
+int Craft::getTotalItemCount(const RuleItem* item) const
+{
+	auto qty = _items->getItem(item);
+
+	for (const auto* v : _vehicles)
+	{
+		if (v->getRules() == item)
+		{
+			qty += 1;
+		}
+		else if (!v->getRules()->getVehicleClipAmmo())
+		{
+			if (v->getRules()->getVehicleClipAmmo() == item)
+			{
+				qty += v->getRules()->getVehicleClipsLoaded();
+			}
+		}
+	}
+
+	for (const auto* w : _weapons)
+	{
+		if (w)
+		{
+			if (w->getRules()->getLauncherItem() == item)
+			{
+				qty += 1;
+			}
+			else if (w->getRules()->getClipItem() == item)
+			{
+				qty += w->getClipsLoaded();
+			}
+		}
+	}
+
+	return qty;
+}
+
+/**
  * Update stats of craft.
  * @param s
  */

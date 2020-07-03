@@ -102,9 +102,6 @@ private:
 	std::vector<Vehicle*> _vehiclesFromBase;
 	std::vector<BaseFacility*> _defenses;
 
-	/// Determines space taken up by ammo clips about to rearm craft.
-	double getIgnoredStores() const;
-
 	using Target::load;
 public:
 	/// Creates a new base.
