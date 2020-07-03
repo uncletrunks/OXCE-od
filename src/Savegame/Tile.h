@@ -34,6 +34,7 @@ class BattleUnit;
 class BattleItem;
 class RuleInventory;
 class Particle;
+class ScriptParserBase;
 
 enum LightLayers : Uint8 { LL_AMBIENT, LL_FIRE, LL_ITEMS, LL_UNITS, LL_MAX };
 
@@ -54,6 +55,12 @@ enum TileUnitOverlapping : int
 class Tile
 {
 public:
+
+	/// Name of class used in script.
+	static constexpr const char *ScriptName = "Tile";
+	/// Register all useful function used by script.
+	static void ScriptRegister(ScriptParserBase* parser);
+
 	static struct SerializationKey
 	{
 		// how many bytes to store for each variable or each member of array of the same name

@@ -199,6 +199,22 @@ public:
 		return &_tiles[getTileIndex(pos)];
 	}
 
+	/**
+	 * Gets the Tile at a given position on the map.
+	 * This method is called over 50mil+ times per turn so it seems useful
+	 * to inline it.
+	 * @param pos Map position.
+	 * @return Pointer to the tile at that position.
+	 */
+	inline const Tile *getTile(Position pos) const
+	{
+		if (pos.x < 0 || pos.y < 0 || pos.z < 0
+			|| pos.x >= _mapsize_x || pos.y >= _mapsize_y || pos.z >= _mapsize_z)
+			return 0;
+
+		return &_tiles[getTileIndex(pos)];
+	}
+
 	/*
 	 * Gets a pointer to the tiles, a tile is the smallest component of battlescape.
 	 * @param pos Index position, less than `getMapSizeXYZ()`.

@@ -23,6 +23,7 @@
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Surface.h"
 #include "../Engine/RNG.h"
+#include "../Engine/ScriptBind.h"
 #include "BattleUnit.h"
 #include "BattleItem.h"
 #include "../Mod/RuleItem.h"
@@ -1038,4 +1039,126 @@ void Tile::resetObstacle(void)
 	_obstacle = 0;
 }
 
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+/**
+ * Get the X part of the tile coordinate of this tile.
+ * @return X Position.
+ */
+void getPositionXScript(const Tile *t, int &ret)
+{
+	if (t)
+	{
+		ret = t->getPosition().x;
+		return;
+	}
+	ret = 0;
 }
+
+/**
+ * Get the Y part of the tile coordinate of this tile.
+ * @return Y Position.
+ */
+void getPositionYScript(const Tile *t, int &ret)
+{
+	if (t)
+	{
+		ret = t->getPosition().y;
+		return;
+	}
+	ret = 0;
+}
+
+/**
+ * Get the Z part of the tile coordinate of this tile.
+ * @return Z Position.
+ */
+void getPositionZScript(const Tile *t, int &ret)
+{
+	if (t)
+	{
+		ret = t->getPosition().z;
+		return;
+	}
+	ret = 0;
+}
+
+void getFloorSpecialTileTypeScript(const Tile *t, int &ret)
+{
+	ret = t ? t->getFloorSpecialTileType() : TILE;
+}
+
+void getObjectSpecialTileTypeScript(const Tile *t, int &ret)
+{
+	ret = t ? t->getObjectSpecialTileType() : TILE;
+}
+
+void getUnitScript(const Tile *t, const BattleUnit*& ret)
+{
+	ret = t ? t->getUnit() : nullptr;
+}
+
+std::string debugDisplayScript(const Tile* t)
+{
+	if (t)
+	{
+		std::string s;
+		s += Tile::ScriptName;
+		s += "(x: ";
+		s += t->getPosition().x;
+		s += " y: ";
+		s += t->getPosition().y;
+		s += " z: ";
+		s += t->getPosition().z;
+		s += " isVoid: ";
+		s += t->isVoid() ? "true" : "false";
+		if (t->getUnit())
+		{
+			s += " unit: \"";
+			s += t->getUnit()->getType();
+			s += "\"";
+		}
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+
+
+} //namespace
+
+void Tile::ScriptRegister(ScriptParserBase* parser)
+{
+	Bind<Tile> t = { parser };
+
+	t.add<&getPositionXScript>("getPosition.getX");
+	t.add<&getPositionYScript>("getPosition.getY");
+	t.add<&getPositionZScript>("getPosition.getZ");
+	t.add<&Tile::getFire>("getFire");
+	t.add<&Tile::getSmoke>("getSmoke");
+	t.add<&Tile::getShade>("getShade");
+
+	t.add<&getUnitScript>("getUnit");
+
+	t.add<&getFloorSpecialTileTypeScript>("getFloorSpecialTileType");
+	t.add<&getObjectSpecialTileTypeScript>("getObjectSpecialTileType");
+
+	t.addDebugDisplay<&debugDisplayScript>();
+
+	t.addCustomConst("STT_TILE", SpecialTileType::TILE);
+	t.addCustomConst("STT_START_POINT", SpecialTileType::START_POINT);
+	t.addCustomConst("STT_END_POINT", SpecialTileType::END_POINT);
+
+}
+
+} //namespace OpenXcom
