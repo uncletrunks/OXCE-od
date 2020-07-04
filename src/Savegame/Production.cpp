@@ -168,7 +168,7 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 						{
 							for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
 							{
-								(*c)->reuseItem(i.first->getType());
+								(*c)->reuseItem(i.first);
 							}
 						}
 					}
@@ -198,7 +198,7 @@ productionProgress_e Production::step(Base * b, SavedGame * g, const Mod *m, Lan
 							{
 								for (std::vector<Craft*>::iterator c = b->getCrafts()->begin(); c != b->getCrafts()->end(); ++c)
 								{
-									(*c)->reuseItem(i.first->getType());
+									(*c)->reuseItem(i.first);
 								}
 							}
 						}

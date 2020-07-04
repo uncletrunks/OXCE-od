@@ -2287,7 +2287,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 				{
 					for (std::vector<Craft*>::iterator c = base->getCrafts()->begin(); c != base->getCrafts()->end(); ++c)
 					{
-						(*c)->reuseItem(rule->getType());
+						(*c)->reuseItem(rule);
 					}
 				}
 			}

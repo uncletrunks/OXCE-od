@@ -80,13 +80,41 @@ void RuleCraftWeapon::load(const YAML::Node &node, Mod *mod)
 	_rearmRate = node["rearmRate"].as<int>(_rearmRate);
 	_projectileType = (CraftWeaponProjectileType)node["projectileType"].as<int>(_projectileType);
 	_projectileSpeed = node["projectileSpeed"].as<int>(_projectileSpeed);
-	_launcher = node["launcher"].as<std::string>(_launcher);
-	_clip = node["clip"].as<std::string>(_clip);
+	_launcherName = node["launcher"].as<std::string>(_launcherName);
+	_clipName = node["clip"].as<std::string>(_clipName);
 	_weaponType = node["weaponType"].as<int>(_weaponType);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
 	_tractorBeamPower = node["tractorBeamPower"].as<int>(_tractorBeamPower);
 	_hidePediaInfo = node["hidePediaInfo"].as<bool>(_hidePediaInfo);
 }
+
+
+/**
+ * Cross link with other rules.
+ */
+void RuleCraftWeapon::afterLoad(const Mod* mod)
+{
+	mod->linkRule(_launcher, _launcherName);
+	mod->linkRule(_clip, _clipName);
+
+
+	if (_launcher == nullptr)
+	{
+		throw Exception("Launcher item is required for craft weapon");
+	}
+	if (_ammoMax)
+	{
+		if (_rearmRate <= 0)
+		{
+			throw Exception("Value rearmRate should be positive when craft weapon have ammoMax set");
+		}
+		if (_clip && _clip->getClipSize() > _rearmRate)
+		{
+			throw Exception("Ammo item clipSize is too big for rearmRate");
+		}
+	}
+}
+
 
 /**
  * Gets the language string that names this craft weapon.
@@ -207,21 +235,21 @@ int RuleCraftWeapon::getRearmRate() const
 }
 
 /**
- * Gets the language string of the item used to
+ * Gets the rule of the item used to
  * equip this craft weapon.
- * @return The item name.
+ * @return The item rule.
  */
-std::string RuleCraftWeapon::getLauncherItem() const
+const RuleItem* RuleCraftWeapon::getLauncherItem() const
 {
 	return _launcher;
 }
 
 /**
- * Gets the language string of the item used to
+ * Gets the rule of the item used to
  * load this craft weapon with ammo.
- * @return The item name.
+ * @return The item rule.
  */
-std::string RuleCraftWeapon::getClipItem() const
+const RuleItem* RuleCraftWeapon::getClipItem() const
 {
 	return _clip;
 }

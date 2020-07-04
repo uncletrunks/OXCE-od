@@ -117,17 +117,16 @@ CraftWeaponsState::CraftWeaponsState(Base *base, size_t craft, size_t weapon) : 
 		RuleCraftWeapon *w = _game->getMod()->getCraftWeapon(*i);
 		const RuleCraft *c = _craft->getRules();
 		bool isResearched = true;
-		if (!w->getClipItem().empty())
+		if (w->getClipItem())
 		{
-			RuleItem *clipItem = _game->getMod()->getItem(w->getClipItem(), true);
-			isResearched = _game->getSavedGame()->isResearched(clipItem->getRequirements());
+			isResearched = _game->getSavedGame()->isResearched(w->getClipItem()->getRequirements());
 		}
 		if (isResearched && _base->getStorageItems()->getItem(w->getLauncherItem()) > 0 && c->isValidWeaponSlot(weapon, w->getWeaponType()))
 		{
 			_weapons.push_back(w);
 			std::ostringstream ss, ss2;
 			ss << _base->getStorageItems()->getItem(w->getLauncherItem());
-			if (!w->getClipItem().empty())
+			if (w->getClipItem())
 			{
 				ss2 << _base->getStorageItems()->getItem(w->getClipItem());
 			}
@@ -170,7 +169,7 @@ void CraftWeaponsState::lstWeaponsClick(Action *)
 	if (current != 0)
 	{
 		_base->getStorageItems()->addItem(current->getRules()->getLauncherItem());
-		_base->getStorageItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded(_game->getMod()));
+		_base->getStorageItems()->addItem(current->getRules()->getClipItem(), current->getClipsLoaded());
 		_craft->addCraftStats(-current->getRules()->getBonusStats());
 		// Make sure any extra shield is removed from craft too when the shield capacity decreases (exploit protection)
 		_craft->setShield(_craft->getShield());

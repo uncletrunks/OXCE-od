@@ -879,7 +879,7 @@ void SellState::changeByValue(int change, int dir)
 	// Calculate the change in storage space.
 	Craft *craft;
 	Soldier *soldier;
-	RuleItem *item, *weapon, *ammo;
+	const RuleItem *item, *weapon, *ammo;
 	double total = 0.0;
 	switch (getRow().type)
 	{
@@ -896,17 +896,17 @@ void SellState::changeByValue(int change, int dir)
 		{
 			if (*w)
 			{
-				weapon = _game->getMod()->getItem((*w)->getRules()->getLauncherItem(), true);
+				weapon = (*w)->getRules()->getLauncherItem();
 				total += weapon->getSize();
-				ammo = _game->getMod()->getItem((*w)->getRules()->getClipItem());
+				ammo = (*w)->getRules()->getClipItem();
 				if (ammo)
-					total += ammo->getSize() * (*w)->getClipsLoaded(_game->getMod());
+					total += ammo->getSize() * (*w)->getClipsLoaded();
 			}
 		}
 		_spaceChange += dir * total;
 		break;
 	case TRANSFER_ITEM:
-		item = (RuleItem*)getRow().rule;
+		item = (const RuleItem*)getRow().rule;
 		_spaceChange -= dir * change * item->getSize();
 		break;
 	default:

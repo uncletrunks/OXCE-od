@@ -2027,11 +2027,11 @@ void GeoscapeState::time1Hour()
 			}
 			else if ((*j)->getStatus() == "STR_REARMING")
 			{
-				std::string s = (*j)->rearm(_game->getMod());
-				if (!s.empty())
+				auto s = (*j)->rearm();
+				if (s)
 				{
 					std::string msg = tr("STR_NOT_ENOUGH_ITEM_TO_REARM_CRAFT_AT_BASE")
-									   .arg(tr(s))
+									   .arg(tr(s->getType()))
 									   .arg((*j)->getName(_game->getLanguage()))
 									   .arg((*i)->getName());
 					popup(new CraftErrorState(this, msg));

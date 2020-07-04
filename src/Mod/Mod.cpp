@@ -1741,6 +1741,7 @@ void Mod::loadAll()
 	afterLoadHelper("enviroEffects", this, _enviroEffects, &RuleEnviroEffects::afterLoad);
 	afterLoadHelper("commendations", this, _commendations, &RuleCommendations::afterLoad);
 	afterLoadHelper("skills", this, _skills, &RuleSkill::afterLoad);
+	afterLoadHelper("craftWeapons", this, _craftWeapons, &RuleCraftWeapon::afterLoad);
 
 	for (auto& a : _armors)
 	{
@@ -1763,13 +1764,13 @@ void Mod::loadAll()
 	{
 		const RuleItem* item = nullptr;
 
-		item = getItem(c.second->getLauncherItem(), false);
+		item = c.second->getLauncherItem();
 		if (item)
 		{
 			_craftWeaponStorageItemsCache.push_back(item);
 		}
 
-		item = getItem(c.second->getClipItem(), false);
+		item = c.second->getClipItem();
 		if (item)
 		{
 			_craftWeaponStorageItemsCache.push_back(item);
@@ -3871,8 +3872,8 @@ struct compareRule<RuleCraftWeapon>
 
 	bool operator()(const std::string &r1, const std::string &r2) const
 	{
-		RuleItem *rule1 = _mod->getItem(_mod->getCraftWeapon(r1)->getLauncherItem(), true);
-		RuleItem *rule2 = _mod->getItem(_mod->getCraftWeapon(r2)->getLauncherItem(), true);
+		auto *rule1 = _mod->getCraftWeapon(r1)->getLauncherItem();
+		auto *rule2 = _mod->getCraftWeapon(r2)->getLauncherItem();
 		return (rule1->getListOrder() < rule2->getListOrder());
 	}
 };

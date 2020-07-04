@@ -117,7 +117,7 @@ ItemsArrivingState::ItemsArrivingState(GeoscapeState *state) : _state(state), _b
 					{
 						for (std::vector<Craft*>::iterator c = (*i)->getCrafts()->begin(); c != (*i)->getCrafts()->end(); ++c)
 						{
-							(*c)->reuseItem((*j)->getItems());
+							(*c)->reuseItem(item);
 						}
 					}
 				}

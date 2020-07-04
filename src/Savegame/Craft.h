@@ -29,6 +29,7 @@ namespace OpenXcom
 typedef std::pair<std::string, int> CraftId;
 
 class RuleCraft;
+class RuleItem;
 class Base;
 class Soldier;
 class CraftWeapon;
@@ -196,7 +197,7 @@ public:
 	/// Refuels the craft.
 	void refuel();
 	/// Rearms the craft.
-	std::string rearm(const Mod *mod);
+	const RuleItem* rearm();
 	/// Sets the craft's battlescape status.
 	void setInBattlescape(bool inbattle);
 	/// Gets if the craft is in battlescape.
@@ -242,9 +243,9 @@ public:
 	/// Gets the craft's unique id.
 	CraftId getUniqueId() const;
 	/// Unloads the craft.
-	void unload(const Mod *mod);
+	void unload();
 	/// Reuses a base item.
-	void reuseItem(const std::string &item);
+	void reuseItem(const RuleItem* item);
 	/// Gets the attraction value of the craft for alien hunter-killers.
 	int getHunterKillerAttraction(int huntMode) const;
 };

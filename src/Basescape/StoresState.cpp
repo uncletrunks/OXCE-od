@@ -304,13 +304,13 @@ void StoresState::initList(bool grandTotal)
 					{
 						if (*craftWeapon)
 						{
-							if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+							if ((*craftWeapon)->getRules()->getLauncherItem() == rule)
 							{
 								qty += 1;
 							}
-							else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+							else if ((*craftWeapon)->getRules()->getClipItem() == rule)
 							{
-								qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+								qty += (*craftWeapon)->getClipsLoaded();
 							}
 						}
 					}
@@ -368,13 +368,13 @@ void StoresState::initList(bool grandTotal)
 						{
 							if (*craftWeapon)
 							{
-								if ((*craftWeapon)->getRules()->getLauncherItem() == (*item))
+								if ((*craftWeapon)->getRules()->getLauncherItem() == rule)
 								{
 									qty += 1;
 								}
-								else if ((*craftWeapon)->getRules()->getClipItem() == (*item))
+								else if ((*craftWeapon)->getRules()->getClipItem() == rule)
 								{
-									qty += (*craftWeapon)->getClipsLoaded(_game->getMod());
+									qty += (*craftWeapon)->getClipsLoaded();
 								}
 							}
 						}

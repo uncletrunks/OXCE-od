@@ -1125,9 +1125,9 @@ void Craft::refuel()
  * @param mod Pointer to mod.
  * @return The ammo ID missing for rearming, or "" if none.
  */
-std::string Craft::rearm(const Mod *mod)
+const RuleItem* Craft::rearm()
 {
-	std::string ammo;
+	const RuleItem* ammo = nullptr;
 	for (std::vector<CraftWeapon*>::iterator i = _weapons.begin(); ; ++i)
 	{
 		if (i == _weapons.end())
@@ -1137,15 +1137,15 @@ std::string Craft::rearm(const Mod *mod)
 		}
 		if (*i != 0 && (*i)->isRearming())
 		{
-			std::string clip = (*i)->getRules()->getClipItem();
+			auto* clip = (*i)->getRules()->getClipItem();
 			int available = _base->getStorageItems()->getItem(clip);
-			if (clip.empty())
+			if (clip == nullptr)
 			{
 				(*i)->rearm(0, 0);
 			}
 			else if (available > 0)
 			{
-				int used = (*i)->rearm(available, mod->getItem(clip)->getClipSize());
+				int used = (*i)->rearm(available, clip->getClipSize());
 
 				if (used == available && (*i)->isRearming())
 				{
@@ -1537,7 +1537,7 @@ CraftId Craft::getUniqueId() const
  * Unloads all the craft contents to the base.
  * @param mod Pointer to mod.
  */
-void Craft::unload(const Mod *mod)
+void Craft::unload()
 {
 	// Remove weapons
 	for (std::vector<CraftWeapon*>::iterator w = _weapons.begin(); w != _weapons.end(); ++w)
@@ -1545,7 +1545,7 @@ void Craft::unload(const Mod *mod)
 		if ((*w) != 0)
 		{
 			_base->getStorageItems()->addItem((*w)->getRules()->getLauncherItem());
-			_base->getStorageItems()->addItem((*w)->getRules()->getClipItem(), (*w)->getClipsLoaded(mod));
+			_base->getStorageItems()->addItem((*w)->getRules()->getClipItem(), (*w)->getClipsLoaded());
 			delete (*w);
 			(*w) = nullptr;
 		}
@@ -1585,7 +1585,7 @@ void Craft::unload(const Mod *mod)
  * updates its status appropriately.
  * @param item Item ID.
  */
-void Craft::reuseItem(const std::string& item)
+void Craft::reuseItem(const RuleItem* item)
 {
 	// Note: Craft in-base status hierarchy is repair, rearm, refuel, ready.
 	// We only want to interrupt processes that are lower in the hierarchy.
@@ -1612,7 +1612,7 @@ void Craft::reuseItem(const std::string& item)
 		return;
 
 	// Check if it's fuel to refuel the craft
-	if (item == _rules->getRefuelItem() && _fuel < _stats.fuelMax)
+	if (item->getType() == _rules->getRefuelItem() && _fuel < _stats.fuelMax)
 		_status = "STR_REFUELLING";
 }
 

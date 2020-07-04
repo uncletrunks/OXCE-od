@@ -859,17 +859,17 @@ double Base::getIgnoredStores() const
 			{
 				if (w != nullptr && w->isRearming())
 				{
-					std::string clip = w->getRules()->getClipItem();
+					auto clip = w->getRules()->getClipItem();
 					int available = getStorageItems()->getItem(clip);
-					if (!clip.empty() && available > 0)
+					if (clip && available > 0)
 					{
-						int clipSize = _mod->getItem(clip, true)->getClipSize();
+						int clipSize = clip->getClipSize();
 						int needed = 0;
 						if (clipSize > 0)
 						{
 							needed = (w->getRules()->getAmmoMax() - w->getAmmo()) / clipSize;
 						}
-						space += std::min(available, needed) * _mod->getItem(clip, true)->getSize();
+						space += std::min(available, needed) * clip->getSize();
 					}
 				}
 			}
@@ -2463,7 +2463,7 @@ std::vector<Craft*>::iterator Base::removeCraft(Craft *craft, bool unload)
 	// Unload craft
 	if (unload)
 	{
-		craft->unload(_mod);
+		craft->unload();
 	}
 
 	// Clear hangar

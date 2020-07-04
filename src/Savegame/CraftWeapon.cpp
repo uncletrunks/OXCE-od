@@ -190,13 +190,12 @@ CraftWeaponProjectile* CraftWeapon::fire() const
 
 /*
  * get how many clips are loaded into this weapon.
- * @param mod a pointer to the core mod.
  * @return number of clips loaded.
  */
-int CraftWeapon::getClipsLoaded(const Mod *mod) const
+int CraftWeapon::getClipsLoaded() const
 {
 	int retVal = (int)floor((double)_ammo / _rules->getRearmRate());
-	RuleItem *clip = mod->getItem(_rules->getClipItem());
+	auto *clip = _rules->getClipItem();
 
 	if (clip && clip->getClipSize() > 0)
 	{

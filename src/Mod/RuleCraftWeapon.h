@@ -26,6 +26,7 @@ namespace OpenXcom
 {
 
 class Mod;
+class RuleItem;
 
 enum CraftWeaponCategory { CWC_WEAPON, CWC_TRACTOR_BEAM, CWC_EQUIPMENT };
 
@@ -41,7 +42,9 @@ private:
 	std::string _type;
 	int _sprite, _sound, _damage, _shieldDamageModifier, _range, _accuracy, _reloadCautious, _reloadStandard, _reloadAggressive, _ammoMax, _rearmRate, _projectileSpeed, _weaponType;
 	CraftWeaponProjectileType _projectileType;
-	std::string _launcher, _clip;
+	std::string _launcherName, _clipName;
+	const RuleItem* _launcher;
+	const RuleItem* _clip;
 	RuleCraftStats _stats;
 	bool _underwaterOnly;
 	int _tractorBeamPower;
@@ -53,6 +56,9 @@ public:
 	~RuleCraftWeapon();
 	/// Loads craft weapon data from YAML.
 	void load(const YAML::Node& node, Mod *mod);
+	/// Cross link with other rules.
+	void afterLoad(const Mod* mod);
+
 	/// Gets the craft weapon's type.
 	const std::string& getType() const;
 	/// Gets the craft weapon's sprite.
@@ -80,9 +86,9 @@ public:
 	/// Gets the craft weapon's rearm rate.
 	int getRearmRate() const;
 	/// Gets the craft weapon's launcher item.
-	std::string getLauncherItem() const;
+	const RuleItem* getLauncherItem() const;
 	/// Gets the craft weapon's clip item.
-	std::string getClipItem() const;
+	const RuleItem* getClipItem() const;
 	/// Gets the craft weapon's projectile's type.
 	CraftWeaponProjectileType getProjectileType() const;
 	/// Gets the craft weapon's projectile speed.

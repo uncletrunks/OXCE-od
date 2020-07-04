@@ -3167,10 +3167,10 @@ void StatsForNerdsState::initCraftWeaponList()
 	addIntegerSeconds(ss, craftWeaponRule->getStandardReload(), "reloadStandard");
 	addIntegerSeconds(ss, craftWeaponRule->getAggressiveReload(), "reloadAggressive");
 
-	addSingleString(ss, craftWeaponRule->getLauncherItem(), "launcher");
+	addRule(ss, craftWeaponRule->getLauncherItem(), "launcher");
 	addInteger(ss, craftWeaponRule->getWeaponType(), "weaponType");
 
-	addSingleString(ss, craftWeaponRule->getClipItem(), "clip");
+	addRule(ss, craftWeaponRule->getClipItem(), "clip");
 	addInteger(ss, craftWeaponRule->getAmmoMax(), "ammoMax");
 	addInteger(ss, craftWeaponRule->getRearmRate(), "rearmRate", 1);
 

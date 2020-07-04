@@ -66,7 +66,7 @@ public:
 	/// Fires the craft weapon. Used during dogfights.
 	CraftWeaponProjectile* fire() const;
 	/// get how many clips are loaded into this weapon.
-	int getClipsLoaded(const Mod *mod) const;
+	int getClipsLoaded() const;
 
 };
 
