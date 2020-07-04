@@ -28,7 +28,7 @@ enum TransferType { TRANSFER_ITEM, TRANSFER_CRAFT, TRANSFER_SOLDIER, TRANSFER_SC
 struct TransferRow
 {
 	TransferType type;
-	void *rule;
+	const void *rule;
 	std::string name;
 	int cost;
 	int qtySrc, qtyDst;

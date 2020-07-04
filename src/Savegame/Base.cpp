@@ -814,11 +814,34 @@ double Base::getUsedStores() const
  * @param offset Adjusts the used capacity.
  * @return True if the base's stores are over their limit.
  */
-bool Base::storesOverfull(double offset)
+bool Base::storesOverfull(double offset) const
 {
 	int capacity = getAvailableStores() * 100;
 	double used = (getUsedStores() + offset) * 100;
 	return (int)used > capacity;
+}
+
+/**
+ * Checks if the base's stores are soo full that even crafts cargo can't fit.
+ */
+bool Base::storesOverfullCritical() const
+{
+	int capacity = getAvailableStores() * 100;
+	double total = 0;
+	for (std::vector<Craft*>::const_iterator i = _crafts.begin(); i != _crafts.end(); ++i)
+	{
+		total += (*i)->getTotalItemStorageSize(_mod);
+	}
+	for (std::vector<Transfer*>::const_iterator i = _transfers.begin(); i != _transfers.end(); ++i)
+	{
+		if ((*i)->getType() == TRANSFER_CRAFT)
+		{
+			Craft *craft = (*i)->getCraft();
+			total += craft->getTotalItemStorageSize(_mod);
+		}
+	}
+	int used = total * 100;
+	return used > capacity;
 }
 
 /**

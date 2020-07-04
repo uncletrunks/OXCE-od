@@ -171,7 +171,9 @@ public:
 	/// Gets the base's used storage space.
 	double getUsedStores() const;
 	/// Checks if the base's stores are overfull.
-	bool storesOverfull(double offset = 0.0);
+	bool storesOverfull(double offset = 0.0) const;
+	/// Checks if the base's stores are soo full that even cargo crafts can't fit.
+	bool storesOverfullCritical() const;
 	/// Gets the base's available storage space.
 	int getAvailableStores() const;
 	/// Gets the base's used laboratory space.

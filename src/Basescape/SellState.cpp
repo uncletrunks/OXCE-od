@@ -40,6 +40,7 @@
 #include "../Savegame/Soldier.h"
 #include "../Savegame/Craft.h"
 #include "../Savegame/ItemContainer.h"
+#include "../Savegame/Vehicle.h"
 #include "../Mod/RuleItem.h"
 #include "../Mod/Armor.h"
 #include "../Mod/RuleCraft.h"
@@ -67,6 +68,7 @@ namespace OpenXcom
 SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState), _sel(0), _total(0), _spaceChange(0), _origin(origin), _reset(false), _sellAllButOne(false)
 {
 	bool overfull = _debriefingState == 0 && Options::storageLimitsEnforced && _base->storesOverfull();
+	bool overfullCritical = overfull ? _base->storesOverfullCritical() : false;
 
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -210,25 +212,33 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	const std::vector<std::string> &items = _game->getMod()->getItemsList();
 	for (std::vector<std::string>::const_iterator i = items.begin(); i != items.end(); ++i)
 	{
-		int qty = _base->getStorageItems()->getItem(*i);
-		if (Options::storageLimitsEnforced && _origin == OPT_BATTLESCAPE)
-		{
-			for (std::vector<Transfer*>::iterator j = _base->getTransfers()->begin(); j != _base->getTransfers()->end(); ++j)
-			{
-				if ((*j)->getItems() == *i)
-				{
-					qty += (*j)->getQuantity();
-				}
-			}
-			for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end(); ++j)
-			{
-				qty += (*j)->getItems()->getItem(*i);
-			}
-		}
-		RuleItem *rule = _game->getMod()->getItem(*i, true);
+		const RuleItem *rule = _game->getMod()->getItem(*i, true);
+		int qty = 0;
 		if (_debriefingState != 0)
 		{
 			qty = _debriefingState->getRecoveredItemCount(rule);
+		}
+		else
+		{
+			qty = _base->getStorageItems()->getItem(rule);
+			if (Options::storageLimitsEnforced && _origin == OPT_BATTLESCAPE)
+			{
+				for (std::vector<Transfer*>::iterator j = _base->getTransfers()->begin(); j != _base->getTransfers()->end(); ++j)
+				{
+					if ((*j)->getItems() == *i)
+					{
+						qty += (*j)->getQuantity();
+					}
+					else if ((*j)->getCraft())
+					{
+						qty += overfullCritical ? (*j)->getCraft()->getTotalItemCount(rule) : (*j)->getCraft()->getItems()->getItem(rule);
+					}
+				}
+				for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end(); ++j)
+				{
+					qty +=  overfullCritical ? (*j)->getTotalItemCount(rule) : (*j)->getItems()->getItem(rule);
+				}
+			}
 		}
 		if (qty > 0 && (Options::canSellLiveAliens || !rule->isAlien()))
 		{
@@ -522,6 +532,97 @@ void SellState::btnOkClick(Action *)
 	_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() + _total);
 	Soldier *soldier;
 	Craft *craft;
+
+	auto cleanUpContainer = [&](ItemContainer* container, const RuleItem* rule, int toRemove) -> int
+	{
+		auto curr = container->getItem(rule);
+		if (curr > toRemove)
+		{
+			container->removeItem(rule, toRemove);
+			return 0;
+		}
+		else
+		{
+			container->removeItem(rule, INT_MAX);
+			return toRemove - curr;
+		}
+	};
+
+	auto cleanUpCraft = [&](Craft* craft, const RuleItem* rule, int toRemove) -> int
+	{
+		struct S
+		{
+			int ToRemove, ToSave;
+			const RuleItem* rule;
+		};
+
+		auto tryRemove = [&toRemove, rule](int curr, const RuleItem* i) -> S
+		{
+			if (i == rule)
+			{
+				auto r = std::min(toRemove, curr);
+				toRemove -= r;
+				curr -= r;
+				return S{ r, curr, i };
+			}
+			else
+			{
+				return S{ 0, curr, i };
+			}
+		};
+		auto tryStore = [&](S s)
+		{
+			if (s.ToSave > 0)
+			{
+				_base->getStorageItems()->addItem(s.rule, s.ToSave);
+			}
+		};
+
+		for (auto*& w :* craft->getWeapons())
+		{
+			if (w != nullptr)
+			{
+				auto* wr = w->getRules();
+
+				auto launcher = tryRemove(1, wr->getLauncherItem());
+				auto clip = tryRemove(w->getClipsLoaded(), wr->getClipItem());
+				if (launcher.ToRemove || clip.ToRemove)
+				{
+					tryStore(launcher);
+					tryStore(clip);
+
+					delete w;
+					w = nullptr;
+				}
+			}
+		}
+
+		Collections::deleteIf(
+			*craft->getVehicles(),
+			[&](Vehicle* v)
+			{
+				auto clipType = v->getRules()->getVehicleClipAmmo();
+
+				auto launcher = tryRemove(1, v->getRules());
+				auto clip = tryRemove(v->getRules()->getVehicleClipsLoaded(), clipType);
+
+				if (launcher.ToRemove || clip.ToRemove)
+				{
+					tryStore(launcher);
+					tryStore(clip);
+
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		);
+
+		return toRemove;
+	};
+
 	for (std::vector<TransferRow>::const_iterator i = _items.begin(); i != _items.end(); ++i)
 	{
 		if (i->amount > 0)
@@ -557,26 +658,23 @@ void SellState::btnOkClick(Action *)
 				break;
 			case TRANSFER_ITEM:
 				RuleItem *item = (RuleItem*)i->rule;
-				if (_base->getStorageItems()->getItem(item) < i->amount)
+				if (_debriefingState != 0)
 				{
-					int toRemove = i->amount - _base->getStorageItems()->getItem(item);
+					// remember the decreased amount for next sell/transfer
+					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
 
+					// set autosell status if we sold all of the item
+					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
+				}
+				else
+				{
 					// remove all of said items from base
-					_base->getStorageItems()->removeItem(item, INT_MAX);
+					int toRemove = cleanUpContainer(_base->getStorageItems(), item, i->amount);
 
 					// if we still need to remove any, remove them from the crafts first, and keep a running tally
 					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
 					{
-						if ((*j)->getItems()->getItem(item) < toRemove)
-						{
-							toRemove -= (*j)->getItems()->getItem(item);
-							(*j)->getItems()->removeItem(item, INT_MAX);
-						}
-						else
-						{
-							(*j)->getItems()->removeItem(item, toRemove);
-							toRemove = 0;
-						}
+						toRemove = cleanUpContainer((*j)->getItems(), item, toRemove);
 					}
 
 					// if there are STILL any left to remove, take them from the transfers, and if necessary, delete it.
@@ -598,21 +696,19 @@ void SellState::btnOkClick(Action *)
 						}
 						else
 						{
+							if ((*j)->getCraft())
+							{
+								toRemove = cleanUpContainer((*j)->getCraft()->getItems(), item, toRemove);
+							}
 							++j;
 						}
 					}
-				}
-				else
-				{
-					_base->getStorageItems()->removeItem(item, i->amount);
-				}
-				if (_debriefingState != 0)
-				{
-					// remember the decreased amount for next sell/transfer
-					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
 
-					// set autosell status if we sold all of the item
-					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
+					// clean reast of craft weapons and vehicles
+					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
+					{
+						toRemove = cleanUpCraft((*j), item, toRemove);
+					}
 				}
 
 				break;
