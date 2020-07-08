@@ -2396,7 +2396,7 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 {
 	// Transform a live alien into one or more recovered items?
 	RuleItem* liveAlienItemRule = _game->getMod()->getItem(from->getType());
-	if (!liveAlienItemRule->getRecoveryTransformations().empty())
+	if (liveAlienItemRule && !liveAlienItemRule->getRecoveryTransformations().empty())
 	{
 		addItemsToBaseStores(liveAlienItemRule, base, 1, true);
 
