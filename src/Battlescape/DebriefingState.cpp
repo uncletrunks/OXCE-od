@@ -1373,6 +1373,32 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
+	// transforam all zombie like units to spawned ones
+	std::vector<BattleUnit*> waitingTransformations;
+	for (auto* u : *battle->getUnits())
+	{
+		if (u->getSpawnUnit() && u->getOriginalFaction() == FACTION_HOSTILE && (!u->isOut() || u->getStatus() == STATUS_IGNORE_ME))
+		{
+			waitingTransformations.push_back(u);
+		}
+	}
+	for (auto* u : waitingTransformations)
+	{
+		auto status = u->getStatus();
+		auto faction = u->getFaction();
+		// convert it, and mind control the resulting unit.
+		// reason: zombies don't create unconscious bodies... ever.
+		// the only way we can get into this situation is if psi-capture is enabled.
+		// we can use that knowledge to our advantage to save having to make it unconscious and spawn a body item for it.
+		BattleUnit *newUnit = _game->getSavedGame()->getSavedBattle()->getBattleGame()->convertUnit(u);
+		u->killedBy(FACTION_HOSTILE); //skip counting as kill
+		newUnit->convertToFaction(faction);
+		if (status == STATUS_IGNORE_ME)
+		{
+			newUnit->goToTimeOut();
+		}
+	}
+
 	// time to care for units.
 	for (std::vector<BattleUnit*>::iterator j = battle->getUnits()->begin(); j != battle->getUnits()->end(); ++j)
 	{
@@ -2396,18 +2422,6 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		return;
 	}
 
-	// Zombie handling: don't recover a zombie.
-	if (from->getSpawnUnit())
-	{
-		// convert it, and mind control the resulting unit.
-		// reason: zombies don't create unconscious bodies... ever.
-		// the only way we can get into this situation is if psi-capture is enabled.
-		// we can use that knowledge to our advantage to save having to make it unconscious and spawn a body item for it.
-		BattleUnit *newUnit = _game->getSavedGame()->getSavedBattle()->getBattleGame()->convertUnit(from);
-		newUnit->convertToFaction(FACTION_PLAYER);
-		// don't process the zombie itself, our new unit just got added to the end of the vector we're iterating, and will be handled later.
-		return;
-	}
 	std::string type = from->getType();
 	RuleItem *ruleLiveAlienItem = _game->getMod()->getItem(type);
 	bool killPrisonersAutomatically = base->getAvailableContainment(ruleLiveAlienItem->getPrisonType()) == 0;
