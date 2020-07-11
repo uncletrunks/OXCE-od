@@ -745,7 +745,7 @@ bool BattleItem::haveAllAmmo() const
  */
 bool BattleItem::setAmmoPreMission(BattleItem *item)
 {
-	int slot = _rules->getSlotForAmmo(item->getRules()->getType());
+	int slot = _rules->getSlotForAmmo(item->getRules());
 	if (slot >= 0)
 	{
 		if (_ammoItem[slot])

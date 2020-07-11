@@ -332,9 +332,9 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 				if (rule->getVehicleUnit())
 				{
 					// if this vehicle requires ammo, remember to ignore it later too
-					if (!rule->getPrimaryCompatibleAmmo()->empty())
+					if (rule->getVehicleClipAmmo())
 					{
-						origBaseItems->addItem(rule->getPrimaryCompatibleAmmo()->front(), 1000000);
+						origBaseItems->addItem(rule->getVehicleClipAmmo(), 1000000);
 					}
 					continue;
 				}
@@ -1477,8 +1477,8 @@ void DebriefingState::prepareDebriefing()
 							{
 								const RuleItem *primaryRule = weapon->getRules();
 								const BattleItem *ammoItem = weapon->getAmmoForSlot(0);
-								const auto *compatible = primaryRule->getPrimaryCompatibleAmmo();
-								if (primaryRule->getVehicleUnit() && !compatible->empty() && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
+								const auto *compatible = primaryRule->getVehicleClipAmmo();
+								if (primaryRule->getVehicleUnit() && compatible && ammoItem != 0 && ammoItem->getAmmoQuantity() > 0)
 								{
 									int total = ammoItem->getAmmoQuantity();
 
@@ -1487,7 +1487,7 @@ void DebriefingState::prepareDebriefing()
 										total /= ammoItem->getRules()->getClipSize();
 									}
 
-									addItemsToBaseStores(compatible->front(), base, total, false);
+									addItemsToBaseStores(compatible, base, total, false);
 								}
 							}
 						};
@@ -2014,27 +2014,18 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 			ReequipStat stat = {i->first, missing, craft->getName(_game->getLanguage()), 0};
 			_missingItems.push_back(stat);
 		}
-		if (tankRule->getPrimaryCompatibleAmmo()->empty())
+		if (tankRule->getVehicleClipAmmo() == nullptr)
 		{ // so this tank does NOT require ammo
 			for (int j = 0; j < canBeAdded; ++j)
-				craft->getVehicles()->push_back(new Vehicle(tankRule, tankRule->getClipSize(), size));
+				craft->getVehicles()->push_back(new Vehicle(tankRule, tankRule->getVehicleClipSize(), size));
 			base->getStorageItems()->removeItem(i->first, canBeAdded);
 		}
 		else
 		{ // so this tank requires ammo
-			RuleItem *ammo = _game->getMod()->getItem(tankRule->getPrimaryCompatibleAmmo()->front(), true);
-			int ammoPerVehicle, clipSize;
-			if (ammo->getClipSize() > 0 && tankRule->getClipSize() > 0)
-			{
-				clipSize = tankRule->getClipSize();
-				ammoPerVehicle = clipSize / ammo->getClipSize();
-			}
-			else
-			{
-				clipSize = ammo->getClipSize();
-				ammoPerVehicle = clipSize;
-			}
-			int baqty = base->getStorageItems()->getItem(ammo->getType()); // Ammo Quantity for this vehicle-type on the base
+			const RuleItem *ammo = tankRule->getVehicleClipAmmo();
+			int ammoPerVehicle = tankRule->getVehicleClipsLoaded();
+
+			int baqty = base->getStorageItems()->getItem(ammo); // Ammo Quantity for this vehicle-type on the base
 			if (baqty < i->second * ammoPerVehicle)
 			{ // missing ammo
 				int missing = (i->second * ammoPerVehicle) - baqty;
@@ -2046,7 +2037,7 @@ void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCa
 			{
 				for (int j = 0; j < canBeAdded; ++j)
 				{
-					craft->getVehicles()->push_back(new Vehicle(tankRule, clipSize, size));
+					craft->getVehicles()->push_back(new Vehicle(tankRule, tankRule->getVehicleClipSize(), size));
 					base->getStorageItems()->removeItem(ammo, ammoPerVehicle);
 				}
 				base->getStorageItems()->removeItem(i->first, canBeAdded);

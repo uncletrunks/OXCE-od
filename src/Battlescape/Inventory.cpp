@@ -881,7 +881,7 @@ void Inventory::mouseClick(Action *action, State *state)
 				// Put item in weapon
 				else if (item->isWeaponWithAmmo())
 				{
-					int slotAmmo = item->getRules()->getSlotForAmmo(_selItem->getRules()->getType());
+					int slotAmmo = item->getRules()->getSlotForAmmo(_selItem->getRules());
 					if (slotAmmo == -1)
 					{
 						_warning->showMessage(_game->getLanguage()->getString("STR_WRONG_AMMUNITION_FOR_THIS_WEAPON"));

@@ -2161,22 +2161,13 @@ void BattlescapeGame::spawnNewUnit(BattleActionAttack attack, Position position)
 		{
 			const RuleItem *newUnitWeapon = getMod()->getItem(newUnit->getType());
 			_save->createItemForUnit(newUnitWeapon, newUnit, true);
-			if (!newUnitWeapon->getPrimaryCompatibleAmmo()->empty())
+			if (newUnitWeapon->getVehicleClipAmmo())
 			{
-				RuleItem *ammo = getMod()->getItem(newUnitWeapon->getPrimaryCompatibleAmmo()->front());
+				const RuleItem *ammo = newUnitWeapon->getVehicleClipAmmo();
 				BattleItem *ammoItem = _save->createItemForUnit(ammo, newUnit);
 				if (ammoItem)
 				{
-					int clipSize;
-					if (ammo->getClipSize() > 0 && newUnitWeapon->getClipSize() > 0)
-					{
-						clipSize = newUnitWeapon->getClipSize();
-					}
-					else
-					{
-						clipSize = ammo->getClipSize();
-					}
-					ammoItem->setAmmoQuantity(clipSize);
+					ammoItem->setAmmoQuantity(newUnitWeapon->getVehicleClipSize());
 				}
 			}
 			newUnit->setTurretType(newUnitWeapon->getTurretType());
@@ -2479,7 +2470,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action, bool p
 				{
 					if (i->getRules()->getBattleType() == BT_AMMO)
 					{
-						if (item->getRules()->getSlotForAmmo(i->getRules()->getType()) != -1)
+						if (item->getRules()->getSlotForAmmo(i->getRules()) != -1)
 						{
 							ammoFound = true;
 							break;
@@ -2501,7 +2492,7 @@ bool BattlescapeGame::worthTaking(BattleItem* item, BattleAction *action, bool p
 			{
 				if (i->getRules()->getBattleType() == BT_FIREARM)
 				{
-					if (i->getRules()->getSlotForAmmo(item->getRules()->getType()) != -1)
+					if (i->getRules()->getSlotForAmmo(item->getRules()) != -1)
 					{
 						weaponFound = true;
 						break;
@@ -2609,7 +2600,7 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 	{
 		if (weapon && weapon->isWeaponWithAmmo() && !weapon->haveAllAmmo())
 		{
-			auto slot = weapon->getRules()->getSlotForAmmo(i->getRules()->getType());
+			auto slot = weapon->getRules()->getSlotForAmmo(i->getRules());
 			if (slot != -1)
 			{
 				BattleActionCost cost{ unit };

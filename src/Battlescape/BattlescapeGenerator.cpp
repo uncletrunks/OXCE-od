@@ -811,20 +811,10 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 					// send disabled vehicles back to base
 					_base->getStorageItems()->addItem(item, 1);
 					// ammo too, if necessary
-					if (!item->getPrimaryCompatibleAmmo()->empty())
+					if (item->getVehicleClipAmmo())
 					{
 						// Calculate how much ammo needs to be added to the base.
-						RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
-						int ammoPerVehicle;
-						if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
-						{
-							ammoPerVehicle = item->getClipSize() / ammo->getClipSize();
-						}
-						else
-						{
-							ammoPerVehicle = ammo->getClipSize();
-						}
-						_base->getStorageItems()->addItem(ammo, ammoPerVehicle);
+						_base->getStorageItems()->addItem(item->getVehicleClipAmmo(), item->getVehicleClipsLoaded());
 					}
 				}
 				else if (item->getVehicleUnit()->getArmor()->getSize() > 1 || Mod::EXTENDED_HWP_LOAD_ORDER == false)
@@ -1167,10 +1157,9 @@ BattleUnit *BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 	if (unit)
 	{
 		_save->createItemForUnit(v->getRules(), unit, true);
-		if (!v->getRules()->getPrimaryCompatibleAmmo()->empty())
+		if (v->getRules()->getVehicleClipAmmo())
 		{
-			std::string ammo = v->getRules()->getPrimaryCompatibleAmmo()->front();
-			BattleItem *ammoItem = _save->createItemForUnit(ammo, unit);
+			BattleItem *ammoItem = _save->createItemForUnit(v->getRules()->getVehicleClipAmmo(), unit);
 			if (ammoItem)
 			{
 				ammoItem->setAmmoQuantity(v->getAmmo());

@@ -888,7 +888,7 @@ void SaveConverter::loadDatCraft()
 					for (int v = 0; v < qty; ++v)
 					{
 						RuleItem *rule = _mod->getItem(_rules->getItems()[k + 10], true);
-						craft->getVehicles()->push_back(new Vehicle(rule, rule->getClipSize(), 4));
+						craft->getVehicles()->push_back(new Vehicle(rule, rule->getVehicleClipSize(), 4));
 					}
 				}
 				// items

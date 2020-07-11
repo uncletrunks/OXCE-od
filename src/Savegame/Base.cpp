@@ -1620,11 +1620,11 @@ void Base::setupDefenses()
 		if (rule->getVehicleUnit())
 		{
 			int size = rule->getVehicleUnit()->getArmor()->getTotalSize();
-			if (rule->getPrimaryCompatibleAmmo()->empty()) // so this vehicle does not need ammo
+			if (rule->getVehicleClipAmmo() == nullptr) // so this vehicle does not need ammo
 			{
 				for (int j = 0; j < itemQty; ++j)
 				{
-					auto vehicle = new Vehicle(rule, rule->getClipSize(), size);
+					auto vehicle = new Vehicle(rule, rule->getVehicleClipSize(), size);
 					_vehicles.push_back(vehicle);
 					_vehiclesFromBase.push_back(vehicle);
 				}
@@ -1632,18 +1632,9 @@ void Base::setupDefenses()
 			}
 			else // so this vehicle needs ammo
 			{
-				RuleItem *ammo = _mod->getItem(rule->getPrimaryCompatibleAmmo()->front(), true);
-				int ammoPerVehicle, clipSize;
-				if (ammo->getClipSize() > 0 && rule->getClipSize() > 0)
-				{
-					clipSize = rule->getClipSize();
-					ammoPerVehicle = clipSize / ammo->getClipSize();
-				}
-				else
-				{
-					clipSize = ammo->getClipSize();
-					ammoPerVehicle = clipSize;
-				}
+				const RuleItem *ammo = rule->getVehicleClipAmmo();
+				int ammoPerVehicle = rule->getVehicleClipsLoaded();
+
 				int baseQty = _items->getItem(ammo) / ammoPerVehicle;
 				if (!baseQty)
 				{
@@ -1653,7 +1644,7 @@ void Base::setupDefenses()
 				int canBeAdded = std::min(itemQty, baseQty);
 				for (int j=0; j<canBeAdded; ++j)
 				{
-					auto vehicle = new Vehicle(rule, clipSize, size);
+					auto vehicle = new Vehicle(rule, rule->getVehicleClipSize(), size);
 					_vehicles.push_back(vehicle);
 					_vehiclesFromBase.push_back(vehicle);
 					_items->removeItem(ammo, ammoPerVehicle);
@@ -2069,19 +2060,9 @@ void Base::cleanupDefenses(bool reclaimItems)
 			RuleItem *rule = v->getRules();
 			std::string type = rule->getType();
 			_items->addItem(type);
-			if (!rule->getPrimaryCompatibleAmmo()->empty())
+			if (rule->getVehicleClipAmmo())
 			{
-				RuleItem *ammo = _mod->getItem(rule->getPrimaryCompatibleAmmo()->front(), true);
-				int ammoPerVehicle;
-				if (ammo->getClipSize() > 0 && rule->getClipSize() > 0)
-				{
-					ammoPerVehicle = rule->getClipSize() / ammo->getClipSize();
-				}
-				else
-				{
-					ammoPerVehicle = ammo->getClipSize();
-				}
-				_items->addItem(ammo, ammoPerVehicle);
+				_items->addItem(rule->getVehicleClipAmmo(), rule->getVehicleClipsLoaded());
 			}
 		}
 	}

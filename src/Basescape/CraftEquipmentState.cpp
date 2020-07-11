@@ -355,12 +355,11 @@ void CraftEquipmentState::initList()
 					bool isOK = rule->belongsToCategory(selectedCategory);
 					if (shareAmmoCategories && !isOK && rule->getBattleType() == BT_FIREARM)
 					{
-						for (auto& compatibleAmmoName : *rule->getPrimaryCompatibleAmmo())
+						for (auto* ammoRule : *rule->getPrimaryCompatibleAmmo())
 						{
-							if (_base->getStorageItems()->getItem(compatibleAmmoName) > 0 || c->getItems()->getItem(compatibleAmmoName) > 0)
+							if (_base->getStorageItems()->getItem(ammoRule) > 0 || c->getItems()->getItem(ammoRule) > 0)
 							{
-								RuleItem *ammoRule = _game->getMod()->getItem(compatibleAmmoName);
-								if (ammoRule && ammoRule->isInventoryItem() && ammoRule->canBeEquippedToCraftInventory() && _game->getSavedGame()->isResearched(ammoRule->getRequirements()))
+								if (ammoRule->isInventoryItem() && ammoRule->canBeEquippedToCraftInventory() && _game->getSavedGame()->isResearched(ammoRule->getRequirements()))
 								{
 									isOK = ammoRule->belongsToCategory(selectedCategory);
 									if (isOK) break;
@@ -642,19 +641,12 @@ void CraftEquipmentState::moveLeftByValue(int change)
 	// Convert vehicle to item
 	if (item->getVehicleUnit())
 	{
-		if (!item->getPrimaryCompatibleAmmo()->empty())
+		if (item->getVehicleClipAmmo())
 		{
 			// Calculate how much ammo needs to be added to the base.
-			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
-			int ammoPerVehicle;
-			if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
-			{
-				ammoPerVehicle = item->getClipSize() / ammo->getClipSize();
-			}
-			else
-			{
-				ammoPerVehicle = ammo->getClipSize();
-			}
+			const RuleItem *ammo = item->getVehicleClipAmmo();
+			int ammoPerVehicle = item->getVehicleClipsLoaded();
+
 			// Put the vehicles and their ammo back as separate items.
 			if (_game->getSavedGame()->getMonthsPassed() != -1)
 			{
@@ -734,21 +726,11 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 		if (room > 0)
 		{
 			change = std::min(room, change);
-			if (!item->getPrimaryCompatibleAmmo()->empty())
+			if (item->getVehicleClipAmmo())
 			{
 				// And now let's see if we can add the total number of vehicles.
-				RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
-				int ammoPerVehicle, clipSize;
-				if (ammo->getClipSize() > 0 && item->getClipSize() > 0)
-				{
-					clipSize = item->getClipSize();
-					ammoPerVehicle = clipSize / ammo->getClipSize();
-				}
-				else
-				{
-					clipSize = ammo->getClipSize();
-					ammoPerVehicle = clipSize;
-				}
+				const RuleItem *ammo = item->getVehicleClipAmmo();
+				int ammoPerVehicle = item->getVehicleClipsLoaded();
 
 				int baseQty = _base->getStorageItems()->getItem(ammo) / ammoPerVehicle;
 				if (_game->getSavedGame()->getMonthsPassed() == -1)
@@ -763,7 +745,7 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 							_base->getStorageItems()->removeItem(ammo, ammoPerVehicle);
 							_base->getStorageItems()->removeItem(_items[_sel]);
 						}
-						c->getVehicles()->push_back(new Vehicle(item, clipSize, size));
+						c->getVehicles()->push_back(new Vehicle(item, item->getVehicleClipSize(), size));
 					}
 				}
 				else
@@ -781,7 +763,7 @@ void CraftEquipmentState::moveRightByValue(int change, bool suppressErrors)
 			else
 				for (int i = 0; i < change; ++i)
 				{
-					c->getVehicles()->push_back(new Vehicle(item, item->getClipSize(), size));
+					c->getVehicles()->push_back(new Vehicle(item, item->getVehicleClipSize(), size));
 					if (_game->getSavedGame()->getMonthsPassed() != -1)
 					{
 						_base->getStorageItems()->removeItem(_items[_sel]);

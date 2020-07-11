@@ -52,7 +52,7 @@ ResearchRequiredState::ResearchRequiredState(RuleItem *item)
 	centerAllSurfaces();
 
 	std::string weapon = item->getType();
-	std::string clip = item->getPrimaryCompatibleAmmo()->front();
+	std::string clip = item->getPrimaryCompatibleAmmo()->front()->getType();
 
 	// Set up objects
 	setWindowBackground(_window, "geoResearchRequired");

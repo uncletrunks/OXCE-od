@@ -554,7 +554,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		if (n)
 		{
-			mod->loadUnorderedNames(_type, _compatibleAmmo[offset], n["compatibleAmmo"]);
+			mod->loadUnorderedNames(_type, _compatibleAmmoNames[offset], n["compatibleAmmo"]);
 			_tuLoad[offset] = n["tuLoad"].as<int>(_tuLoad[offset]);
 			_tuUnload[offset] = n["tuUnload"].as<int>(_tuUnload[offset]);
 		}
@@ -573,7 +573,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	{
 		for (RuleItemAction* conf : { &_confAimed, &_confAuto, &_confSnap, &_confMelee, })
 		{
-			if (conf->ammoSlot != RuleItem::AmmoSlotSelfUse && _compatibleAmmo[conf->ammoSlot].empty())
+			if (conf->ammoSlot != RuleItem::AmmoSlotSelfUse && _compatibleAmmoNames[conf->ammoSlot].empty())
 			{
 				throw Exception("Weapon " + _type + " has clip size 0 and no ammo defined. Please use 'clipSize: -1' for unlimited ammo, or allocate a compatibleAmmo item.");
 			}
@@ -734,11 +734,35 @@ void RuleItem::afterLoad(const Mod* mod)
 		mod->linkRule(_supportedInventorySections, _supportedInventorySectionsNames);
 		Collections::sortVector(_supportedInventorySections);
 	}
+	for (int i = 0; i < AmmoSlotMax; ++i)
+	{
+		mod->linkRule(_compatibleAmmo[i], _compatibleAmmoNames[i]);
+		Collections::sortVector(_compatibleAmmo[i]);
+	}
+	if (_vehicleUnit)
+	{
+		if (_compatibleAmmo[0].size() > 1)
+		{
+			throw Exception("Vehicle weapon support only one ammo type");
+		}
+		if (_compatibleAmmo[0].size() == 1)
+		{
+			auto ammo = _compatibleAmmo[0][0];
+			if (ammo->getClipSize() > 0 && getClipSize() > 0)
+			{
+				if (getClipSize() % ammo->getClipSize())
+				{
+					throw Exception("Vehicle weapon clip size is not multiply of '" + ammo->getType() +  "' clip size");
+				}
+			}
+		}
+	}
 
 	//remove not needed data
 	Collections::removeAll(_requiresName);
 	Collections::removeAll(_requiresBuyName);
 	Collections::removeAll(_recoveryTransformationsName);
+	Collections::removeAll(_compatibleAmmoNames);
 }
 
 /**
@@ -1436,10 +1460,63 @@ int RuleItem::getTUUnload(int slot) const
 }
 
 /**
+ * Gets ammo for vehicle.
+ */
+const RuleItem* RuleItem::getVehicleClipAmmo() const
+{
+	return _compatibleAmmo[0].empty() ? nullptr : _compatibleAmmo[0].front();
+}
+
+/**
+ * Gets number of shots.
+ */
+int RuleItem::getVehicleClipSize() const
+{
+	auto ammo = getVehicleClipAmmo();
+	if (ammo)
+	{
+		if (ammo->getClipSize() > 0 && getClipSize() > 0)
+		{
+			return getClipSize();
+		}
+		else
+		{
+			return ammo->getClipSize();
+		}
+	}
+	else
+	{
+		return getClipSize();
+	}
+}
+
+/**
+ * Gets number of ammo clips that fit vehicle weapon.
+ */
+int RuleItem::getVehicleClipsLoaded() const
+{
+	auto ammo = getVehicleClipAmmo();
+	if (ammo)
+	{
+		if (ammo->getClipSize() > 0 && getClipSize() > 0)
+		{
+			return getClipSize() / ammo->getClipSize();
+		}
+		else
+		{
+			return ammo->getClipSize();
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+/**
  * Gets a list of compatible ammo.
  * @return Pointer to a list of compatible ammo.
  */
-const std::vector<std::string> *RuleItem::getPrimaryCompatibleAmmo() const
+const std::vector<const RuleItem*> *RuleItem::getPrimaryCompatibleAmmo() const
 {
 	return &_compatibleAmmo[0];
 }
@@ -1449,16 +1526,13 @@ const std::vector<std::string> *RuleItem::getPrimaryCompatibleAmmo() const
  * @param type Type of ammo item.
  * @return Slot position.
  */
-int RuleItem::getSlotForAmmo(const std::string& type) const
+int RuleItem::getSlotForAmmo(const RuleItem* type) const
 {
 	for (int i = 0; i < AmmoSlotMax; ++i)
 	{
-		for (const auto& t : _compatibleAmmo[i])
+		if (Collections::sortVectorHave(_compatibleAmmo[i], type))
 		{
-			if (t == type)
-			{
-				return i;
-			}
+			return i;
 		}
 	}
 	return -1;
@@ -1467,7 +1541,7 @@ int RuleItem::getSlotForAmmo(const std::string& type) const
 /**
  *  Get slot position for ammo type.
  */
-const std::vector<std::string> *RuleItem::getCompatibleAmmoForSlot(int slot) const
+const std::vector<const RuleItem*> *RuleItem::getCompatibleAmmoForSlot(int slot) const
 {
 	return &_compatibleAmmo[slot];
 }

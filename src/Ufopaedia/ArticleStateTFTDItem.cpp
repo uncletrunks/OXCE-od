@@ -43,8 +43,8 @@ namespace OpenXcom
 
 		auto ammoSlot = defs->getAmmoSlotForPage(_state->current_page);
 		auto ammoSlotPrevUsage = defs->getAmmoSlotPrevUsageForPage(_state->current_page);
-		const std::vector<std::string> dummy;
-		const std::vector<std::string> *ammo_data = ammoSlot != RuleItem::AmmoSlotSelfUse ? item->getCompatibleAmmoForSlot(ammoSlot) : &dummy;
+		const std::vector<const RuleItem*> dummy;
+		const std::vector<const RuleItem*> *ammo_data = ammoSlot != RuleItem::AmmoSlotSelfUse ? item->getCompatibleAmmoForSlot(ammoSlot) : &dummy;
 
 		// SHOT STATS TABLE (for firearms only)
 		if (item->getBattleType() == BT_FIREARM)
@@ -147,7 +147,7 @@ namespace OpenXcom
 					int currShow = 0;
 					for (auto& type : *ammo_data)
 					{
-						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle(type, true);
+						ArticleDefinition *ammo_article = _game->getMod()->getUfopaediaArticle(type->getType(), true);
 						if (Ufopaedia::isArticleAvailable(_game->getSavedGame(), ammo_article))
 						{
 							if (skipShow > 0)
@@ -155,9 +155,7 @@ namespace OpenXcom
 								--skipShow;
 								continue;
 							}
-							RuleItem *ammo_rule = _game->getMod()->getItem(type, true);
-
-							addAmmoDamagePower(currShow, ammo_rule);
+							addAmmoDamagePower(currShow, type);
 
 							++currShow;
 							if (currShow == maxShow)

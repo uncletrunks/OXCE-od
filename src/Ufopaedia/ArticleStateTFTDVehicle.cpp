@@ -88,9 +88,9 @@ namespace OpenXcom
 
 		_lstStats2->addRow(2, tr("STR_WEAPON").c_str(), tr(defs->weapon).c_str());
 
-		if (!item->getPrimaryCompatibleAmmo()->empty())
+		if (item->getVehicleClipAmmo())
 		{
-			RuleItem *ammo = _game->getMod()->getItem(item->getPrimaryCompatibleAmmo()->front(), true);
+			const RuleItem *ammo = item->getVehicleClipAmmo();
 
 			std::ostringstream ss8;
 			ss8 << ammo->getPower();
@@ -99,14 +99,7 @@ namespace OpenXcom
 			_lstStats2->addRow(2, tr("STR_AMMUNITION").c_str(), tr(ammo->getName()).c_str());
 
 			std::ostringstream ss9;
-			if (item->getClipSize() > 0)
-			{
-				ss9 << item->getClipSize();
-			}
-			else
-			{
-				ss9 << ammo->getClipSize();
-			}
+			ss9 << item->getVehicleClipSize();
 
 			_lstStats2->addRow(2, tr("STR_ROUNDS").c_str(), ss9.str().c_str());
 		}

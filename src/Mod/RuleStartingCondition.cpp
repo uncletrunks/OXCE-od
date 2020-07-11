@@ -220,17 +220,13 @@ bool RuleStartingCondition::isItemPermitted(const std::string& itemType, Mod* mo
 			// secondary categories ("inherited" from equipped ammo)
 			if (mod->getShareAmmoCategories() && item->getBattleType() == BT_FIREARM)
 			{
-				for (auto& compatibleAmmoName : *item->getPrimaryCompatibleAmmo())
+				for (auto* ammoRule : *item->getPrimaryCompatibleAmmo())
 				{
-					if (craft->getItems()->getItem(compatibleAmmoName) > 0)
+					if (craft->getItems()->getItem(ammoRule) > 0)
 					{
-						RuleItem *ammoRule = mod->getItem(compatibleAmmoName);
-						if (ammoRule)
+						for (auto& cat : ammoRule->getCategories())
 						{
-							for (auto& cat : ammoRule->getCategories())
-							{
-								itemCategories.push_back(cat);
-							}
+							itemCategories.push_back(cat);
 						}
 					}
 				}

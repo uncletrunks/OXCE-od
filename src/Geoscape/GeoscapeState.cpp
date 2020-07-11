@@ -2385,8 +2385,8 @@ void GeoscapeState::time1Day()
 					if (man && !man->getRequirements().empty())
 					{
 						const auto &req = man->getRequirements();
-						RuleItem *ammo = mod->getItem(item->getPrimaryCompatibleAmmo()->front());
-						if (ammo && std::find_if(req.begin(), req.end(), [&](const RuleResearch* r){ return r->getName() == ammo->getType(); }) != req.end() && !saveGame->isResearched(req, true))
+						const RuleItem *ammo = item->getPrimaryCompatibleAmmo()->front();
+						if (std::find_if(req.begin(), req.end(), [&](const RuleResearch* r){ return r->getName() == ammo->getType(); }) != req.end() && !saveGame->isResearched(req, true))
 						{
 							popup(new ResearchRequiredState(item));
 						}

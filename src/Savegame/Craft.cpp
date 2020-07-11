@@ -1561,9 +1561,9 @@ void Craft::unload()
 	for (std::vector<Vehicle*>::iterator v = _vehicles.begin(); v != _vehicles.end(); ++v)
 	{
 		_base->getStorageItems()->addItem((*v)->getRules()->getType());
-		if (!(*v)->getRules()->getPrimaryCompatibleAmmo()->empty())
+		if ((*v)->getRules()->getVehicleClipAmmo())
 		{
-			_base->getStorageItems()->addItem((*v)->getRules()->getPrimaryCompatibleAmmo()->front(), (*v)->getAmmo());
+			_base->getStorageItems()->addItem((*v)->getRules()->getVehicleClipAmmo(), (*v)->getRules()->getVehicleClipsLoaded());
 		}
 		delete (*v);
 		(*v) = nullptr;
