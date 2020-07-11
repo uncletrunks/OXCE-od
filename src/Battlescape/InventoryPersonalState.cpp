@@ -25,6 +25,7 @@
 #include "../Interface/TextButton.h"
 #include "../Interface/TextList.h"
 #include "../Interface/Window.h"
+#include "../Mod/Armor.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
 #include "../Savegame/EquipmentLayoutItem.h"
@@ -108,6 +109,18 @@ InventoryPersonalState::InventoryPersonalState(Soldier* soldier)
 			return a->getListOrder() < b->getListOrder();
 		}
 	);
+
+	// display armor
+	if (Options::oxcePersonalLayoutIncludingArmor)
+	{
+		std::ostringstream ss1, ss2;
+		auto armor = soldier->getPersonalEquipmentArmor();
+		if (armor)
+		{
+			ss1 << tr(armor->getType());
+		}
+		_lstLayout->addRow(2, ss1.str().c_str(), ss2.str().c_str());
+	}
 
 	// 3. display items
 	for (auto ruleItem : sorted)

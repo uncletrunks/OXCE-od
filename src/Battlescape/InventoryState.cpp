@@ -780,6 +780,12 @@ void InventoryState::loadGlobalLayout(int index)
 
 bool InventoryState::loadGlobalLayoutArmor(int index)
 {
+	auto armorName = _game->getSavedGame()->getGlobalEquipmentLayoutArmor(index);
+	return tryArmorChange(armorName);
+}
+
+bool InventoryState::tryArmorChange(const std::string& armorName)
+{
 	Armor* prev = nullptr;
 	Soldier* soldier = nullptr;
 	BattleUnit* unit = _inv->getSelectedUnit();
@@ -794,7 +800,6 @@ bool InventoryState::loadGlobalLayoutArmor(int index)
 
 	Armor* next = nullptr;
 	{
-		auto armorName = _game->getSavedGame()->getGlobalEquipmentLayoutArmor(index);
 		next = _game->getMod()->getArmor(armorName, false);
 	}
 
@@ -1159,6 +1164,16 @@ void InventoryState::btnCreatePersonalTemplateClick(Action *)
 		// create new personal template
 		_createInventoryTemplate(personalTemplate);
 
+		// optionally save armor info too
+		if (Options::oxcePersonalLayoutIncludingArmor)
+		{
+			unit->getGeoscapeSoldier()->setPersonalEquipmentArmor(_battleGame->getSelectedUnit()->getArmor());
+		}
+		else
+		{
+			unit->getGeoscapeSoldier()->setPersonalEquipmentArmor(nullptr);
+		}
+
 		// give visual feedback
 		_inv->showWarning(tr("STR_PERSONAL_EQUIPMENT_SAVED"));
 
@@ -1353,6 +1368,27 @@ void InventoryState::btnApplyPersonalTemplateClick(Action *)
 	auto unit = _battleGame->getSelectedUnit();
 	if (unit && unit->getGeoscapeSoldier())
 	{
+		// optionally load armor too
+		if (Options::oxcePersonalLayoutIncludingArmor)
+		{
+			auto newArmor = unit->getGeoscapeSoldier()->getPersonalEquipmentArmor();
+			if (newArmor && newArmor != unit->getArmor())
+			{
+				bool success = tryArmorChange(newArmor->getType());
+
+				if (success)
+				{
+					_reloadUnit = true;
+					init();
+				}
+				else
+				{
+					// FIXME: a better message? or no message?
+					//_inv->showWarning(tr("STR_NOT_ENOUGH_ITEMS_FOR_TEMPLATE"));
+				}
+			}
+		}
+
 		auto& personalTemplate = *unit->getGeoscapeSoldier()->getPersonalEquipmentLayout();
 
 		_applyInventoryTemplate(personalTemplate);

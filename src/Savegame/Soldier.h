@@ -80,6 +80,7 @@ private:
 	Armor *_transformedArmor;
 	std::vector<EquipmentLayoutItem*> _equipmentLayout;           // last used equipment layout, managed by the game
 	std::vector<EquipmentLayoutItem*> _personalEquipmentLayout;   // personal  equipment layout, managed by the player
+	const Armor* _personalEquipmentArmor;
 	SoldierDeath *_death;
 	SoldierDiary *_diary;
 	std::string _statString;
@@ -220,6 +221,11 @@ public:
 	/// Gets the soldier's equipment-layout.
 	std::vector<EquipmentLayoutItem*> *getEquipmentLayout();
 	std::vector<EquipmentLayoutItem*> *getPersonalEquipmentLayout() { return &_personalEquipmentLayout; }
+	/// Gets the soldier's personal equipment armor.
+	const Armor* getPersonalEquipmentArmor() const { return _personalEquipmentArmor; }
+	/// Sets the soldier's personal equipment armor.
+	void setPersonalEquipmentArmor(const Armor* armor) { _personalEquipmentArmor = armor; }
+
 	/// Trains a soldier's psychic stats
 	void trainPsi();
 	/// Trains a soldier's psionic abilities (anytimePsiTraining option).

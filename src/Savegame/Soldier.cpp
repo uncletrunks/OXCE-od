@@ -53,7 +53,7 @@ Soldier::Soldier(RuleSoldier *rules, Armor *armor, int id) :
 	_improvement(0), _psiStrImprovement(0), _rules(rules), _rank(RANK_ROOKIE), _craft(0),
 	_gender(GENDER_MALE), _look(LOOK_BLONDE), _lookVariant(0), _missions(0), _kills(0),
 	_recentlyPromoted(false), _psiTraining(false), _training(false), _returnToTrainingWhenHealed(false),
-	_armor(armor), _replacedArmor(0), _transformedArmor(0), _death(0), _diary(new SoldierDiary()),
+	_armor(armor), _replacedArmor(0), _transformedArmor(0), _personalEquipmentArmor(nullptr), _death(0), _diary(new SoldierDiary()),
 	_corpseRecovered(false)
 {
 	if (id != 0)
@@ -199,6 +199,10 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 			}
 		}
 	}
+	if (node["personalEquipmentArmor"])
+	{
+		_personalEquipmentArmor = mod->getArmor(node["personalEquipmentArmor"].as<std::string>());
+	}
 	if (node["death"])
 	{
 		_death = new SoldierDeath();
@@ -275,6 +279,10 @@ YAML::Node Soldier::save(const ScriptGlobal *shared) const
 	{
 		for (std::vector<EquipmentLayoutItem*>::const_iterator i = _personalEquipmentLayout.begin(); i != _personalEquipmentLayout.end(); ++i)
 			node["personalEquipmentLayout"].push_back((*i)->save());
+	}
+	if (_personalEquipmentArmor)
+	{
+		node["personalEquipmentArmor"] = _personalEquipmentArmor->getType();
 	}
 	if (_death != 0)
 	{

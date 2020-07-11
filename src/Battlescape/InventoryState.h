@@ -91,6 +91,7 @@ public:
 	void saveGlobalLayout(int index, bool includingArmor);
 	void loadGlobalLayout(int index);
 	bool loadGlobalLayoutArmor(int index);
+	bool tryArmorChange(const std::string& armorName);
 	void btnGlobalEquipmentLayoutClick(Action *action);
 	/// Handler for clicking the Load button.
 	void btnInventoryLoadClick(Action *action);
