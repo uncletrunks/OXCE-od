@@ -2653,6 +2653,9 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::getAccuracyThrow>("getAccuracyThrow");
 	ri.add<&RuleItem::getAccuracyUse>("getAccuracyUse");
 
+	ri.add<&RuleItem::getPower>("getPower", "base power before applying unit bonuses, random rolls or other modiffers");
+	ri.add<&RuleItem::getMeleePower>("getMeleePower", "base melee power for normal weapons before applying unit bonuses, random rolls or other modiffers");
+
 	ri.add<&RuleItem::getArmor>("getArmorValue");
 	ri.add<&RuleItem::getWeight>("getWeight");
 	ri.add<&getBattleTypeScript>("getBattleType");
