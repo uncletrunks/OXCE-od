@@ -684,9 +684,10 @@ void ProjectileFlyBState::think()
 			}
 			else
 			{
-				if (_parent->getSave()->getTile(_action.target)->getUnit())
+				auto tmpUnit = _parent->getSave()->getTile(_action.target)->getUnit();
+				if (tmpUnit && tmpUnit != _unit)
 				{
-					_parent->getSave()->getTile(_action.target)->getUnit()->getStatistics()->shotAtCounter++; // Only counts for guns, not throws or launches
+					tmpUnit->getStatistics()->shotAtCounter++; // Only counts for guns, not throws or launches
 				}
 
 				_parent->getMap()->resetCameraSmoothing();
