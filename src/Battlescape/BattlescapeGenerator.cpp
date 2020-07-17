@@ -358,12 +358,12 @@ void BattlescapeGenerator::nextStage()
 							if (tile->getMapData(O_FLOOR))
 							{
 								// in the skyranger? it goes home.
-								if (tile->getMapData(O_FLOOR)->getSpecialType() == START_POINT)
+								if (tile->getFloorSpecialTileType() == START_POINT)
 								{
 									toContainer = takeHomeGuaranteed;
 								}
 								// on the exit grid? it goes to stage two.
-								else if (tile->getMapData(O_FLOOR)->getSpecialType() == END_POINT)
+								else if (tile->getFloorSpecialTileType() == END_POINT)
 								{
 									// apply similar logic (for units) as in protocol 1
 									if ((*i)->getUnit() &&
@@ -1280,8 +1280,7 @@ bool BattlescapeGenerator::canPlaceXCOMUnit(Tile *tile)
 {
 	// to spawn an xcom soldier, there has to be a tile, with a floor, with the starting point attribute and no object in the way
 	if (tile &&
-		tile->getMapData(O_FLOOR) &&
-		tile->getMapData(O_FLOOR)->getSpecialType() == START_POINT &&
+		tile->getFloorSpecialTileType() == START_POINT &&
 		!tile->getMapData(O_OBJECT) &&
 		tile->getMapData(O_FLOOR)->getTUCost(MT_WALK) < 255)
 	{
@@ -1932,8 +1931,7 @@ void BattlescapeGenerator::fuelPowerSources()
 {
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
-		if (_save->getTile(i)->getMapData(O_OBJECT)
-			&& _save->getTile(i)->getMapData(O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE)
+		if (_save->getTile(i)->getObjectSpecialTileType() == UFO_POWER_SOURCE)
 		{
 			_save->createItemForTile(_game->getMod()->getAlienFuelName(), _save->getTile(i));
 		}
@@ -1948,8 +1946,7 @@ void BattlescapeGenerator::explodePowerSources()
 {
 	for (int i = 0; i < _save->getMapSizeXYZ(); ++i)
 	{
-		if (_save->getTile(i)->getMapData(O_OBJECT)
-			&& _save->getTile(i)->getMapData(O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE && RNG::percent(75))
+		if (_save->getTile(i)->getObjectSpecialTileType() == UFO_POWER_SOURCE && RNG::percent(75))
 		{
 			Position pos;
 			pos.x = _save->getTile(i)->getPosition().x*16;

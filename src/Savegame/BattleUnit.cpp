@@ -3342,7 +3342,7 @@ bool BattleUnit::isInExitArea(SpecialTileType stt) const
  */
 bool BattleUnit::liesInExitArea(Tile *tile, SpecialTileType stt) const
 {
-	return tile && tile->getMapData(O_FLOOR) && (tile->getMapData(O_FLOOR)->getSpecialType() == stt);
+	return tile && tile->getFloorSpecialTileType() == stt;
 }
 
 /**

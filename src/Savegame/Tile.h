@@ -148,6 +148,24 @@ public:
 		return _objects[part];
 	}
 
+	/**
+	 * Get special tile type of floor part.
+	 * @return Type of Tile.
+	 */
+	SpecialTileType getFloorSpecialTileType() const
+	{
+		return _objects[O_FLOOR] ? _objects[O_FLOOR]->getSpecialType() : TILE;
+	}
+
+	/**
+	 * Get special tile type of object part.
+	 * @return Type of Tile.
+	 */
+	SpecialTileType getObjectSpecialTileType() const
+	{
+		return _objects[O_OBJECT] ? _objects[O_OBJECT]->getSpecialType() : TILE;
+	}
+
 	/// Sets the pointer to the mapdata for a specific part of the tile
 	void setMapData(MapData *dat, int mapDataID, int mapDataSetID, TilePart part);
 	/// Gets the IDs to the mapdata for a specific part of the tile
