@@ -2613,6 +2613,59 @@ void hasCategoryScript(const RuleItem* ri, int& val, const std::string& cat)
 	val = 0;
 }
 
+void getResistTypeScript(const RuleDamageType* rdt, int &ret)
+{
+	ret = rdt ? rdt->ResistType : 0;
+}
+
+void getAoeScript(const RuleDamageType* rdt, int &ret)
+{
+	ret = rdt ? !rdt->isDirect() : 0;
+}
+
+void getRandomTypeScript(const RuleDamageType* rdt, int &ret)
+{
+	ret = rdt ? rdt->RandomType : 0;
+}
+
+template<float RuleDamageType::* Ptr>
+void getDamageToScript(const RuleDamageType* rdt, int &ret, int value)
+{
+	ret = rdt ? (rdt->* Ptr) * value : 0;
+}
+
+void getRandomDamageScript(const RuleDamageType* rdt, int &ret, int value, RNG::RandomState* rng)
+{
+	ret = 0;
+	if (rdt && rng)
+	{
+		auto func = [&](int min, int max)
+		{
+			return rng->generate(min, max);
+		};
+		ret = rdt->getRandomDamage(value, &func);
+	}
+}
+
+std::string debugDisplayScript(const RuleDamageType* rdt)
+{
+	if (rdt)
+	{
+		std::string s;
+		s += "RuleDamageType";
+		s += "(resist: ";
+		s += std::to_string((int)rdt->ResistType);
+		s += " random: ";
+		s += std::to_string((int)rdt->RandomType);
+		s += ")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
 std::string debugDisplayScript(const RuleItem* ri)
 {
 	if (ri)
@@ -2639,6 +2692,34 @@ std::string debugDisplayScript(const RuleItem* ri)
  */
 void RuleItem::ScriptRegister(ScriptParserBase* parser)
 {
+	{
+		const auto name = std::string{ "RuleDamageType" };
+		parser->registerRawPointerType<RuleDamageType>(name);
+		Bind<RuleDamageType> rs = { parser, name };
+
+		rs.add<&RuleDamageType::isDirect>("isDirect", "if this damage affect one target");
+		rs.add<&getAoeScript>("isAreaOfEffect", "if this damage can affect multiple targets");
+
+		rs.add<&getResistTypeScript>("getResistType", "what resist type is used for damage reduction");
+		rs.add<&getRandomTypeScript>("getRandomType", "how calcualte random value of final attack damage");
+
+		rs.add<&getDamageToScript<&RuleDamageType::ToArmorPre>>("getDamageToArmorPre", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToArmor>>("getDamageToArmor", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToEnergy>>("getDamageToEnergy", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToHealth>>("getDamageToHealth", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToItem>>("getDamageToItem", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToMana>>("getDamageToMana", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToMorale>>("getDamageToMorale", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToStun>>("getDamageToStun", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToTile>>("getDamageToTile", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToTime>>("getDamageToTime", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToWound>>("getDamageToWound", "calculate value multiplied by given modifier");
+
+		rs.add<&getRandomDamageScript>("getRandomDamage", "calculate final attack damage based on given power");
+
+		rs.addDebugDisplay<&debugDisplayScript>();
+	}
+
 	parser->registerPointerType<Mod>();
 
 	Bind<RuleItem> ri = { parser };
@@ -2668,7 +2749,9 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::getAccuracyUse>("getAccuracyUse");
 
 	ri.add<&RuleItem::getPower>("getPower", "base power before applying unit bonuses, random rolls or other modifiers");
+	ri.add<&RuleItem::getDamageType>("getDamageType", "type of damage of normal attack");
 	ri.add<&RuleItem::getMeleePower>("getMeleePower", "base melee power for normal weapons before applying unit bonuses, random rolls or other modifiers");
+	ri.add<&RuleItem::getMeleeType>("getMeleeDamageType", "type of damage of melee attack of  normal weapons");
 
 	ri.add<&RuleItem::getArmor>("getArmorValue");
 	ri.add<&RuleItem::getWeight>("getWeight");
