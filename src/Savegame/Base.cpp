@@ -2092,6 +2092,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 	RuleBaseFacilityFunctions require;
 	RuleBaseFacilityFunctions forbidden;
 	RuleBaseFacilityFunctions future;
+	RuleBaseFacilityFunctions missed;
 
 	int removedBuildings = 0;
 	int removedPrisonType[9] = { };
@@ -2108,6 +2109,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 
 			// removed one, check what we lose
 			removed.add(rule);
+			missed |= rule->getProvidedBaseFunc();
 
 			if (rule->getAliens() > 0)
 			{
@@ -2189,8 +2191,10 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 		}
 	}
 
-	// if there is any required function that we do not have then it means we are trying to remove something still needed
-	if ((~provide & require).any())
+	// if there is any required function that we do not have then it means we are trying to remove something still needed.
+	// in case when building was destroyed by aliens attack we can lack some functions,
+	// if we do not remove anything now then we can add new building even if we lack some functions.
+	if ((~provide & require & missed).any())
 	{
 		return BPE_Used;
 	}
