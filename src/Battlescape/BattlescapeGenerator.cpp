@@ -1282,6 +1282,7 @@ bool BattlescapeGenerator::canPlaceXCOMUnit(Tile *tile)
 	if (tile &&
 		tile->getFloorSpecialTileType() == START_POINT &&
 		!tile->getMapData(O_OBJECT) &&
+		tile->getMapData(O_FLOOR) && // for clarity this is checked again, first time was in `getFloorSpecialTileType`
 		tile->getMapData(O_FLOOR)->getTUCost(MT_WALK) < 255)
 	{
 		if (_craftInventoryTile == 0)
