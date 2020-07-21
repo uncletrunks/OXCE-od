@@ -658,15 +658,6 @@ void SellState::btnOkClick(Action *)
 				break;
 			case TRANSFER_ITEM:
 				RuleItem *item = (RuleItem*)i->rule;
-				if (_debriefingState != 0)
-				{
-					// remember the decreased amount for next sell/transfer
-					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
-
-					// set autosell status if we sold all of the item
-					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
-				}
-				else
 				{
 					// remove all of said items from base
 					int toRemove = cleanUpContainer(_base->getStorageItems(), item, i->amount);
@@ -709,6 +700,16 @@ void SellState::btnOkClick(Action *)
 					{
 						toRemove = cleanUpCraft((*j), item, toRemove);
 					}
+				}
+
+				// Note: this only updates a helper map, it doesn't affect real item recovery (that has already happened and all items are already in the base)
+				if (_debriefingState != 0)
+				{
+					// remember the decreased amount for next sell/transfer
+					_debriefingState->decreaseRecoveredItemCount(item, i->amount);
+
+					// set autosell status if we sold all of the item
+					_game->getSavedGame()->setAutosell(item, (i->qtySrc == i->amount));
 				}
 
 				break;
