@@ -172,7 +172,7 @@ public:
 	double getUsedStores() const;
 	/// Checks if the base's stores are overfull.
 	bool storesOverfull(double offset = 0.0) const;
-	/// Checks if the base's stores are soo full that even cargo crafts can't fit.
+	/// Checks if the base's stores are so full that even cargo crafts can't fit.
 	bool storesOverfullCritical() const;
 	/// Gets the base's available storage space.
 	int getAvailableStores() const;

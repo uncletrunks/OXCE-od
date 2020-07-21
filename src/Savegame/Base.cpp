@@ -822,7 +822,7 @@ bool Base::storesOverfull(double offset) const
 }
 
 /**
- * Checks if the base's stores are soo full that even crafts cargo can't fit.
+ * Checks if the base's stores are so full that even crafts cargo can't fit.
  */
 bool Base::storesOverfullCritical() const
 {

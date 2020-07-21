@@ -743,7 +743,7 @@ void RuleItem::afterLoad(const Mod* mod)
 	{
 		if (_compatibleAmmo[0].size() > 1)
 		{
-			throw Exception("Vehicle weapon support only one ammo type");
+			throw Exception("Vehicle weapons support only one ammo type");
 		}
 		if (_compatibleAmmo[0].size() == 1)
 		{
@@ -752,7 +752,7 @@ void RuleItem::afterLoad(const Mod* mod)
 			{
 				if (getClipSize() % ammo->getClipSize())
 				{
-					throw Exception("Vehicle weapon clip size is not multiply of '" + ammo->getType() +  "' clip size");
+					throw Exception("Vehicle weapon clip size is not a multiple of '" + ammo->getType() +  "' clip size");
 				}
 			}
 		}
@@ -1460,7 +1460,7 @@ int RuleItem::getTUUnload(int slot) const
 }
 
 /**
- * Gets ammo for vehicle.
+ * Gets the ammo type for a vehicle.
  */
 const RuleItem* RuleItem::getVehicleClipAmmo() const
 {
@@ -1468,7 +1468,7 @@ const RuleItem* RuleItem::getVehicleClipAmmo() const
 }
 
 /**
- * Gets number of shots.
+ * Gets the maximum number of rounds for a vehicle. E.g. a vehicle that can load 6 clips with 10 rounds each, returns 60.
  */
 int RuleItem::getVehicleClipSize() const
 {
@@ -1491,7 +1491,7 @@ int RuleItem::getVehicleClipSize() const
 }
 
 /**
- * Gets number of ammo clips that fit vehicle weapon.
+ * Gets the number of clips needed to fully load a vehicle. E.g. a vehicle that holds max 60 rounds and clip size is 10, returns 6.
  */
 int RuleItem::getVehicleClipsLoaded() const
 {
@@ -2653,8 +2653,8 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::getAccuracyThrow>("getAccuracyThrow");
 	ri.add<&RuleItem::getAccuracyUse>("getAccuracyUse");
 
-	ri.add<&RuleItem::getPower>("getPower", "base power before applying unit bonuses, random rolls or other modiffers");
-	ri.add<&RuleItem::getMeleePower>("getMeleePower", "base melee power for normal weapons before applying unit bonuses, random rolls or other modiffers");
+	ri.add<&RuleItem::getPower>("getPower", "base power before applying unit bonuses, random rolls or other modifiers");
+	ri.add<&RuleItem::getMeleePower>("getMeleePower", "base melee power for normal weapons before applying unit bonuses, random rolls or other modifiers");
 
 	ri.add<&RuleItem::getArmor>("getArmorValue");
 	ri.add<&RuleItem::getWeight>("getWeight");

@@ -704,7 +704,7 @@ void SellState::btnOkClick(Action *)
 						}
 					}
 
-					// clean reast of craft weapons and vehicles
+					// clean rest of craft weapons and vehicles
 					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
 					{
 						toRemove = cleanUpCraft((*j), item, toRemove);
