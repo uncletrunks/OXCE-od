@@ -343,7 +343,7 @@ en-US:
 #TrainingFinishedState.cpp
   STR_TRAINING_FINISHED: "Training Finished{NEWLINE}at {0}"
 #UfoDetectedState.cpp
-  STR_CANCEL_AND_IGNORE_UC: "CANCEL & IGNORE"
+  STR_IGNORE_UC: "IGNORE"
 #UfoTrackerState.cpp
   STR_UFO_TRACKER: "UFO Tracker"
 #=================== Menu ===================
