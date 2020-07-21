@@ -536,7 +536,7 @@ void SellState::btnOkClick(Action *)
 	auto cleanUpContainer = [&](ItemContainer* container, const RuleItem* rule, int toRemove) -> int
 	{
 		auto curr = container->getItem(rule);
-		if (curr > toRemove)
+		if (curr >= toRemove)
 		{
 			container->removeItem(rule, toRemove);
 			return 0;
