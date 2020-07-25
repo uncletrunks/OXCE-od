@@ -1663,6 +1663,8 @@ std::vector<Vehicle*> *Base::getVehicles()
  */
 void Base::damageFacilities(Ufo *ufo)
 {
+	_destroyedFacilitiesCache.clear();
+
 	for (int i = 0; i < ufo->getRules()->getMissilePower();)
 	{
 		WeightedOptions options;
@@ -2025,6 +2027,8 @@ void Base::destroyFacility(std::vector<BaseFacility*>::iterator facility)
 			);
 		}
 	}
+
+	_destroyedFacilitiesCache[(*facility)->getRules()] += 1;
 	delete *facility;
 	_facilities.erase(facility);
 }

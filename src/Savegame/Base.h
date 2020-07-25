@@ -20,6 +20,7 @@
 #include "Target.h"
 #include <string>
 #include <vector>
+#include <map>
 #include <yaml-cpp/yaml.h>
 #include "../Mod/RuleBaseFacilityFunctions.h"
 
@@ -101,6 +102,7 @@ private:
 	std::vector<Vehicle*> _vehicles;
 	std::vector<Vehicle*> _vehiclesFromBase;
 	std::vector<BaseFacility*> _defenses;
+	std::map<const RuleBaseFacility*, int> _destroyedFacilitiesCache;
 
 	using Target::load;
 public:
@@ -270,6 +272,8 @@ public:
 	std::vector<BaseFacility*> *getDefenses();
 	/// Gets the base's vehicles.
 	std::vector<Vehicle*> *getVehicles();
+	/// Gets the list of recently destroyed base facilities.
+	std::map<const RuleBaseFacility*, int> *getDestroyedFacilitiesCache() { return &_destroyedFacilitiesCache; }
 	/// Damage and/or destroy facilities after a missile impact.
 	void damageFacilities(Ufo *ufo);
 	/// Damage a given facility.
