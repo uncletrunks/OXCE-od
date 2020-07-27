@@ -666,6 +666,10 @@ void SellState::btnOkClick(Action *)
 					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
 					{
 						toRemove = cleanUpContainer((*j)->getItems(), item, toRemove);
+						if (toRemove > 0)
+						{
+							toRemove = cleanUpCraft((*j), item, toRemove);
+						}
 					}
 
 					// if there are STILL any left to remove, take them from the transfers, and if necessary, delete it.
@@ -690,15 +694,13 @@ void SellState::btnOkClick(Action *)
 							if ((*j)->getCraft())
 							{
 								toRemove = cleanUpContainer((*j)->getCraft()->getItems(), item, toRemove);
+								if (toRemove > 0)
+								{
+									toRemove = cleanUpCraft((*j)->getCraft(), item, toRemove);
+								}
 							}
 							++j;
 						}
-					}
-
-					// clean rest of craft weapons and vehicles
-					for (std::vector<Craft*>::iterator j = _base->getCrafts()->begin(); j != _base->getCrafts()->end() && toRemove; ++j)
-					{
-						toRemove = cleanUpCraft((*j), item, toRemove);
 					}
 				}
 
