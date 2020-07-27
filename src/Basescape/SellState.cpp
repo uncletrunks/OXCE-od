@@ -221,7 +221,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 		else
 		{
 			qty = _base->getStorageItems()->getItem(rule);
-			if (Options::storageLimitsEnforced && _origin == OPT_BATTLESCAPE)
+			if (Options::storageLimitsEnforced && (_origin == OPT_BATTLESCAPE || overfullCritical))
 			{
 				for (std::vector<Transfer*>::iterator j = _base->getTransfers()->begin(); j != _base->getTransfers()->end(); ++j)
 				{

@@ -656,12 +656,9 @@ int Craft::getTotalItemCount(const RuleItem* item) const
 		{
 			qty += 1;
 		}
-		else if (!v->getRules()->getVehicleClipAmmo())
+		else if (v->getRules()->getVehicleClipAmmo() == item)
 		{
-			if (v->getRules()->getVehicleClipAmmo() == item)
-			{
-				qty += v->getRules()->getVehicleClipsLoaded();
-			}
+			qty += v->getRules()->getVehicleClipsLoaded();
 		}
 	}
 
