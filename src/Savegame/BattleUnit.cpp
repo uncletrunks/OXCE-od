@@ -4499,6 +4499,14 @@ MovementType BattleUnit::getMovementType() const
 }
 
 /**
+ * Gets the turn cost.
+ */
+int BattleUnit::getTurnCost() const
+{
+	return _armor->getTurnCost();
+}
+
+/**
  * Elevates the unit to grand galactic inquisitor status,
  * meaning they will NOT take part in the current battle.
  */

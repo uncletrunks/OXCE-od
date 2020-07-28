@@ -645,6 +645,8 @@ public:
 	void calculateEnviDamage(Mod *mod, SavedBattleGame *save);
 	/// Use this function to check the unit's movement type.
 	MovementType getMovementType() const;
+	/// Gets the turn cost.
+	int getTurnCost() const;
 	/// Create special weapon for unit.
 	void setSpecialWeapon(SavedBattleGame *save);
 	/// Get special weapon by battle type.
