@@ -28,7 +28,7 @@ namespace OpenXcom
 /**
  * Low overhead callback.
  *
- * Base template, not defined any where.
+ * Base template, not defined anywhere.
  */
 template<typename T>
 class FuncRef;
@@ -44,9 +44,9 @@ public:
 	using InternalFunc = Ret(*)(Args..., void*);
 
 	/**
-	 * Constructor that take refrerecne to some temporal callable object.
+	 * A constructor that takes a reference to some temporary callable object.
 	 *
-	 * To prevent possibility of unintended dangling reference you need spell full type.
+	 * To prevent the possibility of unintended dangling references, you need to spell the full type.
 	 */
 	template<typename F>
 	explicit FuncRef(F&& f) :FuncRef{ +[](Args... args, void* p){ return std::invoke(*static_cast<F*>(p), std::forward<Args>(args)...); }, &f }
@@ -55,23 +55,23 @@ public:
 	}
 
 	/**
-	 * Construcotr that take pointer to some callabe object.
+	 * A constructor that takes a pointer to some callable object.
 	 */
 	template<typename P>
 	constexpr FuncRef(P* f) : FuncRef{ +[](Args... args, void* p){ return std::invoke(*reinterpret_cast<P*>(p), std::forward<Args>(args)...); }, reinterpret_cast<void*>(f) }
 	{
-		static_assert(sizeof(f) == sizeof(_data), "This code work only if void pointer have same size as given pointer (in special case function pointer)");
+		static_assert(sizeof(f) == sizeof(_data), "This code works only if a void pointer has the same size as the given pointer (in special case function pointer)");
 	}
 
 	/**
-	 * Invalid construcotr from empty pointer.
+	 * Invalid constructor from empty pointer.
 	 */
 	FuncRef(std::nullptr_t) = delete;
 
 	/**
-	 * Helper construcotr for minimum overhead functions.
+	 * Helper constructor for minimum overhead functions.
 	 * @param func Internal function to call.
-	 * @param data State that is pass to interall function call.
+	 * @param data State that is passed to the internal function call.
 	 */
 	constexpr FuncRef(InternalFunc func, void* data) : _func{ func }, _data{ data }
 	{

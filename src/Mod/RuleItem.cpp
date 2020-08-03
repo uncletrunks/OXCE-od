@@ -2697,25 +2697,25 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 		parser->registerRawPointerType<RuleDamageType>(name);
 		Bind<RuleDamageType> rs = { parser, name };
 
-		rs.add<&RuleDamageType::isDirect>("isDirect", "if this damage affect one target");
-		rs.add<&getAoeScript>("isAreaOfEffect", "if this damage can affect multiple targets");
+		rs.add<&RuleDamageType::isDirect>("isDirect", "if this damage type affects only one target");
+		rs.add<&getAoeScript>("isAreaOfEffect", "if this damage type can affect multiple targets");
 
-		rs.add<&getResistTypeScript>("getResistType", "what resist type is used for damage reduction");
-		rs.add<&getRandomTypeScript>("getRandomType", "how calcualte random value of final attack damage");
+		rs.add<&getResistTypeScript>("getResistType", "which damage resistance type is used for damage reduction");
+		rs.add<&getRandomTypeScript>("getRandomType", "how to calculate randomized weapon damage from the weapon's power");
 
-		rs.add<&getDamageToScript<&RuleDamageType::ToArmorPre>>("getDamageToArmorPre", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToArmor>>("getDamageToArmor", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToEnergy>>("getDamageToEnergy", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToHealth>>("getDamageToHealth", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToItem>>("getDamageToItem", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToMana>>("getDamageToMana", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToMorale>>("getDamageToMorale", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToStun>>("getDamageToStun", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToTile>>("getDamageToTile", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToTime>>("getDamageToTime", "calculate value multiplied by given modifier");
-		rs.add<&getDamageToScript<&RuleDamageType::ToWound>>("getDamageToWound", "calculate value multiplied by given modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToArmorPre>>("getDamageToArmorPre", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToArmor>>("getDamageToArmor", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToEnergy>>("getDamageToEnergy", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToHealth>>("getDamageToHealth", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToItem>>("getDamageToItem", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToMana>>("getDamageToMana", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToMorale>>("getDamageToMorale", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToStun>>("getDamageToStun", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToTile>>("getDamageToTile", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToTime>>("getDamageToTime", "calculated damage value multiplied by the corresponding modifier");
+		rs.add<&getDamageToScript<&RuleDamageType::ToWound>>("getDamageToWound", "calculated damage value multiplied by the corresponding modifier");
 
-		rs.add<&getRandomDamageScript>("getRandomDamage", "calculate final attack damage based on given power");
+		rs.add<&getRandomDamageScript>("getRandomDamage", "calculated damage value (based on weapon's power)");
 
 		rs.addDebugDisplay<&debugDisplayScript>();
 	}
@@ -2748,10 +2748,10 @@ void RuleItem::ScriptRegister(ScriptParserBase* parser)
 	ri.add<&RuleItem::getAccuracyThrow>("getAccuracyThrow");
 	ri.add<&RuleItem::getAccuracyUse>("getAccuracyUse");
 
-	ri.add<&RuleItem::getPower>("getPower", "base power before applying unit bonuses, random rolls or other modifiers");
-	ri.add<&RuleItem::getDamageType>("getDamageType", "type of damage of normal attack");
-	ri.add<&RuleItem::getMeleePower>("getMeleePower", "base melee power for normal weapons before applying unit bonuses, random rolls or other modifiers");
-	ri.add<&RuleItem::getMeleeType>("getMeleeDamageType", "type of damage of melee attack of  normal weapons");
+	ri.add<&RuleItem::getPower>("getPower", "primary power, before applying unit bonuses, random rolls or other modifiers");
+	ri.add<&RuleItem::getDamageType>("getDamageType", "primary damage type");
+	ri.add<&RuleItem::getMeleePower>("getMeleePower", "secondary power (gunbutt), before applying unit bonuses, random rolls or other modifiers");
+	ri.add<&RuleItem::getMeleeType>("getMeleeDamageType", "secondary damage type (gunbutt)");
 
 	ri.add<&RuleItem::getArmor>("getArmorValue");
 	ri.add<&RuleItem::getWeight>("getWeight");
