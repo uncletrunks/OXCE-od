@@ -2284,6 +2284,9 @@
     <ClInclude Include="Geoscape\DogfightExperienceState.h">
       <Filter>Geoscape</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Functions.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Geoscape">
