@@ -463,8 +463,8 @@ public:
 	void addPsiSkillExp();
 	/// Adds one to the psi strength exp counter.
 	void addPsiStrengthExp();
-	/// Adds one to the mana exp counter.
-	void addManaExp();
+	/// Adds to the mana exp counter.
+	void addManaExp(int weaponStat);
 	/// Adds one to the melee exp counter.
 	void addMeleeExp();
 	/// Did the unit gain any experience yet?

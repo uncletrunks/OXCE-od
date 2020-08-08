@@ -2129,17 +2129,7 @@ bool TileEngine::awardExperience(BattleActionAttack attack, BattleUnit *target, 
 	}
 
 	// Mana experience - this is a temporary/experimental approach, can be improved later after modder feedback
-	if (weapon->getRules()->getManaExperience() > 0)
-	{
-		for (int i = weapon->getRules()->getManaExperience() / 100; i > 0; --i)
-		{
-			unit->addManaExp();
-		}
-		if (RNG::percent(weapon->getRules()->getManaExperience() % 100))
-		{
-			unit->addManaExp();
-		}
-	}
+	unit->addManaExp(weapon->getRules()->getManaExperience());
 
 	using upExpType = void (BattleUnit::*)();
 
@@ -3913,6 +3903,9 @@ bool TileEngine::psiAttack(BattleActionAttack attack, BattleUnit *victim)
 {
 	if (!victim)
 		return false;
+
+	// Mana experience - this is a temporary/experimental approach, can be improved later after modder feedback
+	attack.attacker->addManaExp(attack.weapon_item->getRules()->getManaExperience());
 
 	attack.attacker->addPsiSkillExp();
 	if (Options::allowPsiStrengthImprovement) victim->addPsiStrengthExp();
