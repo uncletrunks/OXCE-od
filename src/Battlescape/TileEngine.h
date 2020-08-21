@@ -93,7 +93,7 @@ private:
 	std::vector<Uint16> *_voxelData;
 	std::vector<VisibilityBlockCache> _blockVisibility;
 	RuleInventory *_inventorySlotGround;
-	static const int heightFromCenter[11];
+	constexpr static int heightFromCenter[11] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-12,+12};
 	bool _personalLighting;
 	Tile *_cacheTile;
 	Tile *_cacheTileBelow;

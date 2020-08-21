@@ -212,7 +212,7 @@ MapSubset mapAreaExpand(MapSubset gs, int radius)
 
 } // namespace
 
-const int TileEngine::heightFromCenter[11] = {0,-2,+2,-4,+4,-6,+6,-8,+8,-12,+12};
+constexpr int TileEngine::heightFromCenter[11];
 
 
 constexpr Position TileEngine::invalid;
