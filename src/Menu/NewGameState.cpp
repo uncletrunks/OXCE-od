@@ -26,8 +26,11 @@
 #include "../Interface/Text.h"
 #include "../Geoscape/GeoscapeState.h"
 #include "../Geoscape/BuildNewBaseState.h"
+#include "../Geoscape/BaseNameState.h"
+#include "../Basescape/PlaceLiftState.h"
 #include "../Engine/Options.h"
 #include "../Savegame/SavedGame.h"
+#include "../Savegame/Base.h"
 
 namespace OpenXcom
 {
@@ -169,7 +172,26 @@ void NewGameState::btnOkClick(Action *)
 	GeoscapeState *gs = new GeoscapeState;
 	_game->setState(gs);
 	gs->init();
-	_game->pushState(new BuildNewBaseState(_game->getSavedGame()->getBases()->back(), gs->getGlobe(), true));
+
+	auto base = _game->getSavedGame()->getBases()->back();
+	if (base->getMarker() != -1)
+	{
+		if (base->getName().empty())
+		{
+			// fixed location, custom name
+			_game->pushState(new BaseNameState(base, gs->getGlobe(), true, true));
+		}
+		else if (Options::customInitialBase)
+		{
+			// fixed location, fixed name
+			_game->pushState(new PlaceLiftState(base, gs->getGlobe(), true));
+		}
+	}
+	else
+	{
+		// custom location, custom name
+		_game->pushState(new BuildNewBaseState(base, gs->getGlobe(), true));
+	}
 }
 
 /**
