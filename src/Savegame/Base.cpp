@@ -2118,7 +2118,7 @@ BasePlacementErrors Base::isAreaInUse(BaseAreaSubset area, const RuleBaseFacilit
 			if (rule->getAliens() > 0)
 			{
 				auto type = rule->getPrisonType();
-				if (std::find(prisonBegin, prisonCurr, type) != prisonCurr)
+				if (std::find(prisonBegin, prisonCurr, type) == prisonCurr)
 				{
 					//too many prison types, give up
 					if (prisonCurr == prisonEnd)
