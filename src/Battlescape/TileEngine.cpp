@@ -2292,26 +2292,30 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
 	}
 
 	const int wounds = target->getFatalWounds();
+	const int healthOrig = target->getHealth();
 	const int stunLevelOrig = target->getStunlevel();
 	const int adjustedDamage = target->damage(relative, damage, type, _save, attack);
-	// lethal + stun
-	const int totalDamage = adjustedDamage + (target->getStunlevel() - stunLevelOrig);
 
 	// hit log
 	if (attack.attacker)
 	{
-		const int damagePercent = (totalDamage * 100) / target->getBaseStats()->health;
-		if (damagePercent <= 0)
+		int healthDamage = healthOrig - target->getHealth();
+		int stunDamage = target->getStunlevel() - stunLevelOrig;
+		if (healthDamage > 0 || stunDamage > 0)
 		{
-			_save->appendToHitLog(HITLOG_NO_DAMAGE, attack.attacker->getFaction());
-		}
-		else if (damagePercent <= 20)
-		{
-			_save->appendToHitLog(HITLOG_SMALL_DAMAGE, attack.attacker->getFaction());
+			int damagePercent = ((healthDamage + stunDamage) * 100) / target->getBaseStats()->health;
+			if (damagePercent <= 20)
+			{
+				_save->appendToHitLog(HITLOG_SMALL_DAMAGE, attack.attacker->getFaction());
+			}
+			else
+			{
+				_save->appendToHitLog(HITLOG_BIG_DAMAGE, attack.attacker->getFaction());
+			}
 		}
 		else
 		{
-			_save->appendToHitLog(HITLOG_BIG_DAMAGE, attack.attacker->getFaction());
+			_save->appendToHitLog(HITLOG_NO_DAMAGE, attack.attacker->getFaction());
 		}
 	}
 
