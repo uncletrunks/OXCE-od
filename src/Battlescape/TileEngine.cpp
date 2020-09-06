@@ -3975,13 +3975,33 @@ bool TileEngine::psiAttack(BattleActionAttack attack, BattleUnit *victim)
 }
 
 /**
+ * Calculate success rate of melee attack action.
+ */
+int TileEngine::meleeAttackCalculate(BattleActionAttack::ReadOnly attack, const BattleUnit *victim)
+{
+	int hitChance = BattleUnit::getFiringAccuracy(attack, _save->getBattleGame()->getMod());
+	if (victim)
+	{
+		int arc = getArcDirection(getDirectionTo(victim->getPositionVexels(), attack.attacker->getPositionVexels()), victim->getDirection());
+		float penalty = 1.0f - arc * victim->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
+		if (penalty > 0)
+		{
+			hitChance -= victim->getArmor()->getMeleeDodge(victim) * penalty;
+		}
+	}
+
+	auto rng = RNG::globalRandomState().subSequence();
+
+	return hitChance - rng.generate(0, 99);
+}
+
+/**
  *  Attempts a melee attack action.
  * @param action Pointer to an action.
  * @return Whether it failed or succeeded.
  */
 bool TileEngine::meleeAttack(BattleActionAttack attack, BattleUnit *victim)
 {
-	int hitChance = BattleUnit::getFiringAccuracy(attack, _save->getBattleGame()->getMod());
 	if (attack.type != BA_CQB)
 	{
 		// hit log - new melee attack
@@ -3994,20 +4014,7 @@ bool TileEngine::meleeAttack(BattleActionAttack attack, BattleUnit *victim)
 		}
 	}
 
-	if (victim)
-	{
-		int arc = _save->getTileEngine()->getArcDirection(_save->getTileEngine()->getDirectionTo(victim->getPositionVexels(), attack.attacker->getPositionVexels()), victim->getDirection());
-		float penalty = 1.0f - arc * victim->getArmor()->getMeleeDodgeBackPenalty() / 4.0f;
-		if (penalty > 0)
-		{
-			hitChance -= victim->getArmor()->getMeleeDodge(victim) * penalty;
-		}
-	}
-	if (!RNG::percent(hitChance))
-	{
-		return false;
-	}
-	return true;
+	return meleeAttackCalculate(attack, victim) > 0;
 }
 
 /**
