@@ -118,6 +118,10 @@ class ModScript
 	{
 		TryPsiAttackUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
+	struct TryMeleeAttackUnitParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleItem*, const BattleUnit*, const BattleUnit*, int, int, int>
+	{
+		TryMeleeAttackUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 	struct DamageUnitParser : ScriptParserEvents<ScriptOutputArgs<int&, int&, int&, int&, int&, int&, int&, int&, int&>, BattleUnit*, BattleItem*, BattleItem*, BattleUnit*, SavedBattleGame*, const RuleSkill*, int, int, int, int, int, int>
 	{
 		DamageUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
@@ -168,6 +172,11 @@ class ModScript
 	struct TryPsiAttackItemParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleItem*, const BattleUnit*, const BattleUnit*, int, int, int, RNG::RandomState*, int, int>
 	{
 		TryPsiAttackItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
+	struct TryMeleeAttackItemParser : ScriptParserEvents<ScriptOutputArgs<int&>, const BattleItem*, const BattleUnit*, const BattleUnit*, int, int, int, RNG::RandomState*, int, int>
+	{
+		TryMeleeAttackItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
 	////////////////////////////////////////////////////////////
@@ -256,6 +265,7 @@ public:
 	using ReactionUnitReaction = MACRO_NAMED_SCRIPT("reactionUnitReaction", ReactionUnitParser);
 
 	using TryPsiAttackUnit = MACRO_NAMED_SCRIPT("tryPsiAttackUnit", TryPsiAttackUnitParser);
+	using TryMeleeAttackUnit = MACRO_NAMED_SCRIPT("tryMeleeAttackUnit", TryMeleeAttackUnitParser);
 	using HitUnit = MACRO_NAMED_SCRIPT("hitUnit", HitUnitParser);
 	using DamageUnit = MACRO_NAMED_SCRIPT("damageUnit", DamageUnitParser);
 	using HealUnit = MACRO_NAMED_SCRIPT("healUnit", HealUnitParser);
@@ -276,6 +286,7 @@ public:
 
 	using ReactionWeaponAction = MACRO_NAMED_SCRIPT("reactionWeaponAction", ReactionUnitParser);
 	using TryPsiAttackItem = MACRO_NAMED_SCRIPT("tryPsiAttackItem", TryPsiAttackItemParser);
+	using TryMeleeAttackItem = MACRO_NAMED_SCRIPT("tryMeleeAttackItem", TryMeleeAttackItemParser);
 
 	using CreateItem = MACRO_NAMED_SCRIPT("createItem", CreateItemParser);
 	using NewTurnItem = MACRO_NAMED_SCRIPT("newTurnItem", NewTurnItemParser);
@@ -340,6 +351,7 @@ public:
 		ReactionUnitReaction,
 
 		TryPsiAttackUnit,
+		TryMeleeAttackUnit,
 		HitUnit,
 		DamageUnit,
 		HealUnit,
@@ -358,6 +370,7 @@ public:
 
 		ReactionWeaponAction,
 		TryPsiAttackItem,
+		TryMeleeAttackItem,
 
 		CreateItem,
 		NewTurnItem

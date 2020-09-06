@@ -1563,6 +1563,34 @@ ModScript::TryPsiAttackItemParser::TryPsiAttackItemParser(ScriptGlobal* shared, 
 	setDefault("var int r; random.randomRange r 0 55; add psi_attack_success attack_strength; add psi_attack_success r; sub psi_attack_success defense_strength; sub psi_attack_success distance_strength_reduction; return psi_attack_success;");
 }
 
+ModScript::TryMeleeAttackItemParser::TryMeleeAttackItemParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"melee_attack_success",
+
+	"item",
+	"attacker",
+	"victim",
+	"attack_strength",
+	"defense_strength",
+	"battle_action",
+	"random",
+	"arc_to_attacker",
+	"defense_strength_penalty" }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+
+	setDefault(
+		"var int r;\n"
+		"random.randomRange r 0 99;\n"
+		"sub melee_attack_success r;\n"
+		"add melee_attack_success attack_strength;\n"
+		"sub melee_attack_success defense_strength;\n"
+		"add melee_attack_success defense_strength_penalty;\n"
+		"return melee_attack_success;\n"
+	);
+}
+
 /**
  * Init all required data in script using object data.
  */
