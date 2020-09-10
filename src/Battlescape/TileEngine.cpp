@@ -4760,8 +4760,27 @@ Position TileEngine::getOriginVoxel(BattleAction &action, Tile *tile)
 			}
 		}
 		int direction = getDirectionTo(origin, action.target);
-		originVoxel.x += dirXshift[direction]*action.actor->getArmor()->getSize();
-		originVoxel.y += dirYshift[direction]*action.actor->getArmor()->getSize();
+
+		// Offset for different relativeOrigin values
+		switch (action.relativeOrigin)
+		{
+		case BattleActionOrigin::CENTRE:
+			// Standard offset.
+			originVoxel.x += dirXshift[direction] * action.actor->getArmor()->getSize();
+			originVoxel.y += dirYshift[direction] * action.actor->getArmor()->getSize();
+			break;
+
+			// 2:1 Weighted average of the standard offset and a rotation, either left or right.
+		case BattleActionOrigin::LEFT:
+			originVoxel.x += ((2 * dirXshift[direction] + dirXshift[(direction - 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+			originVoxel.y += ((2 * dirYshift[direction] + dirYshift[(direction - 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+			break;
+
+		case BattleActionOrigin::RIGHT:
+			originVoxel.x += ((2 * dirXshift[direction] + dirXshift[(direction + 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+			originVoxel.y += ((2 * dirYshift[direction] + dirYshift[(direction + 1) % 8]) * action.actor->getArmor()->getSize() + 1) / 3;
+			break;
+		};
 	}
 	else
 	{

@@ -250,6 +250,8 @@ en-GB:
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS: "Remember disabled craft weapons"
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS_DESC: "Craft weapons disabled during a dogfight will stay disabled. They will also not be rearmed at the base."
+  STR_OFF_CENTRE_SHOOTING: "Off-centre shooting"
+  STR_OFF_CENTRE_SHOOTING_DESC: "Soldiers will automatically try to adjust the firing angle slightly in case there is no line of fire."
 #===================
   STR_GRAPHS_ZOOM_IN: "Zoom In (Graphs)"
   STR_GRAPHS_ZOOM_OUT: "Zoom Out (Graphs)"

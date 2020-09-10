@@ -324,8 +324,28 @@ void ProjectileFlyBState::init()
 			}
 			else
 			{
-				if (!_parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer))
+				bool foundLoF = _parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
+
+				if (!foundLoF && Options::oxceEnableOffCentreShooting)
 				{
+					// If we can't target from the standard shooting position, try a bit left and right from the centre.
+					for (auto& rel_pos : { BattleActionOrigin::LEFT, BattleActionOrigin::RIGHT })
+					{
+						_action.relativeOrigin = rel_pos;
+						originVoxel = _parent->getTileEngine()->getOriginVoxel(_action, _parent->getSave()->getTile(_origin));
+						foundLoF = _parent->getTileEngine()->canTargetUnit(&originVoxel, targetTile, &_targetVoxel, _unit, isPlayer);
+						if (foundLoF)
+						{
+							break;
+						}
+					}
+				}
+
+				if (!foundLoF)
+				{
+					// Failed to find LOF
+					_action.relativeOrigin = BattleActionOrigin::CENTRE; // reset to the normal origin
+
 					_targetVoxel = TileEngine::invalid.toVoxel(); // out of bounds, even after voxel to tile calculation.
 					if (isPlayer)
 					{
