@@ -5360,6 +5360,12 @@ std::string debugDisplayScript(const BattleUnit* bu)
 			s += "\" race: \"";
 			s += unit->getRace();
 		}
+		auto soldier = bu->getGeoscapeSoldier();
+		if (soldier)
+		{
+			s += "\" name: \"";
+			s += soldier->getName();
+		}
 		s += "\" id: ";
 		s += std::to_string(bu->getId());
 		s += " faction: ";
