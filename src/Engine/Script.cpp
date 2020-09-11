@@ -274,7 +274,8 @@ struct Func_debug_impl_int
 	[[gnu::always_inline]]
 	static RetEnum func (ScriptWorkerBase& c, int i)
 	{
-		c.log_buffer_add(std::to_string(i));
+		auto f = [&]{ return std::to_string(i); };
+		c.log_buffer_add(&f);
 		return RetContinue;
 	}
 };
@@ -284,7 +285,8 @@ struct Func_debug_impl_text
 	[[gnu::always_inline]]
 	static RetEnum func (ScriptWorkerBase& c, ScriptText p)
 	{
-		c.log_buffer_add(p);
+		auto f = [&]{ return std::string(p); };
+		c.log_buffer_add(&f);
 		return RetContinue;
 	}
 };
@@ -538,16 +540,23 @@ void ScriptWorkerBase::executeBase(const Uint8* proc)
 	}
 }
 
+constexpr int log_buffer_limit_max = 500;
+static int log_buffer_limit_count = 0;
+
 /**
  * Add text to log buffer.
  */
-void ScriptWorkerBase::log_buffer_add(const std::string& s)
+void ScriptWorkerBase::log_buffer_add(FuncRef<std::string()> func)
 {
+	if (log_buffer_limit_count > log_buffer_limit_max)
+	{
+		return;
+	}
 	if (!log_buffer.empty())
 	{
 		log_buffer += " ";
 	}
-	log_buffer += s;
+	log_buffer += func();
 }
 
 /**
@@ -555,18 +564,17 @@ void ScriptWorkerBase::log_buffer_add(const std::string& s)
  */
 void ScriptWorkerBase::log_buffer_flush(ProgPos& p)
 {
-	constexpr int limit = 500;
-	static int limit_count = 0;
-	if (++limit_count < limit)
+	if (++log_buffer_limit_count < log_buffer_limit_max)
 	{
 		Logger log;
-		log.get(LOG_DEBUG) << "Script debug log at " << std::hex << std::showbase << std::setw(8) << ((int)p) << ": " << log_buffer;
+		log.get(LOG_DEBUG) << "Script debug log: " << log_buffer;
 		log_buffer.clear();
 	}
-	else if (limit_count == limit)
+	else if (log_buffer_limit_count == log_buffer_limit_max)
 	{
 		Logger log;
 		log.get(LOG_DEBUG) << "Script debug log limit reach";
+		log_buffer.clear();
 	}
 }
 

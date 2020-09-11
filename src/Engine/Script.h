@@ -30,6 +30,7 @@
 #include "Logger.h"
 #include "Exception.h"
 #include "GraphSubset.h"
+#include "Functions.h"
 
 
 namespace OpenXcom
@@ -721,7 +722,7 @@ public:
 	}
 
 	/// Add text to log buffer.
-	void log_buffer_add(const std::string& s);
+	void log_buffer_add(FuncRef<std::string()> func);
 	/// Flush buffer to log file.
 	void log_buffer_flush(ProgPos& p);
 };

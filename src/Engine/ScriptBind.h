@@ -1032,7 +1032,8 @@ struct BindDebugDisplay
 {
 	static RetEnum func(ScriptWorkerBase& swb, const T* t)
 	{
-		swb.log_buffer_add(X(t));
+		auto f = [&]{ return X(t); };
+		swb.log_buffer_add(&f);
 		return RetContinue;
 	}
 };
