@@ -271,7 +271,7 @@ public:
 	/// Performs a transformation on this soldier
 	void transform(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier);
 	/// Calculates how this project changes the soldier's stats
-	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode);
+	UnitStats calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode, const RuleSoldier *sourceSoldierType);
 	/// Gets all the soldier bonuses
 	const std::vector<const RuleSoldierBonus*> *getBonuses(const Mod *mod);
 	/// Get pointer to current stats with soldier bonuses, but without armor bonuses.

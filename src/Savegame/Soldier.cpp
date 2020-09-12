@@ -1554,12 +1554,15 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 	{
 		// a clone already has the correct soldier type, but random stats
 		// if we don't want random stats, let's copy them from the source soldier
-		UnitStats sourceStats = *sourceSoldier->getCurrentStats() + calculateStatChanges(mod, transformationRule, sourceSoldier, 0);
+		UnitStats sourceStats = *sourceSoldier->getCurrentStats() + calculateStatChanges(mod, transformationRule, sourceSoldier, 0, sourceSoldier->getRules());
 		UnitStats mergedStats = UnitStats::combine(transformationRule->getRerollStats(), sourceStats, _currentStats);
 		setBothStats(&mergedStats);
 	}
 	else
 	{
+		// backup original soldier type, it will still be needed later for stat change calculations
+		RuleSoldier* sourceSoldierType = _rules;
+
 		// change soldier type if needed
 		if (!transformationRule->getProducedSoldierType().empty() && _rules->getType() != transformationRule->getProducedSoldierType())
 		{
@@ -1613,7 +1616,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
 		}
 
 		// change stats
-		_currentStats += calculateStatChanges(mod, transformationRule, sourceSoldier, 0);
+		_currentStats += calculateStatChanges(mod, transformationRule, sourceSoldier, 0, sourceSoldierType);
 
 		// and randomize stats where needed
 		{
@@ -1683,7 +1686,7 @@ void Soldier::transform(const Mod *mod, RuleSoldierTransformation *transformatio
  * @param mode 0 = final, 1 = min, 2 = max
  * @return The stat changes
  */
-UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode)
+UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformation *transformationRule, Soldier *sourceSoldier, int mode, const RuleSoldier *sourceSoldierType)
 {
 	UnitStats statChange;
 
@@ -1749,7 +1752,7 @@ UnitStats Soldier::calculateStatChanges(const Mod *mod, RuleSoldierTransformatio
 			: transformationSoldierType->getStatCaps();
 		UnitStats cappedChange = upperBound - currentStats;
 
-		bool isSameSoldierType = (transformationSoldierType == _rules);
+		bool isSameSoldierType = (transformationSoldierType == sourceSoldierType);
 		bool softLimit = transformationRule->isSoftLimit(isSameSoldierType);
 		if (softLimit)
 		{
