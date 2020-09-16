@@ -1556,7 +1556,9 @@ ModScript::TryPsiAttackItemParser::TryPsiAttackItemParser(ScriptGlobal* shared, 
 	"battle_action",
 	"random",
 	"distance",
-	"distance_strength_reduction" }
+	"distance_strength_reduction",
+	"battle_game",
+}
 {
 	BindBase b { this };
 
@@ -1577,7 +1579,9 @@ ModScript::TryMeleeAttackItemParser::TryMeleeAttackItemParser(ScriptGlobal* shar
 	"battle_action",
 	"random",
 	"arc_to_attacker",
-	"defense_strength_penalty" }
+	"defense_strength_penalty",
+	"battle_game",
+}
 {
 	BindBase b { this };
 

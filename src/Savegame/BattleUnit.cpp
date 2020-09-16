@@ -5665,7 +5665,7 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 	"action_unit",
 	"reaction_unit", "reaction_battle_action", "reaction_weapon",
 	"weapon", "skill", "battle_action", "action_target",
-	"move", "arc_to_action_unit" }
+	"move", "arc_to_action_unit", "battle_game" }
 {
 	BindBase b { this };
 
@@ -5729,7 +5729,9 @@ ModScript::TryPsiAttackUnitParser::TryPsiAttackUnitParser(ScriptGlobal* shared, 
 	"skill",
 	"attack_strength",
 	"defense_strength",
-	"battle_action" }
+	"battle_action",
+	"battle_game",
+}
 {
 	BindBase b { this };
 
@@ -5747,7 +5749,9 @@ ModScript::TryMeleeAttackUnitParser::TryMeleeAttackUnitParser(ScriptGlobal* shar
 	"skill",
 	"attack_strength",
 	"defense_strength",
-	"battle_action" }
+	"battle_action",
+	"battle_game",
+}
 {
 	BindBase b { this };
 
