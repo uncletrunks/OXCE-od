@@ -5662,7 +5662,7 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 	"reaction_chance",
 	"distance",
 	"action_unit", "reaction_unit", "weapon", "battle_action", "action_target",
-	"move", }
+	"move", "arc_to_action_unit" }
 {
 	BindBase b { this };
 

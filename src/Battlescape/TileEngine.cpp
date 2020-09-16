@@ -2033,10 +2033,11 @@ bool TileEngine::tryReaction(ReactionScore *reaction, BattleUnit *target, const 
 			int meleeReactionChance = Mod::EXTENDED_MELEE_REACTIONS > 0 ? 100 : 0;
 			int reactionChance = BA_HIT != originalAction.type ? 100 : meleeReactionChance;
 			int dist = Position::distance2d(unit->getPositionVexels(), target->getPositionVexels());
+			int arc = getArcDirection(getDirectionTo(unit->getPositionVexels(), target->getPositionVexels()), unit->getDirection());
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
 			ModScript::ReactionCommon::Output arg{ reactionChance, dist };
-			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType };
+			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType, arc };
 			if (originalAction.weapon)
 			{
 				worker.execute(originalAction.weapon->getRules()->getScript<ModScript::ReactionWeaponAction>(), arg);
