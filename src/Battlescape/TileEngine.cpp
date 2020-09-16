@@ -2037,7 +2037,7 @@ bool TileEngine::tryReaction(ReactionScore *reaction, BattleUnit *target, const 
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
 			ModScript::ReactionCommon::Output arg{ reactionChance, dist };
-			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.skillRules, originalAction.type, origTarg, moveType, arc };
+			ModScript::ReactionCommon::Worker worker{ target, unit, action.weapon, action.type, originalAction.weapon, originalAction.skillRules, originalAction.type, origTarg, moveType, arc };
 			if (originalAction.weapon)
 			{
 				worker.execute(originalAction.weapon->getRules()->getScript<ModScript::ReactionWeaponAction>(), arg);

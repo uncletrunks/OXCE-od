@@ -5661,7 +5661,10 @@ ModScript::SelectMoveSoundUnitParser::SelectMoveSoundUnitParser(ScriptGlobal* sh
 ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"reaction_chance",
 	"distance",
-	"action_unit", "reaction_unit", "weapon", "skill", "battle_action", "action_target",
+
+	"action_unit",
+	"reaction_unit", "reaction_battle_action", "reaction_weapon",
+	"weapon", "skill", "battle_action", "action_target",
 	"move", "arc_to_action_unit" }
 {
 	BindBase b { this };
