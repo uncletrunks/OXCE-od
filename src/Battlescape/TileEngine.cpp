@@ -2037,7 +2037,7 @@ bool TileEngine::tryReaction(ReactionScore *reaction, BattleUnit *target, const 
 			auto *origTarg = _save->getTile(originalAction.target) ? _save->getTile(originalAction.target)->getUnit() : nullptr;
 
 			ModScript::ReactionCommon::Output arg{ reactionChance, dist };
-			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.type, origTarg, moveType, arc };
+			ModScript::ReactionCommon::Worker worker{ target, unit, originalAction.weapon, originalAction.skillRules, originalAction.type, origTarg, moveType, arc };
 			if (originalAction.weapon)
 			{
 				worker.execute(originalAction.weapon->getRules()->getScript<ModScript::ReactionWeaponAction>(), arg);
@@ -3887,13 +3887,13 @@ int TileEngine::psiAttackCalculate(BattleActionAttack::ReadOnly attack, const Ba
 	psiAttackResult = ModScript::scriptFunc1<ModScript::TryPsiAttackItem>(
 		weapon->getRules(),
 		psiAttackResult,
-		weapon, attacker, victim, attackStrength, defenseStrength, type, &rng, (int)dis, (int)weapon->getRules()->getPsiAccuracyRangeReduction(dis)
+		weapon, attacker, victim, attack.skill_rules, attackStrength, defenseStrength, type, &rng, (int)dis, (int)weapon->getRules()->getPsiAccuracyRangeReduction(dis)
 	);
 
 	psiAttackResult =  ModScript::scriptFunc1<ModScript::TryPsiAttackUnit>(
 		victim->getArmor(),
 		psiAttackResult,
-		weapon, attacker, victim, attackStrength, defenseStrength, type
+		weapon, attacker, victim, attack.skill_rules, attackStrength, defenseStrength, type
 	);
 
 	return psiAttackResult;
@@ -3999,13 +3999,13 @@ int TileEngine::meleeAttackCalculate(BattleActionAttack::ReadOnly attack, const 
 	meleeAttackResult = ModScript::scriptFunc1<ModScript::TryMeleeAttackItem>(
 		weapon->getRules(),
 		meleeAttackResult,
-		weapon, attacker, victim, attackStrength, defenseStrength, type, &rng, arc, defenseStrengthPenalty
+		weapon, attacker, victim, attack.skill_rules, attackStrength, defenseStrength, type, &rng, arc, defenseStrengthPenalty
 	);
 
 	meleeAttackResult =  ModScript::scriptFunc1<ModScript::TryMeleeAttackUnit>(
 		victim->getArmor(),
 		meleeAttackResult,
-		weapon, attacker, victim, attackStrength, defenseStrength, type
+		weapon, attacker, victim, attack.skill_rules, attackStrength, defenseStrength, type
 	);
 
 

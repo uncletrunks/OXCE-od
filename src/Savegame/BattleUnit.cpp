@@ -5661,7 +5661,7 @@ ModScript::SelectMoveSoundUnitParser::SelectMoveSoundUnitParser(ScriptGlobal* sh
 ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"reaction_chance",
 	"distance",
-	"action_unit", "reaction_unit", "weapon", "battle_action", "action_target",
+	"action_unit", "reaction_unit", "weapon", "skill", "battle_action", "action_target",
 	"move", "arc_to_action_unit" }
 {
 	BindBase b { this };
@@ -5723,6 +5723,7 @@ ModScript::TryPsiAttackUnitParser::TryPsiAttackUnitParser(ScriptGlobal* shared, 
 	"item",
 	"attacker",
 	"victim",
+	"skill",
 	"attack_strength",
 	"defense_strength",
 	"battle_action" }
@@ -5740,6 +5741,7 @@ ModScript::TryMeleeAttackUnitParser::TryMeleeAttackUnitParser(ScriptGlobal* shar
 	"item",
 	"attacker",
 	"victim",
+	"skill",
 	"attack_strength",
 	"defense_strength",
 	"battle_action" }

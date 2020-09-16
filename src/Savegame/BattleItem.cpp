@@ -24,6 +24,7 @@
 #include "SavedBattleGame.h"
 #include "../Mod/Mod.h"
 #include "../Mod/RuleItem.h"
+#include "../Mod/RuleSkill.h"
 #include "../Mod/RuleInventory.h"
 #include "../Engine/Collections.h"
 #include "../Engine/Surface.h"
@@ -1549,6 +1550,7 @@ ModScript::TryPsiAttackItemParser::TryPsiAttackItemParser(ScriptGlobal* shared, 
 	"item",
 	"attacker",
 	"victim",
+	"skill",
 	"attack_strength",
 	"defense_strength",
 	"battle_action",
@@ -1569,6 +1571,7 @@ ModScript::TryMeleeAttackItemParser::TryMeleeAttackItemParser(ScriptGlobal* shar
 	"item",
 	"attacker",
 	"victim",
+	"skill",
 	"attack_strength",
 	"defense_strength",
 	"battle_action",
