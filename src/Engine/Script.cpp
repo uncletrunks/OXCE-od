@@ -1755,7 +1755,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
  * @param d parser having all meta data.
  */
 ParserWriter::ParserWriter(
-		Uint8 regUsed,
+		size_t regUsed,
 		ScriptContainerBase& c,
 		const ScriptParserBase& d) :
 	container(c),
@@ -2104,7 +2104,7 @@ void ParserWriter::logDump(const ScriptRefData& ref) const
 ScriptParserBase::ScriptParserBase(ScriptGlobal* shared, const std::string& name) :
 	_shared{ shared },
 	_emptyReturn{ false },
-	_regUsed{ RegMax },
+	_regUsedSpace{ RegStartPos },
 	_regOutSize{ 0 }, _regOutName{ },
 	_name{ name }
 {
@@ -2294,7 +2294,7 @@ void ScriptParserBase::addScriptReg(const std::string& s, ArgEnum type, bool wri
 	{
 		throw Exception("Invalid use of type '" + t->name.toString() + "' for reg: '" + s + "'");
 	}
-	if (meta.needRegSpace(_regUsed) <= ScriptMaxReg)
+	if (meta.needRegSpace(_regUsedSpace) <= ScriptMaxReg)
 	{
 		if (haveNameRef(s))
 		{
@@ -2306,8 +2306,8 @@ void ScriptParserBase::addScriptReg(const std::string& s, ArgEnum type, bool wri
 		{
 			_regOutName[_regOutSize++] = name;
 		}
-		auto old = meta.nextRegPos(_regUsed);
-		_regUsed = meta.needRegSpace(_regUsed);
+		auto old = meta.nextRegPos(_regUsedSpace);
+		_regUsedSpace = meta.needRegSpace(_regUsedSpace);
 		addSortHelper(_refList, { name, type, static_cast<RegEnum>(old) });
 	}
 	else
@@ -2458,7 +2458,7 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 	ScriptContainerBase tempScript;
 	std::string err = "Error in parsing script '" + _name + "' for '" + parentName + "': ";
 	ParserWriter help(
-		_regUsed,
+		_regUsedSpace,
 		tempScript,
 		*this
 	);
