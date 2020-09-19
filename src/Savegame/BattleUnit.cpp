@@ -5663,7 +5663,7 @@ ModScript::ReactionUnitParser::ReactionUnitParser(ScriptGlobal* shared, const st
 	"distance",
 
 	"action_unit",
-	"reaction_unit", "reaction_battle_action", "reaction_weapon",
+	"reaction_unit", "reaction_weapon", "reaction_battle_action",
 	"weapon", "skill", "battle_action", "action_target",
 	"move", "arc_to_action_unit", "battle_game" }
 {
