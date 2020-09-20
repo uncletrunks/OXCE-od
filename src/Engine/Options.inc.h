@@ -74,6 +74,7 @@ OPT bool oxceEnableOffCentreShooting;
 
 // OXCE hidden, accessible only via options.cfg
 OPT bool oxceHighlightNewTopicsHidden;
+OPT int oxceInterceptGuiMaintenanceTimeHidden;
 OPT bool oxceEnableUnitResponseSounds;
 OPT bool oxceEnableSlackingIndicator;
 OPT bool oxceEnablePaletteFlickerFix;

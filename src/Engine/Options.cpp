@@ -225,6 +225,7 @@ void create()
 
 	// OXCE hidden
 	_info.push_back(OptionInfo("oxceHighlightNewTopicsHidden", &oxceHighlightNewTopicsHidden, true));
+	_info.push_back(OptionInfo("oxceInterceptGuiMaintenanceTimeHidden", &oxceInterceptGuiMaintenanceTimeHidden, 2));
 	_info.push_back(OptionInfo("oxceEnableUnitResponseSounds", &oxceEnableUnitResponseSounds, true));
 	_info.push_back(OptionInfo("oxceEnableSlackingIndicator", &oxceEnableSlackingIndicator, true));
 	_info.push_back(OptionInfo("oxceEnablePaletteFlickerFix", &oxceEnablePaletteFlickerFix, false));
