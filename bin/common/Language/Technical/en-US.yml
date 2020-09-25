@@ -384,6 +384,7 @@ en-US:
   pilots: "Cockpit size"
   vehicles: "HWP capacity"
   maxItems: "Equipment limit"
+  maxStorageSpace: "Storage space"
   maxAltitude: "Dogfight altitude limit"
   weapons: "Weapon pods"
   weaponStrings: "Weapon names"
