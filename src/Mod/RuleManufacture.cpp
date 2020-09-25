@@ -265,6 +265,17 @@ int RuleManufacture::getManufactureCost() const
 }
 
 /**
+ * Checks if there's enough funds to manufacture one object.
+ * @param funds Current funds.
+ * @return True if manufacture is possible.
+ */
+bool RuleManufacture::haveEnoughMoneyForOneMoreUnit(int64_t funds) const
+{
+	// either we have enough money, or the production doesn't cost anything
+	return funds >= _cost || _cost <= 0;
+}
+
+/**
  * Should all resources of a cancelled project be refunded?
  * @return True, if all resources should be refunded. False otherwise.
  */

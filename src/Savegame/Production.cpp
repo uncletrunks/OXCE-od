@@ -94,7 +94,7 @@ void Production::setSellItems (bool sell)
 
 bool Production::haveEnoughMoneyForOneMoreUnit(SavedGame * g) const
 {
-	return (g->getFunds() >= _rules->getManufactureCost());
+	return _rules->haveEnoughMoneyForOneMoreUnit(g->getFunds());
 }
 
 bool Production::haveEnoughLivingSpaceForOneMoreUnit(Base * b)

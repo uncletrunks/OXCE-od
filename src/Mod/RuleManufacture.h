@@ -20,6 +20,7 @@
 #include <string>
 #include <map>
 #include <yaml-cpp/yaml.h>
+#include <stdint.h>
 #include "RuleBaseFacilityFunctions.h"
 
 namespace OpenXcom
@@ -89,6 +90,8 @@ public:
 	int getManufactureTime() const;
 	/// Gets the cost of manufacturing one object.
 	int getManufactureCost() const;
+	/// Checks if there's enough funds to manufacture one object.
+	bool haveEnoughMoneyForOneMoreUnit(int64_t funds) const;
 	/// Should all resources of a cancelled project be refunded?
 	bool getRefund() const;
 	/// Gets the list of items required to manufacture one object.
