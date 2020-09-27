@@ -2745,11 +2745,11 @@ BattlescapeTally BattlescapeGame::tallyUnits()
 		{
 			if ((*j)->getOriginalFaction() == FACTION_HOSTILE)
 			{
-				if (Options::allowPsionicCapture && (*j)->getFaction() == FACTION_PLAYER)
+				if (Options::allowPsionicCapture && (*j)->getFaction() == FACTION_PLAYER && (*j)->getCapturable())
 				{
 					// don't count psi-captured units
 				}
-				else if (isSurrendering((*j)))
+				else if (isSurrendering((*j)) && (*j)->getCapturable())
 				{
 					// don't count surrendered units
 				}
