@@ -202,6 +202,7 @@ void BaseView::setSelectable(int size)
  * placed on the currently selected square.
  * @param rule Facility type.
  * @param facilityBeingMoved Selected facility.
+ * @param isStartFacility Is this a start facility?
  * @return 0 if placeable, otherwise error code for why we couldn't place it
  * 1: not connected to lift or on top of another facility (standard OXC behavior)
  * 2: trying to upgrade over existing facility, but it's in use
@@ -211,7 +212,7 @@ void BaseView::setSelectable(int size)
  * 6: trying to upgrade over existing facility, but ruleset disallows it
  * 7: trying to upgrade over existing facility, but all buildings next to it are under construction and build queue is off
  */
-BasePlacementErrors BaseView::getPlacementError(const RuleBaseFacility *rule, BaseFacility *facilityBeingMoved) const
+BasePlacementErrors BaseView::getPlacementError(const RuleBaseFacility *rule, BaseFacility *facilityBeingMoved, bool isStartFacility) const
 {
 	// We'll need to know for the final check if we're upgrading an existing facility
 	bool buildingOverExisting = false;
@@ -245,8 +246,12 @@ BasePlacementErrors BaseView::getPlacementError(const RuleBaseFacility *rule, Ba
 			auto facility = _facilities[x][y];
 			if (facility != 0)
 			{
+				if (isStartFacility)
+				{
+					return BPE_NotConnected;
+				}
 				// when moving an existing facility, it should not block itself
-				if (facilityBeingMoved == 0)
+				if (facilityBeingMoved == nullptr)
 				{
 					// Further check to see if the facility already there can be built over and we're not removing an important base function
 					auto canBuildOverError = rule->getCanBuildOverOtherFacility(facility->getRules());
