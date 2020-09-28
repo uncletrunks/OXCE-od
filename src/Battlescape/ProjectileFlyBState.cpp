@@ -305,7 +305,7 @@ void ProjectileFlyBState::init()
 			}
 		}
 	}
-	else if (!_action.weapon->getRules()->getArcingShot())
+	else if (!_action.weapon->getArcingShot(_action.type))
 	{
 		// determine the target voxel.
 		// aim at the center of the unit, the object, the walls or the floor (in that priority)

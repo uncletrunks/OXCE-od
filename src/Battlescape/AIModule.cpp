@@ -1526,7 +1526,7 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 		Position origin = _save->getTileEngine()->getOriginVoxel((*action), 0);
 		Position targetPosition;
 
-		if (action->weapon->getRules()->getArcingShot() || action->type == BA_THROW)
+		if (action->weapon->getArcingShot(action->type) || action->type == BA_THROW)
 		{
 			targetPosition = target->getPosition().toVoxel() + Position (8,8, (2 + -target->getTile()->getTerrainLevel()));
 			if (!_save->getTileEngine()->validateThrow((*action), origin, targetPosition))
