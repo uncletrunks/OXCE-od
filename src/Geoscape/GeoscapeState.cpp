@@ -2226,6 +2226,7 @@ void GeoscapeState::time1Day()
 {
 	SavedGame *saveGame = _game->getSavedGame();
 	Mod *mod = _game->getMod();
+	bool psiStrengthEval = (Options::psiStrengthEval && saveGame->isResearched(mod->getPsiRequirements()));
 	for (Base *base : *_game->getSavedGame()->getBases())
 	{
 		// Handle facility construction
@@ -2476,6 +2477,7 @@ void GeoscapeState::time1Day()
 			if ((*j)->isInTraining())
 			{
 				(*j)->trainPhys(_game->getMod()->getCustomTrainingFactor());
+				(*j)->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
 				if ((*j)->isFullyTrained())
 				{
 					(*j)->setTraining(false);
@@ -2505,7 +2507,7 @@ void GeoscapeState::time1Day()
 			for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
 			{
 				(*s)->trainPsi1Day();
-				(*s)->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && saveGame->isResearched(_game->getMod()->getPsiRequirements())));
+				(*s)->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
 			}
 		}
 	}
@@ -2682,6 +2684,7 @@ void GeoscapeState::time1Month()
 	// Handle Psi-Training and initiate a new retaliation mission, if applicable
 	if (!Options::anytimePsiTraining)
 	{
+		bool psiStrengthEval = (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
 		for (std::vector<Base*>::const_iterator b = _game->getSavedGame()->getBases()->begin(); b != _game->getSavedGame()->getBases()->end(); ++b)
 		{
 			if ((*b)->getAvailablePsiLabs() > 0)
@@ -2691,7 +2694,7 @@ void GeoscapeState::time1Month()
 					if ((*s)->isInPsiTraining())
 					{
 						(*s)->trainPsi();
-						(*s)->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
+						(*s)->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
 					}
 				}
 			}

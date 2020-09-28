@@ -1400,6 +1400,7 @@ void DebriefingState::prepareDebriefing()
 	}
 
 	// time to care for units.
+	bool psiStrengthEval = (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
 	for (std::vector<BattleUnit*>::iterator j = battle->getUnits()->begin(); j != battle->getUnits()->end(); ++j)
 	{
 		UnitStatus status = (*j)->getStatus();
@@ -1491,7 +1492,7 @@ void DebriefingState::prepareDebriefing()
 					if (soldier != 0)
 					{
 						// calculate new statString
-						soldier->calcStatString(_game->getMod()->getStatStrings(), (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())));
+						soldier->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
 					}
 					else
 					{ // non soldier player = tank

@@ -2426,6 +2426,7 @@ void DogfightState::awardExperienceToPilots()
 {
 	if (_firedAtLeastOnce && !_experienceAwarded && _craft && _ufo && (_ufo->isCrashed() || _ufo->isDestroyed()))
 	{
+		bool psiStrengthEval = (Options::psiStrengthEval && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements()));
 		const std::vector<Soldier*> pilots = _craft->getPilotList(false);
 		for (std::vector<Soldier*>::const_iterator it = pilots.begin(); it != pilots.end(); ++it)
 		{
@@ -2453,6 +2454,7 @@ void DogfightState::awardExperienceToPilots()
 					(*it)->getDailyDogfightExperienceCache()->bravery += 10;
 				}
 			}
+			(*it)->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
 		}
 		_experienceAwarded = true;
 	}

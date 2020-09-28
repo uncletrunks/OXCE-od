@@ -410,6 +410,7 @@ void NewBattleState::initSave()
 	base->getCrafts()->push_back(_craft);
 
 	// Generate soldiers
+	bool psiStrengthEval = (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements()));
 	for (int i = 0; i < 30; ++i)
 	{
 		int randomType = RNG::generate(0, _game->getMod()->getSoldiersList().size() - 1);
@@ -439,7 +440,7 @@ void NewBattleState::initSave()
 		stats->bravery = (int)ceil(stats->bravery / 10.0) * 10; // keep it a multiple of 10
 
 		// update again, could have been changed since soldier creation
-		soldier->calcStatString(mod->getStatStrings(), (Options::psiStrengthEval && save->isResearched(mod->getPsiRequirements())));
+		soldier->calcStatString(mod->getStatStrings(), psiStrengthEval);
 
 		base->getSoldiers()->push_back(soldier);
 		if (i < _craft->getRules()->getSoldiers())
