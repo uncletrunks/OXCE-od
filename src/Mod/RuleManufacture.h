@@ -49,6 +49,7 @@ class RuleManufacture
 private:
 	std::string _name, _category;
 	std::string _spawnedPersonType, _spawnedPersonName;
+	YAML::Node _spawnedSoldier;
 	std::vector<std::string> _requiresName;
 	RuleBaseFacilityFunctions _requiresBaseFunc;
 	std::vector<const RuleResearch*> _requires;
@@ -109,6 +110,8 @@ public:
 	const std::string &getSpawnedPersonType() const;
 	/// Gets the custom name of the "manufactured person".
 	const std::string &getSpawnedPersonName() const;
+	/// Gets the spawned soldier template.
+	const YAML::Node& getSpawnedSoldierTemplate() const { return _spawnedSoldier; }
 	/// Is it possible to use auto-sell feature for this manufacturing project?
 	bool canAutoSell() const;
 	/// Gets the list weight for this manufacture item.

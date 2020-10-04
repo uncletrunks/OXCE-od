@@ -67,6 +67,10 @@ void RuleManufacture::load(const YAML::Node &node, Mod* mod, int listOrder)
 	_randomProducedItemsNames = node["randomProducedItems"].as< std::vector<std::pair<int, std::map<std::string, int> > > >(_randomProducedItemsNames);
 	_spawnedPersonType = node["spawnedPersonType"].as<std::string>(_spawnedPersonType);
 	_spawnedPersonName = node["spawnedPersonName"].as<std::string>(_spawnedPersonName);
+	if (node["spawnedSoldier"])
+	{
+		_spawnedSoldier = node["spawnedSoldier"];
+	}
 	_listOrder = node["listOrder"].as<int>(_listOrder);
 	if (!_listOrder)
 	{
