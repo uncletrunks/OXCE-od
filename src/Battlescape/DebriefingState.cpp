@@ -59,6 +59,7 @@
 #include "../Menu/ErrorMessageState.h"
 #include "../Menu/MainMenuState.h"
 #include "../Interface/Cursor.h"
+#include "../Engine/Exception.h"
 #include "../Engine/Options.h"
 #include "../Engine/RNG.h"
 #include "../Basescape/ManageAlienContainmentState.h"
@@ -2421,6 +2422,20 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		// Ignore everything else, e.g. no points for live/dead aliens (since you did NOT recover them)
 		// Also no points or anything else for the recovered items
 		return;
+	}
+
+	// This ain't good! Let's display at least some useful info before we crash...
+	if (!liveAlienItemRule)
+	{
+		std::ostringstream ss;
+		ss << "Live alien item definition is missing. Unit ID = " << from->getId();
+		ss << "; Type = " << from->getType();
+		ss << "; Status = " << from->getStatus();
+		ss << "; Faction = " << from->getFaction();
+		ss << "; Orig. faction = " << from->getOriginalFaction();
+		ss << "; Spawn unit = [" << from->getSpawnUnit()->getType() << "]";
+		ss << "; isSurrendering = " << from->isSurrendering();
+		throw Exception(ss.str());
 	}
 
 	std::string type = from->getType();
