@@ -37,6 +37,9 @@ private:
 	std::vector<std::string> _regionList;
 	bool _city;
 	int _points, _funds;
+	int _spawnedPersons;
+	std::string _spawnedPersonType, _spawnedPersonName;
+	YAML::Node _spawnedSoldier;
 	std::map<std::string, int> _everyMultiItemList;
 	std::vector<std::string> _everyItemList, _randomItemList;
 	WeightedOptions _weightedItemList;
@@ -66,6 +69,16 @@ public:
 	int getPoints() const { return _points; }
 	/// Gets the amount of funds awarded when this event pops up.
 	int getFunds() const { return _funds; }
+
+	/// Gets the number of spawned persons.
+	int getSpawnedPersons() const { return _spawnedPersons; }
+	/// Gets the spawned person type.
+	const std::string& getSpawnedPersonType() const { return _spawnedPersonType; }
+	/// Gets the custom name of the spawned person.
+	const std::string& getSpawnedPersonName() const { return _spawnedPersonName; }
+	/// Gets the spawned soldier template.
+	const YAML::Node& getSpawnedSoldierTemplate() const { return _spawnedSoldier; }
+
 	/// Gets a list of items; they are all transferred to HQ stores when this event pops up.
 	const std::map<std::string, int> &getEveryMultiItemList() const { return _everyMultiItemList; }
 	/// Gets a list of items; they are all transferred to HQ stores when this event pops up.
