@@ -237,7 +237,11 @@ InterceptState::InterceptState(Globe *globe, Base *base, Target *target) : _glob
 				}
 				if (Options::oxceInterceptGuiMaintenanceTimeHidden == 2 || (*j)->getStatus() == "STR_REARMING")
 				{
-					maintenanceHours += (*j)->calcRearmTime();
+					// Note: if the craft is already refueling, don't count any potential rearm time (can be > 0 if ammo is missing)
+					if ((*j)->getStatus() != "STR_REFUELLING")
+					{
+						maintenanceHours += (*j)->calcRearmTime();
+					}
 				}
 
 				int days = maintenanceHours / 24;
