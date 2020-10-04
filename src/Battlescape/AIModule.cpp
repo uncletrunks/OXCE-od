@@ -2371,7 +2371,7 @@ void AIModule::extendedFireModeChoice(BattleActionCost& costAuto, BattleActionCo
 
 		if (_traceAI)
 		{
-			Log(LOG_INFO) << "Evaluate option " << i << ", score = " << newScore;
+			Log(LOG_INFO) << "Evaluate option " << (int)i << ", score = " << newScore;
 		}
 	}
 
