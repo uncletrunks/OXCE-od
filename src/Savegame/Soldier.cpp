@@ -129,8 +129,21 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 		_callsign = node["callsign"].as<std::string>();
 	}
 	_nationality = node["nationality"].as<int>(_nationality);
-	_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
-	_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
+	if (soldierTemplate)
+	{
+		UnitStats ii, cc;
+		if (node["initialStats"])
+			ii = node["initialStats"].as<UnitStats>(ii);
+		if (node["currentStats"])
+			cc = node["currentStats"].as<UnitStats>(cc);
+		_initialStats = UnitStats::templateMerge(_initialStats, ii);
+		_currentStats = UnitStats::templateMerge(_currentStats, cc);
+	}
+	else
+	{
+		_initialStats = node["initialStats"].as<UnitStats>(_initialStats);
+		_currentStats = node["currentStats"].as<UnitStats>(_currentStats);
+	}
 	_dailyDogfightExperienceCache = node["dailyDogfightExperienceCache"].as<UnitStats>(_dailyDogfightExperienceCache);
 
 	// re-roll mana stats when upgrading saves
