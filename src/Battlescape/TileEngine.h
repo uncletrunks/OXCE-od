@@ -172,7 +172,7 @@ public:
 	/// Handles unit hit.
 	bool hitUnit(BattleActionAttack attack, BattleUnit *target, const Position &relative, int damage, const RuleDamageType *type, bool rangeAtack = true);
 	/// Handles bullet/weapon hits.
-	void hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack = true);
+	void hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack = true, int terrainMeleeTilePart = 0);
 	/// Handles explosions.
 	void explode(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, int maxRadius, bool rangeAtack = true);
 	/// Checks if a destroyed tile starts an explosion.
@@ -207,7 +207,7 @@ public:
 	/// Calculate success rate of melee attack action.
 	int meleeAttackCalculate(BattleActionAttack::ReadOnly attack, const BattleUnit *victim);
 	/// Attempts a melee attack action.
-	bool meleeAttack(BattleActionAttack attack, BattleUnit *victim);
+	bool meleeAttack(BattleActionAttack attack, BattleUnit *victim, int terrainMeleeTilePart = 0);
 
 	/// Remove the medikit from the game if consumable and empty.
 	void medikitRemoveIfEmpty(BattleAction *action);
@@ -238,6 +238,7 @@ public:
 	bool validMeleeRange(BattleUnit *attacker, BattleUnit *target, int dir);
 	/// Returns validity of a melee attack from a given position.
 	bool validMeleeRange(Position pos, int direction, BattleUnit *attacker, BattleUnit *target, Position *dest, bool preferEnemy = true);
+	bool validTerrainMeleeRange(BattleAction* action);
 	/// Gets the AI to look through a window.
 	int faceWindow(Position position);
 	/// Checks a unit's % exposure on a tile.

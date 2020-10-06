@@ -2412,7 +2412,7 @@ bool TileEngine::hitUnit(BattleActionAttack attack, BattleUnit *target, const Po
  * @param unit The unit that caused the explosion.
  * @param clipOrWeapon clip or weapon causing the damage.
  */
-void TileEngine::hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack)
+void TileEngine::hit(BattleActionAttack attack, Position center, int power, const RuleDamageType *type, bool rangeAtack, int terrainMeleeTilePart)
 {
 	bool terrainChanged = false; //did the hit destroy a tile thereby changing line of sight?
 	int effectGenerated = 0; //did the hit produce smoke (1), fire/light (2) or disabled a unit (3) ?
@@ -2424,13 +2424,13 @@ void TileEngine::hit(BattleActionAttack attack, Position center, int power, cons
 	}
 
 	voxelCheckFlush();
-	const auto part = voxelCheck(center, attack.attacker);
+	const auto part = (terrainMeleeTilePart > 0) ? (VoxelType)terrainMeleeTilePart : voxelCheck(center, attack.attacker);
 	const auto damage = type->getRandomDamage(power);
 	const auto tileFinalDamage = type->getTileFinalDamage(type->getRandomDamageForTile(power, damage));
 	if (part >= V_FLOOR && part <= V_OBJECT)
 	{
 		bool nothing = true;
-		if (part == V_FLOOR || part == V_OBJECT)
+		if (terrainMeleeTilePart == 0 && (part == V_FLOOR || part == V_OBJECT))
 		{
 			for (std::vector<BattleItem*>::iterator i = tile->getInventory()->begin(); i != tile->getInventory()->end(); ++i)
 			{
@@ -4021,8 +4021,13 @@ int TileEngine::meleeAttackCalculate(BattleActionAttack::ReadOnly attack, const 
  * @param action Pointer to an action.
  * @return Whether it failed or succeeded.
  */
-bool TileEngine::meleeAttack(BattleActionAttack attack, BattleUnit *victim)
+bool TileEngine::meleeAttack(BattleActionAttack attack, BattleUnit *victim, int terrainMeleeTilePart)
 {
+	if (terrainMeleeTilePart > 0)
+	{
+		// terrain melee doesn't miss
+		return true;
+	}
 	if (attack.type != BA_CQB)
 	{
 		// hit log - new melee attack
@@ -4553,6 +4558,99 @@ bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attack
 	}
 
 	return chosenTarget != 0;
+}
+
+/**
+ * Validates the terrain melee range.
+ */
+bool TileEngine::validTerrainMeleeRange(BattleAction* action)
+{
+	if (Mod::EXTENDED_TERRAIN_MELEE <= 0)
+	{
+		// turned off
+		return false;
+	}
+
+	action->terrainMeleeTilePart = 0;
+
+	Position pos = action->actor->getPosition();
+	int direction = action->actor->getDirection();
+	BattleUnit* attacker = action->actor;
+
+	if (direction < 0 || direction > 7)
+	{
+		return false;
+	}
+	if (direction % 2 != 0)
+	{
+		// diagonal directions are not supported
+		return false;
+	}
+	if (attacker->getArmor()->getSize() > 1)
+	{
+		// 2x2 units are not supported
+		return false;
+	}
+	Position p;
+	Pathfinding::directionToVector(direction, &p);
+
+	Tile* originTile = _save->getTile(pos);
+	Tile* neighbouringTile = _save->getTile(pos + p);
+	if (originTile && neighbouringTile)
+	{
+		auto setTarget = [](Tile* tt, TilePart tp, BattleAction* aa) -> bool
+		{
+			MapData* obj = tt->getMapData(tp);
+			if (obj)
+			{
+				bool isHighEnough = false;
+				for (int i = Mod::EXTENDED_TERRAIN_MELEE; i < 12; ++i)
+				{
+					if (obj->getLoftID(i) > 0)
+					{
+						isHighEnough = true;
+						break;
+					}
+				}
+				if (isHighEnough)
+				{
+					aa->target = tt->getPosition();
+					aa->terrainMeleeTilePart = tp;
+					return true;
+				}
+			}
+			return false;
+		};
+
+		if (direction == 0 && setTarget(originTile, O_NORTHWALL, action))
+		{
+			// North: target the north wall of the same tile
+			return true;
+		}
+		else if (direction == 2 && setTarget(neighbouringTile, O_WESTWALL, action))
+		{
+			// East: target the west wall of the neighbouring tile
+			return true;
+		}
+		else if (direction == 4 && setTarget(neighbouringTile, O_NORTHWALL, action))
+		{
+			// South: target the north wall of the neighbouring tile
+			return true;
+		}
+		else if (direction == 6 && setTarget(originTile, O_WESTWALL, action))
+		{
+			// West: target the west wall of the same tile
+			return true;
+		}
+
+		if (setTarget(neighbouringTile, O_OBJECT, action))
+		{
+			// All directions: target the object on the neighbouring tile
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

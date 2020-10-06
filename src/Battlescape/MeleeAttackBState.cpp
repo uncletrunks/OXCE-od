@@ -115,6 +115,13 @@ void MeleeAttackBState::init()
 		return;
 	}
 
+	// terrain melee
+	if (_action.terrainMeleeTilePart > 0)
+	{
+		_voxel = _action.target.toVoxel() + Position(8, 8, 12);
+		performMeleeAttack();
+		return;
+	}
 
 	AIModule *ai = _unit->getAIModule();
 
@@ -228,7 +235,7 @@ void MeleeAttackBState::performMeleeAttack()
 
 
 	// make an explosion action
-	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BattleActionAttack::GetAferShoot(_action, _ammo), 0, true));
+	_parent->statePushFront(new ExplosionBState(_parent, damagePosition, BattleActionAttack::GetAferShoot(_action, _ammo), 0, true, 0, 0, _action.terrainMeleeTilePart));
 
 
 	_reaction = true;

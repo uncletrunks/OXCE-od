@@ -475,7 +475,10 @@ void ActionMenuState::handleAction()
 				_action->actor,
 				0, &_action->target))
 			{
-				_action->result = "STR_THERE_IS_NO_ONE_THERE";
+				if (!_game->getSavedGame()->getSavedBattle()->getTileEngine()->validTerrainMeleeRange(_action))
+				{
+					_action->result = "STR_THERE_IS_NO_ONE_THERE";
+				}
 			}
 			else
 			{

@@ -367,6 +367,7 @@ public:
 	static bool EXTENDED_RUNNING_COST;
 	static bool EXTENDED_HWP_LOAD_ORDER;
 	static int EXTENDED_MELEE_REACTIONS;
+	static int EXTENDED_TERRAIN_MELEE;
 
 	// reset all the statics in all classes to default values
 	static void resetGlobalStatics();

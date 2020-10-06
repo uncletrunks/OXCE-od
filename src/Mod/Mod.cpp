@@ -149,6 +149,7 @@ bool Mod::EXTENDED_ITEM_RELOAD_COST;
 bool Mod::EXTENDED_RUNNING_COST;
 bool Mod::EXTENDED_HWP_LOAD_ORDER;
 int Mod::EXTENDED_MELEE_REACTIONS;
+int Mod::EXTENDED_TERRAIN_MELEE;
 
 constexpr size_t MaxDifficultyLevels = 5;
 
@@ -226,6 +227,7 @@ void Mod::resetGlobalStatics()
 	EXTENDED_RUNNING_COST = false;
 	EXTENDED_HWP_LOAD_ORDER = false;
 	EXTENDED_MELEE_REACTIONS = 0;
+	EXTENDED_TERRAIN_MELEE = 0;
 }
 
 /**
@@ -2026,6 +2028,7 @@ void Mod::loadConstants(const YAML::Node &node)
 	EXTENDED_RUNNING_COST = node["extendedRunningCost"].as<bool>(EXTENDED_RUNNING_COST);
 	EXTENDED_HWP_LOAD_ORDER = node["extendedHwpLoadOrder"].as<bool>(EXTENDED_HWP_LOAD_ORDER);
 	EXTENDED_MELEE_REACTIONS = node["extendedMeleeReactions"].as<int>(EXTENDED_MELEE_REACTIONS);
+	EXTENDED_TERRAIN_MELEE = node["extendedTerrainMelee"].as<int>(EXTENDED_TERRAIN_MELEE);
 }
 
 /**
