@@ -1203,6 +1203,10 @@ void SavedBattleGame::endTurn()
 			{
 				(*i)->setTurnsSinceSpotted(0);
 			}
+			if ((*i)->getAIModule())
+			{
+				(*i)->getAIModule()->reset(); // clean up AI state
+			}
 
 			if ((*i)->getTurnsLeftSpottedForSnipers() != 0)
 			{
