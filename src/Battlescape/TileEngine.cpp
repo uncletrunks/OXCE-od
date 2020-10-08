@@ -4609,6 +4609,11 @@ bool TileEngine::validTerrainMeleeRange(BattleAction* action)
 			MapData* obj = tt->getMapData(tp);
 			if (obj)
 			{
+				if (tp != O_OBJECT && !obj->isDoor() && !obj->isUFODoor() && tt->getTUCost(tp, MT_WALK) < 255)
+				{
+					// it is possible to walk through this (rubble) wall... no need to attack it
+					return false;
+				}
 				bool isHighEnough = false;
 				for (int i = Mod::EXTENDED_TERRAIN_MELEE; i < 12; ++i)
 				{
