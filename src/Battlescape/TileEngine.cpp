@@ -4691,11 +4691,12 @@ int TileEngine::faceWindow(Position position)
  * @param action The action to validate.
  * @param originVoxel The origin point of the action.
  * @param targetVoxel The target point of the action.
+ * @param depth Battlescape depth.
  * @param curve The curvature of the throw.
  * @param voxelType The type of voxel at which this parabola terminates.
  * @return Validity of action.
  */
-bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, double *curve, int *voxelType, bool forced)
+bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Position targetVoxel, int depth, double *curve, int *voxelType, bool forced)
 {
 	bool foundCurve = false;
 	double curvature = 0.5;
@@ -4724,7 +4725,7 @@ bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Posit
 		return false;
 	}
 	// out of range - can't throw here
-	if (ProjectileFlyBState::validThrowRange(&action, originVoxel, targetTile) == false)
+	if (ProjectileFlyBState::validThrowRange(&action, originVoxel, targetTile, depth) == false)
 	{
 		return false;
 	}

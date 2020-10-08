@@ -150,6 +150,7 @@ bool Mod::EXTENDED_RUNNING_COST;
 bool Mod::EXTENDED_HWP_LOAD_ORDER;
 int Mod::EXTENDED_MELEE_REACTIONS;
 int Mod::EXTENDED_TERRAIN_MELEE;
+int Mod::EXTENDED_UNDERWATER_THROW_FACTOR;
 
 constexpr size_t MaxDifficultyLevels = 5;
 
@@ -228,6 +229,7 @@ void Mod::resetGlobalStatics()
 	EXTENDED_HWP_LOAD_ORDER = false;
 	EXTENDED_MELEE_REACTIONS = 0;
 	EXTENDED_TERRAIN_MELEE = 0;
+	EXTENDED_UNDERWATER_THROW_FACTOR = 0;
 }
 
 /**
@@ -2029,6 +2031,7 @@ void Mod::loadConstants(const YAML::Node &node)
 	EXTENDED_HWP_LOAD_ORDER = node["extendedHwpLoadOrder"].as<bool>(EXTENDED_HWP_LOAD_ORDER);
 	EXTENDED_MELEE_REACTIONS = node["extendedMeleeReactions"].as<int>(EXTENDED_MELEE_REACTIONS);
 	EXTENDED_TERRAIN_MELEE = node["extendedTerrainMelee"].as<int>(EXTENDED_TERRAIN_MELEE);
+	EXTENDED_UNDERWATER_THROW_FACTOR = node["extendedUnderwaterThrowFactor"].as<int>(EXTENDED_UNDERWATER_THROW_FACTOR);
 }
 
 /**

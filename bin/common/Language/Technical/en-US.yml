@@ -153,6 +153,8 @@ en-US:
   costPanic: "Panic cost"
 #
   weight: "Weight"
+  throwRange: "Throw range"
+  underwaterThrowRange: "Underwater throw range"
   throwMultiplier: "Throwing acc. multiplier"
   accuracyThrow: "Throwing accuracy"
   costThrow: "Throwing cost"

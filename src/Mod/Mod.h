@@ -368,6 +368,7 @@ public:
 	static bool EXTENDED_HWP_LOAD_ORDER;
 	static int EXTENDED_MELEE_REACTIONS;
 	static int EXTENDED_TERRAIN_MELEE;
+	static int EXTENDED_UNDERWATER_THROW_FACTOR;
 
 	// reset all the statics in all classes to default values
 	static void resetGlobalStatics();

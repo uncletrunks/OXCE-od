@@ -1539,7 +1539,7 @@ int AIModule::scoreFiringMode(BattleAction *action, BattleUnit *target, bool che
 		if (action->weapon->getArcingShot(action->type) || action->type == BA_THROW)
 		{
 			targetPosition = target->getPosition().toVoxel() + Position (8,8, (2 + -target->getTile()->getTerrainLevel()));
-			if (!_save->getTileEngine()->validateThrow((*action), origin, targetPosition))
+			if (!_save->getTileEngine()->validateThrow((*action), origin, targetPosition, _save->getDepth()))
 			{
 				return 0;
 			}
@@ -2418,7 +2418,7 @@ void AIModule::grenadeAction()
 		Position originVoxel = _save->getTileEngine()->getOriginVoxel(action, 0);
 		Position targetVoxel = action.target.toVoxel() + Position (8,8, (2 + -_save->getTile(action.target)->getTerrainLevel()));
 		// are we within range?
-		if (_save->getTileEngine()->validateThrow(action, originVoxel, targetVoxel))
+		if (_save->getTileEngine()->validateThrow(action, originVoxel, targetVoxel, _save->getDepth()))
 		{
 			_attackAction->weapon = grenade;
 			_attackAction->target = action.target;

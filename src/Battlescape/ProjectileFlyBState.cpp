@@ -166,7 +166,7 @@ void ProjectileFlyBState::init()
 		}
 		break;
 	case BA_THROW:
-		if (!validThrowRange(&_action, _parent->getTileEngine()->getOriginVoxel(_action, 0), _parent->getSave()->getTile(_action.target)))
+		if (!validThrowRange(&_action, _parent->getTileEngine()->getOriginVoxel(_action, 0), _parent->getSave()->getTile(_action.target), _parent->getSave()->getDepth()))
 		{
 			// out of range
 			_action.result = "STR_OUT_OF_RANGE";
@@ -850,22 +850,46 @@ void ProjectileFlyBState::cancel()
  * @param action Pointer to throw action.
  * @param origin Position to throw from.
  * @param target Tile to throw to.
+ * @param depth Battlescape depth.
  * @return True when the range is valid.
  */
-bool ProjectileFlyBState::validThrowRange(BattleAction *action, Position origin, Tile *target)
+bool ProjectileFlyBState::validThrowRange(BattleAction *action, Position origin, Tile *target, int depth)
 {
 	// note that all coordinates and thus also distances below are in number of tiles (not in voxels).
 	if (action->type != BA_THROW)
 	{
 		return true;
 	}
+	int xdiff = action->target.x - action->actor->getPosition().x;
+	int ydiff = action->target.y - action->actor->getPosition().y;
+	int realDistanceSq = (xdiff * xdiff) + (ydiff * ydiff);
+
+	if (depth > 0)
+	{
+		if (action->weapon->getRules()->getUnderwaterThrowRange() > 0)
+		{
+			return realDistanceSq <= action->weapon->getRules()->getUnderwaterThrowRangeSq();
+		}
+	}
+	else
+	{
+		if (action->weapon->getRules()->getThrowRange() > 0)
+		{
+			return realDistanceSq <= action->weapon->getRules()->getThrowRangeSq();
+		}
+	}
+
+	double realDistance = sqrt((double)realDistanceSq);
+
 	int offset = 2;
 	int zd = (origin.z)-((action->target.z * 24 + offset) - target->getTerrainLevel());
 	int weight = action->weapon->getTotalWeight();
 	double maxDistance = (getMaxThrowDistance(weight, action->actor->getBaseStats()->strength, zd) + 8) / 16.0;
-	int xdiff = action->target.x - action->actor->getPosition().x;
-	int ydiff = action->target.y - action->actor->getPosition().y;
-	double realDistance = sqrt((double)(xdiff*xdiff)+(double)(ydiff*ydiff));
+
+	if (depth > 0 && Mod::EXTENDED_UNDERWATER_THROW_FACTOR > 0)
+	{
+		maxDistance = maxDistance * (double)Mod::EXTENDED_UNDERWATER_THROW_FACTOR / 100.0;
+	}
 
 	return realDistance <= maxDistance;
 }

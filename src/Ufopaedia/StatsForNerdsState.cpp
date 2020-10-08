@@ -1637,6 +1637,8 @@ void StatsForNerdsState::initItemList()
 	}
 
 	addInteger(ss, itemRule->getWeight(), "weight", 3);
+	addInteger(ss, itemRule->getThrowRange(), "throwRange");
+	addInteger(ss, itemRule->getUnderwaterThrowRange(), "underwaterThrowRange");
 
 	addRuleStatBonus(ss, *itemRule->getThrowMultiplierRaw(), "throwMultiplier");
 	addIntegerPercent(ss, itemRule->getAccuracyThrow(), "accuracyThrow", 100);

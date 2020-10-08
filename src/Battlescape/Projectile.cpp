@@ -278,7 +278,7 @@ int Projectile::calculateThrow(double accuracy)
 	for (std::vector<Position>::iterator i = targets.begin(); i != targets.end(); ++i)
 	{
 		targetVoxel = *i;
-		if (_save->getTileEngine()->validateThrow(_action, originVoxel, targetVoxel, &curvature, &test, forced))
+		if (_save->getTileEngine()->validateThrow(_action, originVoxel, targetVoxel, _save->getDepth(), &curvature, &test, forced))
 		{
 			break;
 		}

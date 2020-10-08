@@ -298,6 +298,7 @@ private:
 	Unit* _vehicleUnit;
 	double _size;
 	int _costBuy, _costSell, _transferTime, _weight;
+	int _throwRange, _underwaterThrowRange;
 	int _bigSprite;
 	int _floorSprite;
 	int _handSprite, _bulletSprite;
@@ -441,6 +442,12 @@ public:
 	int getTransferTime() const;
 	/// Gets the item's weight.
 	int getWeight() const;
+	/// Gets the item's maximum throw range.
+	int getThrowRange() const { return _throwRange; }
+	int getThrowRangeSq() const { return _throwRange * _throwRange; }
+	/// Gets the item's maximum underwater throw range.
+	int getUnderwaterThrowRange() const { return _underwaterThrowRange; }
+	int getUnderwaterThrowRangeSq() const { return _underwaterThrowRange * _underwaterThrowRange; }
 	/// Gets the item's reference in BIGOBS.PCK for use in inventory.
 	int getBigSprite() const;
 	/// Gets the item's reference in FLOOROB.PCK for use in battlescape.
