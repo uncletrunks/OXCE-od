@@ -93,6 +93,7 @@ namespace OpenXcom
 
 		/// callback for OK button
 		void btnOkClick(Action *action);
+		void btnResetMusicClick(Action *action);
 
 		/// callback for PREV button
 		void btnPrevClick(Action *action);

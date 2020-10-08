@@ -214,6 +214,7 @@ namespace OpenXcom
 		_btnOk->onMouseClick((ActionHandler)&ArticleState::btnOkClick);
 		_btnOk->onKeyboardPress((ActionHandler)&ArticleState::btnOkClick,Options::keyOk);
 		_btnOk->onKeyboardPress((ActionHandler)&ArticleState::btnOkClick,Options::keyCancel);
+		_btnOk->onKeyboardPress((ActionHandler)&ArticleState::btnResetMusicClick, Options::keySelectMusicTrack);
 		_btnPrev->setText("<<");
 		_btnPrev->onMouseClick((ActionHandler)&ArticleState::btnPrevClick);
 		_btnPrev->onKeyboardPress((ActionHandler)&ArticleState::btnPrevClick, Options::keyGeoLeft);
@@ -233,6 +234,16 @@ namespace OpenXcom
 	void ArticleState::btnOkClick(Action *)
 	{
 		_game->popState();
+	}
+
+	/**
+	 * Resets the music to a random geoscape music.
+	 * @param action Pointer to an action.
+	 */
+	void ArticleState::btnResetMusicClick(Action *)
+	{
+		// reset that pesky interception music!
+		_game->getMod()->playMusic("GMGEO");
 	}
 
 	/**
