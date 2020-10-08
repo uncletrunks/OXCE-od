@@ -2741,7 +2741,7 @@ BattlescapeTally BattlescapeGame::tallyUnits()
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
 		//TODO: add handling of stunned units for display purposes in AbortMissionState
-		if (!(*j)->isOut() && !(*j)->isOutThresholdExceed())
+		if (!(*j)->isOut() && (!(*j)->isOutThresholdExceed() || (*j)->getUnitRules()->getSpawnUnit()))
 		{
 			if ((*j)->getOriginalFaction() == FACTION_HOSTILE)
 			{
