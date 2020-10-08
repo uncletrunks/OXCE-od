@@ -4595,6 +4595,12 @@ bool TileEngine::validTerrainMeleeRange(BattleAction* action)
 	Pathfinding::directionToVector(direction, &p);
 
 	Tile* originTile = _save->getTile(pos);
+	if (originTile && originTile->getTerrainLevel() <= -16)
+	{
+		// if we are on the upper part of stairs, target one tile above
+		pos += Position(0, 0, 1);
+		originTile = _save->getTile(pos);
+	}
 	Tile* neighbouringTile = _save->getTile(pos + p);
 	if (originTile && neighbouringTile)
 	{
