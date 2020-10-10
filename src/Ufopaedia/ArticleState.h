@@ -57,12 +57,14 @@ namespace OpenXcom
 
 		/// Change page to next in article or move to next index position.
 		void nextArticlePage();
+		bool hasNextArticlePage();
 
 		/// Change index position to previous article.
 		void prevArticle();
 
 		/// Change page to previous in article or move to previous index position.
 		void prevArticlePage();
+		bool hasPrevArticlePage();
 	};
 
 	/**

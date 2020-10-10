@@ -53,8 +53,7 @@ namespace OpenXcom
 	 */
 	void ArticleCommonState::nextArticlePage()
 	{
-		auto curr = getCurrentArticle();
-		if (current_page >= curr->getNumberOfPages() - 1)
+		if (!hasNextArticlePage())
 		{
 			// goto to first page of next article
 			nextArticle();
@@ -64,6 +63,11 @@ namespace OpenXcom
 		{
 			current_page++;
 		}
+	}
+
+	bool ArticleCommonState::hasNextArticlePage()
+	{
+		return !(current_page >= getCurrentArticle()->getNumberOfPages() - 1);
 	}
 
 	/**
@@ -88,8 +92,7 @@ namespace OpenXcom
 	 */
 	void ArticleCommonState::prevArticlePage()
 	{
-		auto curr = getCurrentArticle();
-		if (current_page == 0 || current_page > curr->getNumberOfPages() - 1)
+		if (!hasPrevArticlePage())
 		{
 			// goto last page of previous article
 			prevArticle();
@@ -99,6 +102,11 @@ namespace OpenXcom
 		{
 			current_page--;
 		}
+	}
+
+	bool ArticleCommonState::hasPrevArticlePage()
+	{
+		return !(current_page == 0 || current_page > getCurrentArticle()->getNumberOfPages() - 1);
 	}
 
 	/**
