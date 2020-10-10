@@ -1593,7 +1593,7 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 
 		if (isWoundable())
 		{
-			_fatalWounds[bodypart] += std::get<toWound>(args.data);
+			setValueMax(_fatalWounds[bodypart], std::get<toWound>(args.data), 0, 100);
 			moraleChange(-std::get<toWound>(args.data));
 		}
 
@@ -2196,11 +2196,7 @@ int BattleUnit::getAccuracyModifier(const BattleItem *item) const
  */
 void BattleUnit::setArmor(int armor, UnitSide side)
 {
-	if (armor < 0)
-	{
-		armor = 0;
-	}
-	_currentArmor[side] = armor;
+	_currentArmor[side] = Clamp(armor, 0, _maxArmor[side]);
 }
 
 /**
@@ -3645,11 +3641,22 @@ int BattleUnit::getTurretType() const
  * @param part The body part (in the range 0-5)
  * @return The amount of fatal wound of a body part
  */
-int BattleUnit::getFatalWound(int part) const
+int BattleUnit::getFatalWound(UnitBodyPart part) const
 {
-	if (part < 0 || part > 5)
+	if (part < 0 || part >= BODYPART_MAX)
 		return 0;
 	return _fatalWounds[part];
+}
+/**
+ * Set fatal wound amount of a body part
+ * @param wound The amount of fatal wound of a body part shoud have
+ * @param part The body part (in the range 0-5)
+ */
+void BattleUnit::setFatalWound(int wound, UnitBodyPart part)
+{
+	if (part < 0 || part >= BODYPART_MAX)
+		return;
+	_fatalWounds[part] = Clamp(wound, 0, 100);
 }
 
 /**
@@ -3658,9 +3665,9 @@ int BattleUnit::getFatalWound(int part) const
  * @param woundAmount the amount of fatal wound healed
  * @param healthAmount The amount of health to add to soldier health
  */
-void BattleUnit::heal(int part, int woundAmount, int healthAmount)
+void BattleUnit::heal(UnitBodyPart part, int woundAmount, int healthAmount)
 {
-	if (part < 0 || part > 5 || !_fatalWounds[part])
+	if (part < 0 || part >= BODYPART_MAX || !_fatalWounds[part])
 	{
 		return;
 	}
@@ -4892,6 +4899,13 @@ void BattleUnit::disableIndicators()
 namespace
 {
 
+void setArmorValueScript(BattleUnit *bu, int side, int value)
+{
+	if (bu && 0 <= side && side < SIDE_MAX)
+	{
+		bu->setArmor(value, (UnitSide)side);
+	}
+}
 void getArmorValueScript(const BattleUnit *bu, int &ret, int side)
 {
 	if (bu && 0 <= side && side < SIDE_MAX)
@@ -4901,7 +4915,7 @@ void getArmorValueScript(const BattleUnit *bu, int &ret, int side)
 	}
 	ret = 0;
 }
-void getArmorMaxScript(const BattleUnit *bu, int &ret, int side)
+void getArmorValueMaxScript(const BattleUnit *bu, int &ret, int side)
 {
 	if (bu && 0 <= side && side < SIDE_MAX)
 	{
@@ -4910,6 +4924,34 @@ void getArmorMaxScript(const BattleUnit *bu, int &ret, int side)
 	}
 	ret = 0;
 }
+
+void setFatalWoundScript(BattleUnit *bu, int part, int val)
+{
+	if (bu && 0 <= part && part < BODYPART_MAX)
+	{
+		bu->setFatalWound(val, (UnitBodyPart)part);
+	}
+}
+void getFatalWoundScript(const BattleUnit *bu, int &ret, int part)
+{
+	if (bu && 0 <= part && part < BODYPART_MAX)
+	{
+		ret = bu->getFatalWound((UnitBodyPart)part);
+		return;
+	}
+	ret = 0;
+}
+void getFatalWoundMaxScript(const BattleUnit *bu, int &ret, int part)
+{
+	if (bu && 0 <= part && part < BODYPART_MAX)
+	{
+		ret = 100;
+		return;
+	}
+	ret = 0;
+}
+
+
 void getGenderScript(const BattleUnit *bu, int &ret)
 {
 	if (bu)
@@ -5456,9 +5498,14 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&setBaseStatRangeScript<&BattleUnit::_morale, 0, 100>>("setMorale");
 
 
-	bu.add<&getArmorValueScript>("getArmor");
-	bu.add<&getArmorMaxScript>("getArmorMax");
+	bu.add<&setArmorValueScript>("setArmor", "first arg is side, second one is new value of armor");
+	bu.add<&getArmorValueScript>("getArmor", "first arg return armor value, second arg is side");
+	bu.add<&getArmorValueMaxScript>("getArmorMax", "first arg return max armor value, second arg is side");
 
+	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal", "sum for every body part");
+	bu.add<&setFatalWoundScript>("setFatalwounds", "first arg is body part, second one is new value of wounds");
+	bu.add<&getFatalWoundScript>("getFatalwounds", "first arg return wounds number, second arg is body part");
+	bu.add<&getFatalWoundMaxScript>("getFatalwoundsMax", "first arg return max wounds number, second arg is body part");
 
 	UnitStats::addGetStatsScript<&BattleUnit::_stats>(bu, "Stats.");
 	UnitStats::addSetStatsWithCurrScript<&BattleUnit::_stats, &BattleUnit::_tu, &BattleUnit::_energy, &BattleUnit::_health, &BattleUnit::_mana>(bu, "Stats.");
@@ -5468,8 +5515,6 @@ void BattleUnit::ScriptRegister(ScriptParserBase* parser)
 	bu.add<&getVisibleUnitsCountScript>("getVisibleUnitsCount");
 	bu.add<&getFactionScript>("getFaction");
 
-	bu.add<&BattleUnit::getFatalWounds>("getFatalwoundsTotal");
-	bu.add<&BattleUnit::getFatalWound>("getFatalwounds");
 	bu.add<&BattleUnit::getOverKillDamage>("getOverKillDamage");
 	bu.addRules<Armor, &BattleUnit::getArmor>("getRuleArmor");
 	bu.addFunc<getRuleSoldierScript>("getRuleSoldier");

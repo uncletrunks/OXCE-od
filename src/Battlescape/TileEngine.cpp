@@ -4059,7 +4059,7 @@ void TileEngine::medikitRemoveIfEmpty(BattleAction *action)
 	}
 }
 
-bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMediKitAction originalMedikitAction, int bodyPart)
+bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMediKitAction originalMedikitAction, UnitBodyPart bodyPart)
 {
 	BattleActionAttack attack;
 	attack.type = action->type;
@@ -4088,7 +4088,7 @@ bool TileEngine::medikitUse(BattleAction *action, BattleUnit *target, BattleMedi
 	ModScript::HealUnit::Output args { };
 
 	std::get<medikitActionKey>(args.data) += originalMedikitAction;
-	std::get<bodyPartKey>(args.data) += bodyPart;
+	std::get<bodyPartKey>(args.data) += (int)bodyPart;
 	std::get<woundRecoveryKey>(args.data) += rule->getWoundRecovery();
 	std::get<healthRecoveryKey>(args.data) += rule->getHealthRecovery();
 	std::get<energyRecoveryKey>(args.data) += rule->getEnergyRecovery();
