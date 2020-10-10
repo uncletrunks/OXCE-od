@@ -287,6 +287,9 @@ void ActionMenuState::btnActionMenuItemClick(Action *action)
 
 void ActionMenuState::handleAction()
 {
+	// reset potential garbage from the previous action
+	_action->terrainMeleeTilePart = 0;
+
 	{
 		const RuleItem *weapon = _action->weapon->getRules();
 		bool newHitLog = false;
