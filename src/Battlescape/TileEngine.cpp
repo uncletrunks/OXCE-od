@@ -4573,6 +4573,21 @@ bool TileEngine::validTerrainMeleeRange(BattleAction* action)
 
 	action->terrainMeleeTilePart = 0;
 
+	if (action->weapon)
+	{
+		auto wRule = action->weapon->getRules();
+		if (wRule->getBattleType() == BT_MELEE)
+		{
+			// check primary damage type
+			if (wRule->getDamageType()->ToTile == 0.0) return false;
+		}
+		else
+		{
+			// check secondary damage type
+			if (wRule->getMeleeType()->ToTile == 0.0) return false;
+		}
+	}
+
 	Position pos = action->actor->getPosition();
 	int direction = action->actor->getDirection();
 	BattleUnit* attacker = action->actor;
