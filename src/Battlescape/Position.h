@@ -84,7 +84,7 @@ public:
 	}
 
 	/// Calculates the distance in 3d.
-	constexpr static float distance(Position pos1, Position pos2)
+	static float distance(Position pos1, Position pos2)
 	{
 		return std::sqrt(distanceSq(pos1, pos2));
 	}
@@ -109,7 +109,7 @@ public:
 	 * @param pos2 Position of second square.
 	 * @return Distance.
 	 */
-	constexpr static int distance2d(Position pos1, Position pos2)
+	static int distance2d(Position pos1, Position pos2)
 	{
 		return (int)std::ceil(std::sqrt(distance2dSq(pos1, pos2)));
 	}
