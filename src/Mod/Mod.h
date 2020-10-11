@@ -236,6 +236,7 @@ private:
 	int _pilotAccuracyZeroPoint, _pilotAccuracyRange, _pilotReactionsZeroPoint, _pilotReactionsRange;
 	int _pilotBraveryThresholds[3];
 	int _performanceBonusFactor;
+	bool _enableNewResearchSorting;
 	bool _useCustomCategories, _shareAmmoCategories, _showDogfightDistanceInKm, _showFullNameInAlienInventory;
 	int _alienInventoryOffsetX, _alienInventoryOffsetBigUnit;
 	bool _hidePediaInfoButton, _extraNerdyPediaInfo;
@@ -803,6 +804,8 @@ public:
 	int getPilotBraveryThresholdNormal() const { return _pilotBraveryThresholds[2]; }
 	/// Gets a performance bonus factor
 	int getPerformanceBonusFactor() const { return _performanceBonusFactor; }
+	/// Should the player have the option to sort the 'New Research' list?
+	bool getEnableNewResearchSorting() const { return _enableNewResearchSorting; }
 	/// Should custom categories be used in Buy/Sell/Transfer GUIs?
 	bool getUseCustomCategories() const { return _useCustomCategories; }
 	/// Should weapons "inherit" categories of their ammo?

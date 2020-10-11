@@ -83,6 +83,10 @@ en-US:
   STR_FILTER_DEFAULT_NO_SUPPLIES: "Default (no supplies)"
   STR_FILTER_FACILITY_REQUIRED: "Facility Missing"
   STR_FILTER_HIDDEN: "Hidden"
+#NewResearchListState.cpp
+  STR_SORT_DEFAULT: "Default"
+  STR_SORT_BY_COST: "By cost"
+  STR_SORT_BY_NAME: "By name"
 #ProductionCompleteState.cpp
   STR_RANDOM_PRODUCTION_SUMMARY: "Summary"
 #PurchaseState.cpp
