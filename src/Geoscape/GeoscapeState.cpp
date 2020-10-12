@@ -124,6 +124,7 @@
 #include "../Engine/Exception.h"
 #include "../Mod/AlienDeployment.h"
 #include "../Mod/RuleInterface.h"
+#include "../Mod/RuleVideo.h"
 #include "../fmath.h"
 #include "../fallthrough.h"
 
@@ -2367,10 +2368,22 @@ void GeoscapeState::time1Day()
 			if (!research->getCutscene().empty())
 			{
 				popup(new CutsceneState(research->getCutscene()));
+				if (saveGame->getEnding() == END_NONE)
+				{
+					const RuleVideo* videoRule = _game->getMod()->getVideo(research->getCutscene(), true);
+					if (videoRule->getWinGame()) saveGame->setEnding(END_WIN);
+					if (videoRule->getLoseGame()) saveGame->setEnding(END_LOSE);
+				}
 			}
 			if (bonus && !bonus->getCutscene().empty())
 			{
 				popup(new CutsceneState(bonus->getCutscene()));
+				if (saveGame->getEnding() == END_NONE)
+				{
+					const RuleVideo* videoRule = _game->getMod()->getVideo(bonus->getCutscene(), true);
+					if (videoRule->getWinGame()) saveGame->setEnding(END_WIN);
+					if (videoRule->getLoseGame()) saveGame->setEnding(END_LOSE);
+				}
 			}
 			// 3e. handle research complete popup + ufopedia article popups (topic+bonus)
 			popup(new ResearchCompleteState(newResearch, bonus, research));
@@ -2639,6 +2652,10 @@ void GeoscapeState::time1Day()
 		{
 			popup(new SaveGameState(OPT_GEOSCAPE, SAVE_AUTO_GEOSCAPE, _palette));
 		}
+	}
+	else if (saveGame->getEnding() != END_NONE && saveGame->isIronman())
+	{
+		_game->pushState(new SaveGameState(OPT_GEOSCAPE, SAVE_IRONMAN, _palette));
 	}
 
 	// pay attention to your maintenance player!
