@@ -843,6 +843,15 @@ void ProjectileFlyBState::cancel()
 		if (!_parent->getMap()->getCamera()->isOnScreen(p, false, 0, false))
 			_parent->getMap()->getCamera()->centerOnPosition(p);
 	}
+	if (_parent->areAllEnemiesNeutralized())
+	{
+		// stop autoshots when battle auto-ends
+		_action.autoShotCounter = 1000;
+
+		// Rationale: if there are any fatally wounded soldiers
+		// the game still allows the player to resume playing the current turn (and heal them)
+		// but we don't want to resume auto-shooting (it just looks silly)
+	}
 }
 
 /**
