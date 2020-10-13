@@ -1027,6 +1027,15 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	bool fearImmune = tile->getUnit()->getArmor()->getFearImmune();
 	if (psiVisionDistance > 0 && !fearImmune)
 	{
+		int psiCamo = tile->getUnit()->getArmor()->getPsiCamouflage();
+		if (psiCamo > 0)
+		{
+			psiVisionDistance = std::min(psiVisionDistance, psiCamo);
+		}
+		else if (psiCamo < 0)
+		{
+			psiVisionDistance = std::max(0, psiVisionDistance + psiCamo);
+		}
 		if (currentDistanceSq <= (psiVisionDistance * psiVisionDistance))
 		{
 			return true; // we already sense the unit, no need to check obstacles or smoke

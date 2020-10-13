@@ -2358,6 +2358,7 @@ void StatsForNerdsState::initArmorList()
 
 	addIntegerPercent(ss, armorRule->getHeatVision(), "heatVision");
 	addInteger(ss, armorRule->getPsiVision(), "psiVision");
+	addInteger(ss, armorRule->getPsiCamouflage(), "psiCamouflage");
 
 	addInteger(ss, armorRule->getVisibilityAtDay(), "visibilityAtDay");
 	addInteger(ss, armorRule->getVisibilityAtDark(), "visibilityAtDark");
