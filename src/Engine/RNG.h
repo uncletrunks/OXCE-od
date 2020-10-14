@@ -20,7 +20,6 @@
 #include <algorithm>
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
-#include <random>
 
 namespace OpenXcom
 {
