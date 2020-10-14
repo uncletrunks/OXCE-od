@@ -2283,7 +2283,7 @@ void GeoscapeState::time1Day()
 			base->removeResearch(project);
 			project = nullptr;
 
-			// 3b. handle interrogation and spawned items
+			// 3b. handle interrogation and spawned items/events
 			if (Options::retainCorpses && research->destroyItem())
 			{
 				auto ruleUnit = mod->getUnit(research->getName(), false);
@@ -2302,6 +2302,18 @@ void GeoscapeState::time1Day()
 				Transfer *t = new Transfer(1);
 				t->setItems(research->getSpawnedItem());
 				base->getTransfers()->push_back(t);
+			}
+			RuleEvent* spawnedEventRule = _game->getMod()->getEvent(research->getSpawnedEvent());
+			if (spawnedEventRule)
+			{
+				GeoscapeEvent* newEvent = new GeoscapeEvent(*spawnedEventRule);
+				int minutes = (spawnedEventRule->getTimer() + (RNG::generate(0, spawnedEventRule->getTimerRandom()))) / 30 * 30;
+				if (minutes < 60) minutes = 60; // just in case
+				newEvent->setSpawnCountdown(minutes);
+				saveGame->getGeoscapeEvents().push_back(newEvent);
+
+				// remember that it has been generated
+				saveGame->addGeneratedEvent(spawnedEventRule);
 			}
 			// 3c. handle getonefrees (topic+lookup)
 			if (!research->getGetOneFree().empty() || !research->getGetOneFreeProtected().empty())
