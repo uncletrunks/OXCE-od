@@ -163,7 +163,7 @@ void Soldier::load(const YAML::Node& node, const Mod *mod, SavedGame *save, cons
 	_manaMissing = node["manaMissing"].as<int>(_manaMissing);
 	_healthMissing = node["healthMissing"].as<int>(_healthMissing);
 	_recovery = node["recovery"].as<float>(_recovery);
-	Armor *armor = nullptr;
+	Armor *armor = _armor;
 	if (node["armor"])
 	{
 		armor = mod->getArmor(node["armor"].as<std::string>());
