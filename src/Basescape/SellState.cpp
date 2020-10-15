@@ -259,7 +259,7 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	}
 
 	_vanillaCategories = _cats.size();
-	if (_game->getMod()->getUseCustomCategories())
+	if (_game->getMod()->getDisplayCustomCategories() > 0)
 	{
 		bool hasUnassigned = false;
 
@@ -284,9 +284,12 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 			}
 		}
 		// then use them nicely in order
-		_cats.clear();
-		_cats.push_back("STR_ALL_ITEMS");
-		_vanillaCategories = _cats.size();
+		if (_game->getMod()->getDisplayCustomCategories() == 1)
+		{
+			_cats.clear();
+			_cats.push_back("STR_ALL_ITEMS");
+			_vanillaCategories = _cats.size();
+		}
 		const std::vector<std::string> &categories = _game->getMod()->getItemCategoriesList();
 		for (std::vector<std::string>::const_iterator k = categories.begin(); k != categories.end(); ++k)
 		{
