@@ -960,7 +960,7 @@ void DebriefingState::prepareDebriefing()
 	for (std::vector<std::string>::const_iterator i = _game->getMod()->getItemsList().begin(); i != _game->getMod()->getItemsList().end(); ++i)
 	{
 		RuleItem *rule = _game->getMod()->getItem(*i);
-		if (rule->getSpecialType() > 1)
+		if (rule->getSpecialType() > 1 && rule->getSpecialType() < DEATH_TRAPS)
 		{
 			RecoveryItem *item = new RecoveryItem();
 			item->name = *i;
@@ -1696,7 +1696,7 @@ void DebriefingState::prepareDebriefing()
 					if (battle->getTile(i)->getMapData(tp))
 					{
 						size_t specialType = battle->getTile(i)->getMapData(tp)->getSpecialType();
-						if (specialType != nonRecoverType && _recoveryStats.find(specialType) != _recoveryStats.end())
+						if (specialType != nonRecoverType && specialType < (size_t)DEATH_TRAPS && _recoveryStats.find(specialType) != _recoveryStats.end())
 						{
 							addStat(_recoveryStats[specialType]->name, 1, _recoveryStats[specialType]->value);
 						}
