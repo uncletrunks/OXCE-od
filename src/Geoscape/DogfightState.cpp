@@ -447,21 +447,25 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	_btnStandoff->copy(_window);
 	_btnStandoff->setGroup(&_mode);
 	_btnStandoff->onMousePress((ActionHandler)&DogfightState::btnStandoffPress);
+	_btnStandoff->onMousePress((ActionHandler)&DogfightState::btnStandoffRightPress, SDL_BUTTON_RIGHT);
 	_btnStandoff->setVisible(!_ufoIsAttacking);
 
 	_btnCautious->copy(_window);
 	_btnCautious->setGroup(&_mode);
 	_btnCautious->onMousePress((ActionHandler)&DogfightState::btnCautiousPress);
+	_btnCautious->onMousePress((ActionHandler)&DogfightState::btnCautiousRightPress, SDL_BUTTON_RIGHT);
 	_btnCautious->setVisible(!_disableCautious);
 
 	_btnStandard->copy(_window);
 	_btnStandard->setGroup(&_mode);
 	_btnStandard->onMousePress((ActionHandler)&DogfightState::btnStandardPress);
+	_btnStandard->onMousePress((ActionHandler)&DogfightState::btnStandardRightPress, SDL_BUTTON_RIGHT);
 	_btnStandard->setVisible(!_ufoIsAttacking);
 
 	_btnAggressive->copy(_window);
 	_btnAggressive->setGroup(&_mode);
 	_btnAggressive->onMousePress((ActionHandler)&DogfightState::btnAggressivePress);
+	_btnAggressive->onMousePress((ActionHandler)&DogfightState::btnAggressiveRightPress, SDL_BUTTON_RIGHT);
 	if (_ufoIsAttacking)
 	{
 		btnAggressivePress(0);
@@ -469,6 +473,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 
 	_btnDisengage->copy(_window);
 	_btnDisengage->onMousePress((ActionHandler)&DogfightState::btnDisengagePress);
+	_btnDisengage->onMousePress((ActionHandler)&DogfightState::btnDisengageRightPress, SDL_BUTTON_RIGHT);
 	_btnDisengage->setGroup(&_mode);
 	_btnDisengage->setVisible(!_disableDisengage);
 
@@ -1840,6 +1845,19 @@ void DogfightState::btnStandoffPress(Action *)
 	}
 }
 
+void DogfightState::btnStandoffRightPress(Action *)
+{
+	_state->handleDogfightMultiAction(0);
+}
+
+void DogfightState::btnStandoffSimulateLeftPress(Action *action)
+{
+	if (_btnStandoff->getVisible())
+	{
+		_btnStandoff->mousePress(action, this);
+	}
+}
+
 /**
  * Switches to Cautious mode (maximum weapon range).
  * @param action Pointer to an action.
@@ -1880,6 +1898,19 @@ void DogfightState::btnCautiousPress(Action *)
 	}
 }
 
+void DogfightState::btnCautiousRightPress(Action *)
+{
+	_state->handleDogfightMultiAction(1);
+}
+
+void DogfightState::btnCautiousSimulateLeftPress(Action *action)
+{
+	if (_btnCautious->getVisible())
+	{
+		_btnCautious->mousePress(action, this);
+	}
+}
+
 /**
  * Switches to Standard mode (minimum weapon range).
  * @param action Pointer to an action.
@@ -1899,6 +1930,19 @@ void DogfightState::btnStandardPress(Action *)
 			}
 		}
 		maximumDistance();
+	}
+}
+
+void DogfightState::btnStandardRightPress(Action *)
+{
+	_state->handleDogfightMultiAction(2);
+}
+
+void DogfightState::btnStandardSimulateLeftPress(Action *action)
+{
+	if (_btnStandard->getVisible())
+	{
+		_btnStandard->mousePress(action, this);
 	}
 }
 
@@ -1924,6 +1968,19 @@ void DogfightState::btnAggressivePress(Action *)
 	}
 }
 
+void DogfightState::btnAggressiveRightPress(Action *)
+{
+	_state->handleDogfightMultiAction(3);
+}
+
+void DogfightState::btnAggressiveSimulateLeftPress(Action *action)
+{
+	if (_btnAggressive->getVisible())
+	{
+		_btnAggressive->mousePress(action, this);
+	}
+}
+
 /**
  * Disengages from the UFO.
  * @param action Pointer to an action.
@@ -1935,6 +1992,19 @@ void DogfightState::btnDisengagePress(Action *)
 		_end = true;
 		setStatus("STR_DISENGAGING");
 		_targetDist = 800;
+	}
+}
+
+void DogfightState::btnDisengageRightPress(Action *)
+{
+	_state->handleDogfightMultiAction(4);
+}
+
+void DogfightState::btnDisengageSimulateLeftPress(Action *action)
+{
+	if (_btnDisengage->getVisible())
+	{
+		_btnDisengage->mousePress(action, this);
 	}
 }
 

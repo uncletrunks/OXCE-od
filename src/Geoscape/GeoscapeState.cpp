@@ -3153,6 +3153,45 @@ void GeoscapeState::handleDogfights()
 }
 
 /**
+ * Goes through all active dogfight instances and tries to perform the same action.
+ * @param button Action to perform.
+ */
+void GeoscapeState::handleDogfightMultiAction(int button)
+{
+	for (auto d : _dogfights)
+	{
+		if (d->isMinimized())
+			continue;
+
+		SDL_Event ev;
+		ev.type = SDL_MOUSEBUTTONDOWN;
+		ev.button.button = SDL_BUTTON_LEFT;
+		Action a = Action(&ev, 0.0, 0.0, 0, 0);
+
+		switch (button)
+		{
+		case 0:
+			d->btnStandoffSimulateLeftPress(&a);
+			break;
+		case 1:
+			d->btnCautiousSimulateLeftPress(&a);
+			break;
+		case 2:
+			d->btnStandardSimulateLeftPress(&a);
+			break;
+		case 3:
+			d->btnAggressiveSimulateLeftPress(&a);
+			break;
+		case 4:
+			d->btnDisengageSimulateLeftPress(&a);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+/**
  * Goes through all dogfight instances and tries to award pilot experience.
  * This is called each time any UFO takes any damage in dogfight... very ugly, but I couldn't find a better place for it.
  *
