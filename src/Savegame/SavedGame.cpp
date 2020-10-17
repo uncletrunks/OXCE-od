@@ -2524,6 +2524,7 @@ Region *SavedGame::locateRegion(double lon, double lat) const
 	{
 		return *found;
 	}
+	Log(LOG_ERROR) << "Failed to find a region at location [" << lon << ", " << lat << "].";
 	return 0;
 }
 
