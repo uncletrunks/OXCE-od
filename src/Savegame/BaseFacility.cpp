@@ -142,6 +142,20 @@ int BaseFacility::getBuildTime() const
 }
 
 /**
+ * Returns the base facility's remaining time
+ * until it's finished building (0 = complete).
+ * Facility upgrades and downgrades are ignored in this calculation.
+ * @return Time left in days.
+ */
+int BaseFacility::getAdjustedBuildTime() const
+{
+	if (_hadPreviousFacility)
+		return 0;
+
+	return _buildTime;
+}
+
+/**
  * Changes the base facility's remaining time
  * until it's finished building.
  * @param time Time left in days.

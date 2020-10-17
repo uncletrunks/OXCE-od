@@ -67,6 +67,8 @@ public:
 	BaseAreaSubset getPlacement() const;
 	/// Gets the facility's construction time.
 	int getBuildTime() const;
+	/// Gets the facility's adjusted construction time (i.e. NOT considering upgrades/downgrades).
+	int getAdjustedBuildTime() const;
 	/// Sets the facility's construction time.
 	void setBuildTime(int time);
 	/// Builds up the facility.
