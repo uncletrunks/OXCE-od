@@ -71,6 +71,7 @@ en-US:
   STR_END_OF_SEARCH: "End of search."
 #ManufactureInfoState.cpp
   STR_REFUND_PRODUCTION: "REFUND!"
+  STR_HOURS_PER_UNIT: "HOURS PER UNIT>{ALT}{0}"
 #ManufactureStartState.cpp
   STR_PERSON_JOINING: "Person Joining"
   STR_RANDOM_PRODUCTION_DISCLAIMER: "Random production!"
