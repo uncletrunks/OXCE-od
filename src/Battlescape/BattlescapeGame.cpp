@@ -2841,15 +2841,27 @@ bool BattlescapeGame::getKneelReserved() const
 int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 {
 	// death trap?
-	if (unit->getTile()->getFloorSpecialTileType() >= DEATH_TRAPS)
+	Tile* deathTrapTile = nullptr;
+	for (int sx = 0; sx < unit->getArmor()->getSize(); sx++)
+	{
+		for (int sy = 0; sy < unit->getArmor()->getSize(); sy++)
+		{
+			Tile* t = _save->getTile(unit->getPosition() + Position(sx, sy, 0));
+			if (!deathTrapTile && t && t->getFloorSpecialTileType() >= DEATH_TRAPS)
+			{
+				deathTrapTile = t;
+			}
+		}
+	}
+	if (deathTrapTile)
 	{
 		std::ostringstream ss;
-		ss << "STR_DEATH_TRAP_" << unit->getTile()->getFloorSpecialTileType();
+		ss << "STR_DEATH_TRAP_" << deathTrapTile->getFloorSpecialTileType();
 		auto deathTrapRule = getMod()->getItem(ss.str());
 		if (deathTrapRule && (deathTrapRule->getBattleType() == BT_PROXIMITYGRENADE || deathTrapRule->getBattleType() == BT_MELEE))
 		{
 			BattleItem* deathTrapItem = nullptr;
-			for (auto item : *unit->getTile()->getInventory())
+			for (auto item : *deathTrapTile->getInventory())
 			{
 				if (item->getRules() == deathTrapRule)
 				{
@@ -2859,18 +2871,18 @@ int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 			}
 			if (!deathTrapItem)
 			{
-				deathTrapItem = _save->createItemForTile(deathTrapRule, unit->getTile());
+				deathTrapItem = _save->createItemForTile(deathTrapRule, deathTrapTile);
 			}
 			if (deathTrapRule->getBattleType() == BT_PROXIMITYGRENADE)
 			{
 				deathTrapItem->setFuseTimer(0);
-				Position p = unit->getTile()->getPosition().toVoxel() + Position(8, 8, unit->getTile()->getTerrainLevel());
+				Position p = deathTrapTile->getPosition().toVoxel() + Position(8, 8, deathTrapTile->getTerrainLevel());
 				statePushNext(new ExplosionBState(this, p, BattleActionAttack::GetBeforeShoot(BA_NONE, nullptr, deathTrapItem)));
 				return 2;
 			}
 			else if (deathTrapRule->getBattleType() == BT_MELEE)
 			{
-				Position p = unit->getTile()->getPosition().toVoxel() + Position(8, 8, 12);
+				Position p = deathTrapTile->getPosition().toVoxel() + Position(8, 8, 12);
 				// EXPERIMENTAL: terrainMeleeTilePart = 4 (V_UNIT); no attacker
 				statePushNext(new ExplosionBState(this, p, BattleActionAttack::GetBeforeShoot(BA_HIT, nullptr, deathTrapItem), nullptr, false, 0, 0, 4));
 				return 2;
