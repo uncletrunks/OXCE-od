@@ -65,11 +65,9 @@ namespace OpenXcom
  * @param base Pointer to the base to get info from.
  * @param origin Game section that originated this state.
  */
-SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState), _sel(0), _total(0), _spaceChange(0), _origin(origin), _reset(false), _sellAllButOne(false)
+SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin) : _base(base), _debriefingState(debriefingState), _sel(0), _total(0), _spaceChange(0), _origin(origin),
+	_reset(false), _sellAllButOne(false), _delayedInitDone(false)
 {
-	bool overfull = _debriefingState == 0 && Options::storageLimitsEnforced && _base->storesOverfull();
-	bool overfullCritical = overfull ? _base->storesOverfullCritical() : false;
-
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnQuickSearch = new TextEdit(this, 48, 9, 10, 13);
@@ -108,6 +106,26 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	add(_cbxCategory, "text", "sellMenu");
 
 	centerAllSurfaces();
+
+	_timerInc = new Timer(250);
+	_timerInc->onTimer((StateHandler)&SellState::increase);
+	_timerDec = new Timer(250);
+	_timerDec->onTimer((StateHandler)&SellState::decrease);
+}
+
+/**
+ * Delayed constructor functionality.
+ */
+void SellState::delayedInit()
+{
+	if (_delayedInitDone)
+	{
+		return;
+	}
+	_delayedInitDone = true;
+
+	bool overfull = _debriefingState == 0 && Options::storageLimitsEnforced && _base->storesOverfull();
+	bool overfullCritical = overfull ? _base->storesOverfullCritical() : false;
 
 	// Set up objects
 	setWindowBackground(_window, "sellMenu");
@@ -319,11 +337,6 @@ SellState::SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin
 	_cbxCategory->onKeyboardRelease((ActionHandler)&SellState::btnQuickSearchToggle, Options::keyToggleQuickSearch);
 
 	updateList();
-
-	_timerInc = new Timer(250);
-	_timerInc->onTimer((StateHandler)&SellState::increase);
-	_timerDec = new Timer(250);
-	_timerDec->onTimer((StateHandler)&SellState::decrease);
 }
 
 /**
@@ -340,6 +353,8 @@ SellState::~SellState()
 */
 void SellState::init()
 {
+	delayedInit();
+
 	State::init();
 
 	if (_reset)

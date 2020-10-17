@@ -65,6 +65,7 @@ private:
 	OptionsOrigin _origin;
 	bool _reset;
 	bool _sellAllButOne;
+	bool _delayedInitDone;
 	/// Gets the category of the current selection.
 	std::string getCategory(int sel) const;
 	/// Determines if the current selection belongs to a given category.
@@ -74,6 +75,7 @@ private:
 public:
 	/// Creates the Sell state.
 	SellState(Base *base, DebriefingState *debriefingState, OptionsOrigin origin = OPT_GEOSCAPE);
+	void delayedInit();
 	/// Cleans up the Sell state.
 	~SellState();
 	/// Resets state.
