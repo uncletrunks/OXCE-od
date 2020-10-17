@@ -485,7 +485,7 @@ void BaseView::draw()
 	for (std::vector<BaseFacility*>::iterator i = _base->getFacilities()->begin(); i != _base->getFacilities()->end(); ++i)
 	{
 		// Draw connectors
-		if ((*i)->getBuildTime() == 0 || (*i)->getIfHadPreviousFacility())
+		if ((*i)->isBuiltOrHadPreviousFacility())
 		{
 			// Facilities to the right
 			int x = (*i)->getX() + (*i)->getRules()->getSize();
@@ -493,7 +493,7 @@ void BaseView::draw()
 			{
 				for (int y = (*i)->getY(); y < (*i)->getY() + (*i)->getRules()->getSize(); ++y)
 				{
-					if (_facilities[x][y] != 0 && (_facilities[x][y]->getBuildTime() == 0 || _facilities[x][y]->getIfHadPreviousFacility()))
+					if (_facilities[x][y] != 0 && _facilities[x][y]->isBuiltOrHadPreviousFacility())
 					{
 						Surface *frame = _texture->getFrame(7);
 						auto fx = (x * GRID_SIZE - GRID_SIZE / 2);
@@ -509,7 +509,7 @@ void BaseView::draw()
 			{
 				for (int subX = (*i)->getX(); subX < (*i)->getX() + (*i)->getRules()->getSize(); ++subX)
 				{
-					if (_facilities[subX][y] != 0 && (_facilities[subX][y]->getBuildTime() == 0 || _facilities[subX][y]->getIfHadPreviousFacility()))
+					if (_facilities[subX][y] != 0 && _facilities[subX][y]->isBuiltOrHadPreviousFacility())
 					{
 						Surface *frame = _texture->getFrame(8);
 						auto fx = (subX * GRID_SIZE);

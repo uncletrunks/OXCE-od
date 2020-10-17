@@ -85,6 +85,8 @@ public:
 	bool getIfHadPreviousFacility() const;
 	/// Sets whether this facility was placed over another or was placed by removing another
 	void setIfHadPreviousFacility(bool hadPreviousFacility);
+	/// Is the facility fully built or being upgraded/downgraded?
+	bool isBuiltOrHadPreviousFacility() const;
 };
 
 }

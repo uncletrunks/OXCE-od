@@ -214,7 +214,6 @@ void BaseFacility::setCraftForDrawing(Craft *craft)
 
 /**
  * Gets whether this facility was placed over another or was placed by removing another
- * Used for determining if this facility should count for base connectivity
  * @return true if placed over or by removing another facility
  */
 bool BaseFacility::getIfHadPreviousFacility() const
@@ -229,6 +228,16 @@ bool BaseFacility::getIfHadPreviousFacility() const
 void BaseFacility::setIfHadPreviousFacility(bool hadPreviousFacility)
 {
 	_hadPreviousFacility = hadPreviousFacility;
+}
+
+/**
+ * Is the facility fully built or being upgraded/downgraded?
+ * Used for determining if this facility should count for base connectivity
+ * @return True, if fully built or being upgraded/downgraded.
+ */
+bool BaseFacility::isBuiltOrHadPreviousFacility() const
+{
+	return _buildTime == 0 || _hadPreviousFacility;
 }
 
 }
