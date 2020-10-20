@@ -2524,15 +2524,25 @@ void GeoscapeState::time1Day()
 		}
 		if (!trainingFinishedList.empty())
 		{
-			popup(new TrainingFinishedState(base, trainingFinishedList));
+			popup(new TrainingFinishedState(base, trainingFinishedList, false));
 		}
 		// Handle psionic training
 		if (base->getAvailablePsiLabs() > 0 && Options::anytimePsiTraining)
 		{
+			std::vector<Soldier*> psiTrainingFinishedList;
 			for (std::vector<Soldier*>::const_iterator s = base->getSoldiers()->begin(); s != base->getSoldiers()->end(); ++s)
 			{
 				(*s)->trainPsi1Day();
 				(*s)->calcStatString(_game->getMod()->getStatStrings(), psiStrengthEval);
+				if ((*s)->isInPsiTraining() && (*s)->isFullyPsiTrained())
+				{
+					(*s)->setPsiTraining(false);
+					psiTrainingFinishedList.push_back(*s);
+				}
+			}
+			if (!psiTrainingFinishedList.empty())
+			{
+				popup(new TrainingFinishedState(base, psiTrainingFinishedList, true));
 			}
 		}
 	}

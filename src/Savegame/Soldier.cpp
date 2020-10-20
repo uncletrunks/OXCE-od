@@ -1255,6 +1255,29 @@ void Soldier::trainPsi1Day()
 }
 
 /**
+ * Is the soldier already fully psi-trained?
+ * @return True, if the soldier cannot gain any more stats in the psi-training facility.
+ */
+bool Soldier::isFullyPsiTrained()
+{
+	if (_currentStats.psiSkill >= _rules->getStatCaps().psiSkill)
+	{
+		if (Options::allowPsiStrengthImprovement)
+		{
+			if (_currentStats.psiStrength >= _rules->getStatCaps().psiStrength)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * returns whether or not the unit is in psi training
  * @return true/false
  */
