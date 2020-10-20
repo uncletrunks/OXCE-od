@@ -1158,6 +1158,10 @@ void TechTreeViewerState::initLists()
 			// person joining
 			std::ostringstream name;
 			name << "  ";
+			if (!rule->getSpawnedSoldierTemplate().IsNull())
+			{
+				name << "*";
+			}
 			name << tr(rule->getSpawnedPersonName() != "" ? rule->getSpawnedPersonName() : rule->getSpawnedPersonType());
 			_lstRight->addRow(1, name.str().c_str());
 			_lstRight->setRowColor(row, _white);
