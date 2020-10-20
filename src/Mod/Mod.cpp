@@ -1619,7 +1619,7 @@ void Mod::loadAll()
 	ModScript parser{ _scriptGlobal, this };
 	auto mods = FileMap::getRulesets();
 
-	Log(LOG_INFO) << "Loading rulesets...";
+	Log(LOG_INFO) << "Loading begins...";
 	_scriptGlobal->beginLoad();
 	_modData.clear();
 	_modData.resize(mods.size());
@@ -1648,6 +1648,7 @@ void Mod::loadAll()
 		offset += size;
 	}
 
+	Log(LOG_INFO) << "Pre-loading rulesets...";
 	// load rulesets that can affect loading vanilla resources
 	for (size_t i = 0; _modData.size() > i; ++i)
 	{
@@ -1662,6 +1663,7 @@ void Mod::loadAll()
 		}
 	}
 
+	Log(LOG_INFO) << "Loading vanilla resources...";
 	// vanilla resources load
 	_modCurrent = &_modData.at(0);
 	loadVanillaResources();
@@ -1675,6 +1677,7 @@ void Mod::loadAll()
 	_soundOffsetBattle = _sounds["BATTLE.CAT"]->getMaxSharedSounds();
 	_soundOffsetGeo = _sounds["GEO.CAT"]->getMaxSharedSounds();
 
+	Log(LOG_INFO) << "Loading rulesets...";
 	// load rest rulesets
 	for (size_t i = 0; mods.size() > i; ++i)
 	{
@@ -1690,6 +1693,7 @@ void Mod::loadAll()
 			throwModOnErrorHelper(modId, e.what());
 		}
 	}
+	Log(LOG_INFO) << "Loading rulesets done.";
 
 	//back master
 	_modCurrent = &_modData.at(0);
@@ -1860,6 +1864,7 @@ void Mod::loadAll()
 		Options::save();
 	}
 
+	Log(LOG_INFO) << "Loading ended.";
 
 	sortLists();
 	loadExtraResources();
