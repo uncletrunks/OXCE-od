@@ -1749,7 +1749,7 @@ void BattlescapeGame::primaryAction(Position pos)
 			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getVisible())
 			{
 				auto targetFaction = _save->selectUnit(pos)->getFaction();
-				bool psiTargetAllowed = _currentAction.weapon->getRules()->isPsiTargetAllowed(targetFaction);
+				bool psiTargetAllowed = _currentAction.weapon->getRules()->isTargetAllowed(targetFaction);
 				if (_currentAction.type == BA_MINDCONTROL && targetFaction == FACTION_PLAYER)
 				{
 					// no mind controlling allies, unwanted side effects
@@ -2858,7 +2858,9 @@ int BattlescapeGame::checkForProximityGrenades(BattleUnit *unit)
 		std::ostringstream ss;
 		ss << "STR_DEATH_TRAP_" << deathTrapTile->getFloorSpecialTileType();
 		auto deathTrapRule = getMod()->getItem(ss.str());
-		if (deathTrapRule && (deathTrapRule->getBattleType() == BT_PROXIMITYGRENADE || deathTrapRule->getBattleType() == BT_MELEE))
+		if (deathTrapRule &&
+			deathTrapRule->isTargetAllowed(unit->getOriginalFaction()) &&
+			(deathTrapRule->getBattleType() == BT_PROXIMITYGRENADE || deathTrapRule->getBattleType() == BT_MELEE))
 		{
 			BattleItem* deathTrapItem = nullptr;
 			for (auto item : *deathTrapTile->getInventory())

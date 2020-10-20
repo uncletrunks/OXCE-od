@@ -115,7 +115,7 @@ en-US:
   underwaterOnly: "Underwater only?"
   landOnly: "Land only?"
   psiRequired: "Psi skill required?"
-  psiTargetMatrix: "Psi-amp targets"
+  targetMatrix: "Item targets"
   manaRequired: "Mana required?"
   LOSRequired: "Sight required?"
 #

@@ -167,7 +167,7 @@ RuleItem::RuleItem(const std::string &type) :
 	_experienceTrainingMode(ETM_DEFAULT), _manaExperience(0), _listOrder(0),
 	_maxRange(200), _minRange(0), _dropoff(2), _bulletSpeed(0), _explosionSpeed(0), _shotgunPellets(0), _shotgunBehaviorType(0), _shotgunSpread(100), _shotgunChoke(100),
 	_spawnUnitFaction(-1),
-	_psiTargetMatrix(6),
+	_targetMatrix(7),
 	_LOSRequired(false), _underwaterOnly(false), _landOnly(false), _psiReqiured(false), _manaRequired(false),
 	_meleePower(0), _specialType(-1), _vaporColor(-1), _vaporDensity(0), _vaporProbability(15),
 	_vaporColorSurface(-1), _vaporDensitySurface(0), _vaporProbabilitySurface(15),
@@ -425,6 +425,7 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 			_dropoff = 1;
 			_confAimed.range = 0;
 			_accuracyMulti.setPsiAttack();
+			_targetMatrix = 6; // only hostile and neutral by default
 		}
 		else
 		{
@@ -656,7 +657,12 @@ void RuleItem::load(const YAML::Node &node, Mod *mod, int listOrder, const ModSc
 	_zombieUnit = node["zombieUnit"].as<std::string>(_zombieUnit);
 	_spawnUnit = node["spawnUnit"].as<std::string>(_spawnUnit);
 	_spawnUnitFaction = node["spawnUnitFaction"].as<int>(_spawnUnitFaction);
-	_psiTargetMatrix = node["psiTargetMatrix"].as<int>(_psiTargetMatrix);
+	if (node["psiTargetMatrix"])
+	{
+		// TODO: just backwards-compatibility, remove in 2022, update ruleset validator too
+		_targetMatrix = node["psiTargetMatrix"].as<int>(_targetMatrix);
+	}
+	_targetMatrix = node["targetMatrix"].as<int>(_targetMatrix);
 	_LOSRequired = node["LOSRequired"].as<bool>(_LOSRequired);
 	_meleePower = node["meleePower"].as<int>(_meleePower);
 	_underwaterOnly = node["underwaterOnly"].as<bool>(_underwaterOnly);
@@ -2325,24 +2331,26 @@ int RuleItem::getMeleePower() const
 }
 
 /**
- * Checks the psiamp's allowed targets.
+ * Checks if this item can be used to target a given faction.
+ * Usage #1: checks the psiamp's allowed targets.
  * - Not used in AI.
  * - Mind control of the same faction is hardcoded disabled.
+ * Usage #2: checks if a death trap item applies to a given faction.
  * @return True if allowed, false otherwise.
  */
-bool RuleItem::isPsiTargetAllowed(UnitFaction targetFaction) const
+bool RuleItem::isTargetAllowed(UnitFaction targetFaction) const
 {
 	if (targetFaction == FACTION_PLAYER)
 	{
-		return _psiTargetMatrix & 1;
+		return _targetMatrix & 1;
 	}
 	else if (targetFaction == FACTION_HOSTILE)
 	{
-		return _psiTargetMatrix & 2;
+		return _targetMatrix & 2;
 	}
 	else if (targetFaction == FACTION_NEUTRAL)
 	{
-		return _psiTargetMatrix & 4;
+		return _targetMatrix & 4;
 	}
 	return false;
 }

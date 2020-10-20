@@ -1283,31 +1283,31 @@ void StatsForNerdsState::addMediKitTargets(std::ostringstream& ss, const RuleIte
 }
 
 /**
- * Adds psiamp target types to the table.
+ * Adds item target types to the table.
  */
-void StatsForNerdsState::addPsiampTargets(std::ostringstream& ss, const RuleItem* value, const std::string& propertyName, const int& defaultvalue)
+void StatsForNerdsState::addItemTargets(std::ostringstream& ss, const RuleItem* value, const std::string& propertyName, const int& defaultvalue)
 {
-	if (value->getPsiTargetMatrixRaw() == defaultvalue && !_showDefaults)
+	if (value->getTargetMatrixRaw() == defaultvalue && !_showDefaults)
 	{
 		return;
 	}
 	resetStream(ss);
 	ss << "{";
 	// FIXME: make translatable one day, when some better default names are suggested
-	if (value->isPsiTargetAllowed(FACTION_PLAYER))
+	if (value->isTargetAllowed(FACTION_PLAYER))
 		ss << "friend" << ", ";
-	if (value->isPsiTargetAllowed(FACTION_HOSTILE))
+	if (value->isTargetAllowed(FACTION_HOSTILE))
 		ss << "hostile" << ", ";
-	if (value->isPsiTargetAllowed(FACTION_NEUTRAL))
+	if (value->isTargetAllowed(FACTION_NEUTRAL))
 		ss << "neutral" << ", ";
 	ss << "}";
 	if (_showIds)
 	{
-		ss << " [" << value->getPsiTargetMatrixRaw() << "]";
+		ss << " [" << value->getTargetMatrixRaw() << "]";
 	}
 	_lstRawData->addRow(2, trp(propertyName).c_str(), ss.str().c_str());
 	++_counter;
-	if (value->getPsiTargetMatrixRaw() != defaultvalue)
+	if (value->getTargetMatrixRaw() != defaultvalue)
 	{
 		_lstRawData->setCellColor(_lstRawData->getTexts() - 1, 1, _pink);
 	}
@@ -1570,7 +1570,8 @@ void StatsForNerdsState::initItemList()
 	int psiRequiredDefault = itemBattleType == BT_PSIAMP ? true : false;
 	addBoolean(ss, itemRule->isPsiRequired(), "psiRequired", psiRequiredDefault);
 	addBoolean(ss, itemRule->isManaRequired(), "manaRequired");
-	addPsiampTargets(ss, itemRule, "psiTargetMatrix", 6);
+	int targetMatrixDefault = itemBattleType == BT_PSIAMP ? 6 : 7;
+	addItemTargets(ss, itemRule, "targetMatrix", targetMatrixDefault);
 	addBoolean(ss, itemRule->isLOSRequired(), "LOSRequired");
 
 	if (itemBattleType == BT_FIREARM
