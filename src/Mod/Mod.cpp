@@ -4637,7 +4637,15 @@ void Mod::loadVanillaResources()
 		for (size_t i = 0; i < ARRAYLEN(surfaceNames); ++i)
 		{
 			SurfaceSet* s = _sets[surfaceNames[i]];
-			s->setMaxSharedFrames((int)s->getTotalFrames());
+			if (s)
+			{
+				s->setMaxSharedFrames((int)s->getTotalFrames());
+			}
+			else
+			{
+				Log(LOG_ERROR) << "Surface set " << surfaceNames[i] << " not found.";
+				throw Exception("Surface set " + surfaceNames[i] + " not found.");
+			}
 		}
 		//special case for surface set that is loaded later
 		{
