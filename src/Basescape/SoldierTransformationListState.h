@@ -32,8 +32,6 @@ class TextEdit;
 class TextList;
 class ComboBox;
 class Base;
-class Soldier;
-class SoldiersState;
 class RuleSoldierTransformation;
 
 /**
@@ -43,7 +41,6 @@ class RuleSoldierTransformation;
 class SoldierTransformationListState : public State
 {
 private:
-	SoldiersState* _parent;
 	Base* _base;
 	ComboBox* _screenActions;
 	TextButton* _btnOK;
@@ -57,7 +54,7 @@ private:
 	std::vector<RuleSoldierTransformation*> _availableTransformations;
 public:
 	/// Creates the Transformations Overview state.
-	SoldierTransformationListState(SoldiersState* parent, Base* base, ComboBox* screenActions);
+	SoldierTransformationListState(Base* base, ComboBox* screenActions);
 	/// Cleans up the Transformations Overview state.
 	~SoldierTransformationListState();
 	/// Refreshes the list of transformations.

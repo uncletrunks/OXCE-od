@@ -17,7 +17,6 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "SoldierTransformationListState.h"
-#include "SoldiersState.h"
 #include <algorithm>
 #include <climits>
 #include "../Engine/Action.h"
@@ -47,11 +46,10 @@ namespace OpenXcom
 
 /**
  * Initializes all the elements in the Transformations Overview screen.
- * @param parent Pointer to the Soldiers screen that started this list.
  * @param base Pointer to the base to get info from.
- * @param screenActions Pointer to the base to get info from.
+ * @param screenActions Pointer to the list of transformations in the parent SoldiersState.
  */
-SoldierTransformationListState::SoldierTransformationListState(SoldiersState *parent, Base *base, ComboBox *screenActions) : _parent(parent), _base(base), _screenActions(screenActions)
+SoldierTransformationListState::SoldierTransformationListState(Base *base, ComboBox *screenActions) : _base(base), _screenActions(screenActions)
 {
 	// Calculate once
 	_game->getSavedGame()->getAvailableTransformations(_availableTransformations, _game->getMod(), _base);
