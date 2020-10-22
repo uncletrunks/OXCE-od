@@ -115,7 +115,7 @@ ru:
   underwaterOnly: "Только подводное?"
   landOnly: "Только атмосферное?"
   psiRequired: "Требует пси-навыка?"
-  psiTargetMatrix: "Пси-усилитель действует на"
+  targetMatrix: "Предмет действует на"
   manaRequired: "Требует маны?"
   LOSRequired: "Нужна прям. видимость?"
 #
@@ -314,7 +314,7 @@ ru:
   specialWeapon: "Специальное оружие"
   heatVision: "Тепловое видение"
   psiVision: "Пси-видение"
-  psiCamouflage: "Пси камуфляж"
+  psiCamouflage: "Пси-камуфляж"
   visibilityAtDay: "Видимость днем"
   visibilityAtDark: "Видимость ночью"
   camouflageAtDay: "Камуфляж днем"
