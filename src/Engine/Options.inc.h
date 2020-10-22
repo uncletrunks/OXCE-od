@@ -86,6 +86,7 @@ OPT int oxceManufactureScrollSpeed;
 OPT int oxceManufactureScrollSpeedWithCtrl;
 OPT int oxceResearchScrollSpeed;
 OPT int oxceResearchScrollSpeedWithCtrl;
+OPT int oxceGeoSlowdownFactor;
 
 OPT bool oxceRecommendedOptionsWereSet;
 

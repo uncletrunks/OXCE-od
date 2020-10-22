@@ -135,7 +135,7 @@ namespace OpenXcom
  * Initializes all the elements in the Geoscape screen.
  * @param game Pointer to the core game.
  */
-GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomOutEffectDone(false), _minimizedDogfights(0)
+GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomOutEffectDone(false), _minimizedDogfights(0), _slowdownCounter(0)
 {
 	int screenWidth = Options::baseXGeoscape;
 	int screenHeight = Options::baseYGeoscape;
@@ -796,6 +796,20 @@ void GeoscapeState::timeAdvance()
 	int timeSpan = 0;
 	if (_timeSpeed == _btn5Secs)
 	{
+		if (Options::oxceGeoSlowdownFactor > 1)
+		{
+			_slowdownCounter--;
+			if (_slowdownCounter > 0)
+			{
+				// wait
+				_globe->draw();
+				return;
+			}
+			else
+			{
+				_slowdownCounter = Clamp(Options::oxceGeoSlowdownFactor, 2, 100);
+			}
+		}
 		timeSpan = 1;
 	}
 	else if (_timeSpeed == _btn1Min)

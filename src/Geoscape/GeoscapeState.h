@@ -61,6 +61,7 @@ private:
 	std::list<DogfightState*> _dogfights, _dogfightsToBeStarted;
 	std::vector<Craft*> _activeCrafts;
 	size_t _minimizedDogfights;
+	int _slowdownCounter;
 
 	/// Update list of active crafts.
 	const std::vector<Craft*>* updateActiveCrafts();
