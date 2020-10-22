@@ -267,7 +267,7 @@ en-GB:
   STR_NIGHT_VISION_COLOR: "Select Night Vision colour"
   STR_NIGHT_VISION_COLOR_DESC: "Values from 1 to 15, each representing a different shade colour."
   STR_AUTO_NIGHT_VISION_THRESHOLD: "Auto Night Vision threshold"
-  STR_AUTO_NIGHT_VISION_THRESHOLD_DESC: "If darker than this threshold, toggle Night Vision on and Personal Lights off automatically."
+  STR_AUTO_NIGHT_VISION_THRESHOLD_DESC: "If darker than this threshold, toggle Night Vision on automatically."
   STR_AUTO_SELL: "Auto-Sell Manager"
   STR_AUTO_SELL_DESC: "In the battle debriefing sell screen, any item types you sold in previous battles will be automatically marked for selling."
   STR_REMEMBER_DISABLED_CRAFT_WEAPONS: "Remember disabled craft weapons"
