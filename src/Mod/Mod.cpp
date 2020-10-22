@@ -1852,6 +1852,7 @@ void Mod::loadAll()
 	{
 		_fixedUserOptions.erase("oxceUpdateCheck");
 		_fixedUserOptions.erase("maximizeInfoScreens"); // FIXME: make proper categorisations in the next release
+		_fixedUserOptions.erase("oxceAutoNightVisionThreshold");
 
 		const std::vector<OptionInfo> &options = Options::getOptionInfo();
 		for (std::vector<OptionInfo>::const_iterator i = options.begin(); i != options.end(); ++i)

@@ -540,7 +540,7 @@ BattlescapeState::BattlescapeState() :
 	if (_save->getGlobalShade() > Options::oxceAutoNightVisionThreshold)
 	{
 		// turn personal lights off
-		_save->getTileEngine()->togglePersonalLighting();
+		//_save->getTileEngine()->togglePersonalLighting();
 		// turn night vision on
 		_map->toggleNightVision();
 	}
