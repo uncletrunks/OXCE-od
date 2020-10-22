@@ -653,6 +653,10 @@ void refreshMods()
 	}
 	Log(LOG_INFO) << "Scanning user mods in '" << getUserFolder() << "'...";
 	FileMap::scanModDir(getUserFolder(), "mods", false);
+#ifdef __MOBILE__
+	Log(LOG_INFO) << "Scanning user mods in '" << getDataFolder() << "'...";
+	FileMap::scanModDir(getDataFolder(), "mods", false);
+#endif
 
 	// Check mods' dependencies on other mods and extResources (UFO, TFTD, etc),
 	// also breaks circular dependency loops.
