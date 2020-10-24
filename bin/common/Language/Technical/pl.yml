@@ -115,7 +115,7 @@ pl:
   underwaterOnly: "Tylko podwodne?"
   landOnly: "Tylko lądowe?"
   psiRequired: "Wymaga zdolności psi?"
-  psiTargetMatrix: "Cel wzmacniacza psi"
+  targetMatrix: "Dozwolone cele dla przedmiotu"
   manaRequired: "Wymaga many?"
   LOSRequired: "Wymaga linii wzroku?"
 #
