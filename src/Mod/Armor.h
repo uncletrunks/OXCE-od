@@ -53,6 +53,7 @@ public:
 
 	static const std::string NONE;
 private:
+	std::string _ufopediaType;
 	std::string _type, _spriteSheet, _spriteInv, _corpseGeoName, _storeItemName, _specWeaponName;
 	std::string _requiresName;
 	std::string _layersDefaultPrefix;
@@ -117,6 +118,9 @@ public:
 	void afterLoad(const Mod* mod);
 	/// Gets whether or not there is an infinite supply of this armor.
 	bool hasInfiniteSupply() const { return _infiniteSupply; }
+
+	/// Gets the custom name of the Ufopedia article related to this armor.
+	const std::string& getUfopediaType() const;
 
 	/// Gets the armor's type.
 	const std::string& getType() const;

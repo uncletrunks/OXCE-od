@@ -103,6 +103,7 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	{
 		load(parent, parsers, mod);
 	}
+	_ufopediaType = node["ufopediaType"].as<std::string>(_ufopediaType);
 	_type = node["type"].as<std::string>(_type);
 	_spriteSheet = node["spriteSheet"].as<std::string>(_spriteSheet);
 	_spriteInv = node["spriteInv"].as<std::string>(_spriteInv);
@@ -298,6 +299,18 @@ void Armor::afterLoad(const Mod* mod)
 }
 
 
+
+/**
+ * Gets the custom name of the Ufopedia article related to this armor.
+ * @return The ufopedia article name.
+ */
+const std::string& Armor::getUfopediaType() const
+{
+	if (!_ufopediaType.empty())
+		return _ufopediaType;
+
+	return _type;
+}
 
 /**
  * Returns the language string that names

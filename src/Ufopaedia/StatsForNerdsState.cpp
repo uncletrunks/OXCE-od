@@ -2391,6 +2391,7 @@ void StatsForNerdsState::initArmorList()
 
 		addSection("{Naming}", "", _white);
 		addSingleString(ss, armorRule->getType(), "type");
+		addSingleString(ss, armorRule->getUfopediaType(), "ufopediaType");
 		addRuleNamed(ss, armorRule->getRequiredResearch(), "requires");
 
 		addSection("{Recovery}", "", _white);
