@@ -313,6 +313,9 @@ namespace OpenXcom
 	void ArticleDefinitionArmor::load(const YAML::Node &node, int listOrder)
 	{
 		ArticleDefinition::load(node, listOrder);
+		image_id = node["image_id"].as<std::string>(image_id);
+		if (image_id.find("_CPAL") != std::string::npos)
+			customPalette = true;
 	}
 
 	/**

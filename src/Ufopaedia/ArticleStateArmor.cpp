@@ -47,7 +47,15 @@ namespace OpenXcom
 		_txtTitle = new Text(300, 17, 5, 24);
 
 		// Set palette
-		setStandardPalette("PAL_BATTLEPEDIA");
+		auto customArmorSprite = defs->image_id.empty() ? nullptr : _game->getMod()->getSurface(defs->image_id, true);
+		if (defs->customPalette && customArmorSprite)
+		{
+			setCustomPalette(customArmorSprite->getPalette(), Mod::BATTLESCAPE_CURSOR);
+		}
+		else
+		{
+			setStandardPalette("PAL_BATTLEPEDIA");
+		}
 
 		_buttonColor = _game->getMod()->getInterface("articleArmor")->getElement("button")->color;
 		_textColor = _game->getMod()->getInterface("articleArmor")->getElement("text")->color;
@@ -74,8 +82,12 @@ namespace OpenXcom
 		_image = new Surface(320, 200, 0, 0);
 		add(_image);
 
-		auto defaultPrefix = armor->getLayersDefaultPrefix();
-		if (!defaultPrefix.empty())
+		if (customArmorSprite)
+		{
+			// blit on the background, so that text and button are always visible
+			customArmorSprite->blitNShade(_bg, 0, 0);
+		}
+		else if (!armor->getLayersDefaultPrefix().empty())
 		{
 			// dummy default soldier (M0)
 			Soldier *s = new Soldier(_game->getMod()->getSoldier(_game->getMod()->getSoldiersList().front(), true), armor, 0);
