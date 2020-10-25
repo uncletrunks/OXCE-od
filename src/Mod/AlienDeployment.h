@@ -37,6 +37,7 @@ struct ItemSet
 struct DeploymentData
 {
 	int alienRank;
+	std::string customUnitType;
 	int lowQty, highQty, dQty, extraQty;
 	int percentageOutsideUfo;
 	std::vector<ItemSet> itemSets, extraRandomItems;

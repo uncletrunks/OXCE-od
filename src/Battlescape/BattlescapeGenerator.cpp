@@ -1354,7 +1354,7 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 				}
 			}
 
-			std::string alienName = race->getMember((*d).alienRank);
+			std::string alienName = (*d).customUnitType.empty() ? race->getMember((*d).alienRank) : (*d).customUnitType;
 
 			bool outside = RNG::generate(0,99) < (*d).percentageOutsideUfo;
 			if (_ufo == 0)
