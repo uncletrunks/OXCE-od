@@ -45,7 +45,7 @@ private:
 	TextButton *_btnOk, *_btnNew;
 	Window *_window;
 	Text *_txtTitle, *_txtSelectedTopic, *_txtProgress, *_txtCostIndicator;
-	TextList *_lstLeft, *_lstRight;
+	TextList *_lstLeft, *_lstRight, *_lstFull;
 	Uint8 _purple, _pink, _blue, _white, _gold, _grey;
 	std::string _selectedTopic;
 	TTVMode _selectedFlag;
@@ -58,6 +58,7 @@ private:
 	void initLists();
 	void onSelectLeftTopic(Action *action);
 	void onSelectRightTopic(Action *action);
+	void onSelectFullTopic(Action *action);
 public:
 	/// Creates the Tech Tree Viewer state.
 	TechTreeViewerState(const RuleResearch *r = 0, const RuleManufacture *m = 0, const RuleBaseFacility *f = 0);
