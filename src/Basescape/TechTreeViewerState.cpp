@@ -124,6 +124,7 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 	_btnOk->setText(tr("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&TechTreeViewerState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&TechTreeViewerState::btnOkClick, Options::keyCancel);
+	_btnOk->onKeyboardPress((ActionHandler)&TechTreeViewerState::btnBackClick, SDLK_BACKSPACE);
 
 	int discoveredSum = 0;
 	// pre-calculate globally
@@ -224,6 +225,21 @@ void TechTreeViewerState::btnOkClick(Action *)
 }
 
 /**
+ * Navigates to the previous topic from the browsing history.
+ * @param action Pointer to an action.
+ */
+void TechTreeViewerState::btnBackClick(Action *)
+{
+	if (!_history.empty())
+	{
+		_selectedFlag = _history.back().second;
+		_selectedTopic = _history.back().first;
+		_history.pop_back();
+		initLists();
+	}
+}
+
+/**
 * Opens the Select Topic screen.
 * @param action Pointer to an action.
 */
@@ -244,19 +260,17 @@ void TechTreeViewerState::initLists()
 		if (_selectedFlag == TTV_MANUFACTURING)
 		{
 			ss << tr("STR_M_FLAG");
-			_txtCostIndicator->setText("");
 		}
 		else if (_selectedFlag == TTV_FACILITIES)
 		{
 			ss << tr("STR_F_FLAG");
-			_txtCostIndicator->setText("");
 		}
 		else if (_selectedFlag == TTV_ITEMS)
 		{
 			ss << tr("STR_I_FLAG");
-			_txtCostIndicator->setText("");
 		}
 		_txtSelectedTopic->setText(tr("STR_TOPIC").arg(ss.str()));
+		_txtCostIndicator->setText("");
 	}
 
 	// reset
@@ -1365,6 +1379,7 @@ void TechTreeViewerState::onSelectLeftTopic(Action *)
 	int index = _lstLeft->getSelectedRow();
 	if (_leftFlags[index] > TTV_NONE)
 	{
+		_history.push_back(std::make_pair(_selectedTopic, _selectedFlag));
 		_selectedFlag = _leftFlags[index];
 		_selectedTopic = _leftTopics[index];
 		initLists();
@@ -1380,6 +1395,7 @@ void TechTreeViewerState::onSelectRightTopic(Action *)
 	int index = _lstRight->getSelectedRow();
 	if (_rightFlags[index] > TTV_NONE)
 	{
+		_history.push_back(std::make_pair(_selectedTopic, _selectedFlag));
 		_selectedFlag = _rightFlags[index];
 		_selectedTopic = _rightTopics[index];
 		initLists();
@@ -1391,6 +1407,7 @@ void TechTreeViewerState::onSelectRightTopic(Action *)
 */
 void TechTreeViewerState::setSelectedTopic(const std::string &selectedTopic, TTVMode topicType)
 {
+	_history.push_back(std::make_pair(_selectedTopic, _selectedFlag));
 	_selectedTopic = selectedTopic;
 	_selectedFlag = topicType;
 }

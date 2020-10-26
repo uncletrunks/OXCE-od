@@ -49,6 +49,7 @@ private:
 	Uint8 _purple, _pink, _blue, _white, _gold, _grey;
 	std::string _selectedTopic;
 	TTVMode _selectedFlag;
+	std::vector<std::pair<std::string, TTVMode> > _history;
 	std::vector<std::string> _leftTopics, _rightTopics;
 	std::vector<TTVMode> _leftFlags, _rightFlags;
 	std::unordered_set<std::string> _disabledResearch;
@@ -66,6 +67,8 @@ public:
 	void init() override;
 	/// Handler for clicking the OK button.
 	void btnOkClick(Action *action);
+	/// Handler for clicking the Back button.
+	void btnBackClick(Action *action);
 	/// Handler for clicking the New button.
 	void btnNewClick(Action *action);
 	/// Sets the selected topic.
