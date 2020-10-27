@@ -180,6 +180,22 @@ interfaces: #done
         color: 1
       - id: button
         color: 1
+  - type: noteMenu
+    backgroundImage: BACK01.SCR
+    elements:
+      - id: palette
+        color: 4
+      - id: window
+        color: 1
+      - id: text
+        color: 1
+        color2: 239
+      - id: list
+        color: 1
+        color2: 239
+        border: 1
+      - id: button
+        color: 1
   - type: errorMessages
     elements:
       - id: geoscapePalette

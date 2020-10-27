@@ -1339,6 +1339,19 @@ const BattlescapeGame *SavedBattleGame::getBattleGame() const
 }
 
 /**
+ * Is BattlescapeState busy?
+ * @return True, if busy.
+ */
+bool SavedBattleGame::isBattlescapeStateBusy() const
+{
+	if (_battleState)
+	{
+		return _battleState->isBusy();
+	}
+	return false;
+}
+
+/**
  * Sets the BattlescapeState.
  * @param bs A Pointer to a BattlescapeState.
  */

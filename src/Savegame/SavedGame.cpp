@@ -425,6 +425,7 @@ void SavedGame::load(const std::string &filename, Mod *mod, Language *lang)
 	_graphFinanceToggles = doc["graphFinanceToggles"].as<std::string>(_graphFinanceToggles);
 	_funds = doc["funds"].as< std::vector<int64_t> >(_funds);
 	_maintenance = doc["maintenance"].as< std::vector<int64_t> >(_maintenance);
+	_userNotes = doc["userNotes"].as< std::vector<std::string> >(_userNotes);
 	_researchScores = doc["researchScores"].as< std::vector<int> >(_researchScores);
 	_incomes = doc["incomes"].as< std::vector<int64_t> >(_incomes);
 	_expenditures = doc["expenditures"].as< std::vector<int64_t> >(_expenditures);
@@ -828,6 +829,7 @@ void SavedGame::save(const std::string &filename, Mod *mod) const
 	node["rng"] = RNG::getSeed();
 	node["funds"] = _funds;
 	node["maintenance"] = _maintenance;
+	node["userNotes"] = _userNotes;
 	node["researchScores"] = _researchScores;
 	node["incomes"] = _incomes;
 	node["expenditures"] = _expenditures;

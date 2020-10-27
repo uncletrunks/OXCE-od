@@ -272,6 +272,8 @@ public:
 	void stopScrolling(Action *action);
 	/// Autosave next turn.
 	void autosave();
+	/// Is busy?
+	bool isBusy() const;
 };
 
 }

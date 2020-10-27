@@ -378,6 +378,9 @@ en-US:
 #MainMenuState.cpp
   STR_UPDATE: "Update"
   STR_LATEST_VERSION_INFO: "You are using the latest OpenXcom version."
+#NotesState.cpp
+  STR_NOTES: "Notes"
+  STR_NEW_NOTE: "<NEW NOTE>"
 #OptionsAdvancedState.cpp
   STR_OXCE: "Extended"
 #OptionsBaseState.cpp

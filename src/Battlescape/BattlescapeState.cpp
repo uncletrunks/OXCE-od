@@ -3519,4 +3519,12 @@ void BattlescapeState::autosave()
 	_autosave = true;
 }
 
+/**
+ * Is busy?
+ */
+bool BattlescapeState::isBusy() const
+{
+	return (_map->getCursorType() == CT_NONE || _battleGame->isBusy());
+}
+
 }

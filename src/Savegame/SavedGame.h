@@ -130,6 +130,7 @@ private:
 	GameEnding _end;
 	bool _ironman;
 	GameTime *_time;
+	std::vector<std::string> _userNotes;
 	std::vector<int> _researchScores;
 	std::vector<int64_t> _funds, _maintenance, _incomes, _expenditures;
 	double _globeLon, _globeLat;
@@ -456,6 +457,8 @@ public:
 	int getCurrentScore(int monthsPassed) const;
 	/// Clear links for the given alien base. Use this before deleting the alien base.
 	void clearLinksForAlienBase(AlienBase* alienBase, const Mod* mod);
+	/// Gets the list of user notes.
+	std::vector<std::string>& getUserNotes() { return _userNotes; }
 };
 
 }
