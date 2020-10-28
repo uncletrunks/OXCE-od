@@ -134,7 +134,7 @@ void NotesState::updateList()
 	_lstNotes->addRow(1, tr("STR_NEW_NOTE").c_str());
 	if (_origin != OPT_BATTLESCAPE)
 	{
-		_lstNotes->setRowColor(_lstNotes->getTexts() - 1, color);
+		_lstNotes->setRowColor(_lstNotes->getLastRowIndex(), color);
 	}
 	_lstNotes->scrollDown(true);
 }
@@ -183,7 +183,7 @@ void NotesState::lstNotesPress(Action* action)
 		else
 		{
 			// any row except for the last
-			if (_selectedRow >= 0 && _selectedRow < _lstNotes->getTexts() - 1)
+			if (_selectedRow >= 0 && _selectedRow < _lstNotes->getLastRowIndex())
 			{
 				// delete the selected note
 				_selectedNote = "";
@@ -197,7 +197,7 @@ void NotesState::lstNotesPress(Action* action)
 		_lstNotes->setCellText(_selectedRow, 0, "");
 
 		// set the initial text for editing
-		if (_selectedRow == _lstNotes->getTexts() - 1)
+		if (_selectedRow == _lstNotes->getLastRowIndex())
 		{
 			_edtNote->setText("");
 		}
@@ -233,16 +233,16 @@ void NotesState::edtNoteKeyPress(Action* action)
 		_lstNotes->setScrolling(true);
 
 		// if we're adding a new note...
-		if (_selectedRow == _lstNotes->getTexts() - 1)
+		if (_selectedRow == _lstNotes->getLastRowIndex())
 		{
 			// change color to normal
-			_lstNotes->setRowColor(_lstNotes->getTexts() - 1, _lstNotes->getColor());
+			_lstNotes->setRowColor(_lstNotes->getLastRowIndex(), _lstNotes->getColor());
 
 			// add a new empty note
 			_lstNotes->addRow(1, tr("STR_NEW_NOTE").c_str());
 			if (_origin != OPT_BATTLESCAPE)
 			{
-				_lstNotes->setRowColor(_lstNotes->getTexts() - 1, _lstNotes->getSecondaryColor());
+				_lstNotes->setRowColor(_lstNotes->getLastRowIndex(), _lstNotes->getSecondaryColor());
 			}
 			_lstNotes->scrollDown(true);
 		}
@@ -266,7 +266,8 @@ void NotesState::btnSaveClick(Action*)
 	notes.clear();
 	if (_lstNotes->getTexts() > 1)
 	{
-		for (int i = 0; i < _lstNotes->getTexts() - 1; ++i)
+		// ignore last row
+		for (int i = 0; i < _lstNotes->getLastRowIndex(); ++i)
 		{
 			std::string note = _lstNotes->getCellText(i, 0);
 			if (!note.empty())

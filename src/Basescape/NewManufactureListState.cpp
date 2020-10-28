@@ -187,7 +187,7 @@ void NewManufactureListState::lstProdClickRight(Action *)
 		_showRequirements = !_showRequirements;
 		auto baseFunc = _base->getProvidedBaseFunc({});
 
-		for (size_t row = 0; row < _lstManufacture->getRows(); ++row)
+		for (size_t row = 0; row < _lstManufacture->getTexts(); ++row)
 		{
 			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[row]);
 			if (info)
@@ -461,7 +461,7 @@ void NewManufactureListState::fillProductionList(bool refreshCategories)
 		_catStrings.clear();
 		_catStrings.push_back("STR_ALL_ITEMS");
 
-		for (size_t r = 0; r < _lstManufacture->getRows(); ++r)
+		for (size_t r = 0; r < _lstManufacture->getTexts(); ++r)
 		{
 			RuleManufacture *info = _game->getMod()->getManufacture(_displayedStrings[r]);
 			if (info)
