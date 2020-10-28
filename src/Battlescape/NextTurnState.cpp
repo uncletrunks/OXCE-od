@@ -154,7 +154,7 @@ NextTurnState::NextTurnState(SavedBattleGame *battleGame, BattlescapeState *stat
 	// environmental effects
 	std::string message;
 
-	if (sc)
+	if (sc && !_battleGame->getBattleGame()->areAllEnemiesNeutralized())
 	{
 		if (_battleGame->getSide() == FACTION_PLAYER)
 		{
