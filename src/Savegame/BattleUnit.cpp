@@ -471,7 +471,7 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 	_maxViewDistanceAtDay = _armor->getVisibilityAtDay() ? _armor->getVisibilityAtDay() : mod->getMaxViewDistance();
 
 	_breathFrame = -1; // most aliens don't breathe per-se, that's exclusive to humanoids
-	if (armor->drawBubbles())
+	if (_armor->drawBubbles())
 	{
 		_breathFrame = 0;
 	}
