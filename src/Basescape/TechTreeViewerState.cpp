@@ -134,6 +134,19 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 	_btnOk->onKeyboardPress((ActionHandler)&TechTreeViewerState::btnOkClick, Options::keyCancel);
 	_btnOk->onKeyboardPress((ActionHandler)&TechTreeViewerState::btnBackClick, SDLK_BACKSPACE);
 
+	if (Options::oxceDisableTechTreeViewer)
+	{
+		_txtTitle->setText(tr("STR_THIS_FEATURE_IS_DISABLED"));
+		_txtSelectedTopic->setVisible(false);
+		_txtProgress->setVisible(false);
+		_txtCostIndicator->setVisible(false);
+		_lstLeft->setVisible(false);
+		_lstRight->setVisible(false);
+		_lstFull->setVisible(false);
+		_btnNew->setVisible(false);
+		return;
+	}
+
 	int discoveredSum = 0;
 	// pre-calculate globally
 	const std::vector<const RuleResearch *> &discoveredResearch = _game->getSavedGame()->getDiscoveredResearch();
@@ -220,7 +233,11 @@ TechTreeViewerState::~TechTreeViewerState()
 void TechTreeViewerState::init()
 {
 	State::init();
-	initLists();
+
+	if (!Options::oxceDisableTechTreeViewer)
+	{
+		initLists();
+	}
 }
 
 /**

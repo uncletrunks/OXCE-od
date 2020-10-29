@@ -238,6 +238,7 @@ void create()
 	_info.push_back(OptionInfo("oxceResearchScrollSpeed", &oxceResearchScrollSpeed, 10, "", "HIDDEN"));
 	_info.push_back(OptionInfo("oxceResearchScrollSpeedWithCtrl", &oxceResearchScrollSpeedWithCtrl, 1, "", "HIDDEN"));
 	_info.push_back(OptionInfo("oxceGeoSlowdownFactor", &oxceGeoSlowdownFactor, 1, "", "HIDDEN"));
+	_info.push_back(OptionInfo("oxceDisableTechTreeViewer", &oxceDisableTechTreeViewer, false, "", "HIDDEN"));
 
 	_info.push_back(OptionInfo("oxceRecommendedOptionsWereSet", &oxceRecommendedOptionsWereSet, false));
 
