@@ -136,7 +136,9 @@ TechTreeViewerState::TechTreeViewerState(const RuleResearch *r, const RuleManufa
 
 	if (Options::oxceDisableTechTreeViewer)
 	{
-		_txtTitle->setText(tr("STR_THIS_FEATURE_IS_DISABLED"));
+		_txtTitle->setHeight(_txtTitle->getHeight() * 9);
+		_txtTitle->setWordWrap(true);
+		_txtTitle->setText(tr("STR_THIS_FEATURE_IS_DISABLED_1"));
 		_txtSelectedTopic->setVisible(false);
 		_txtProgress->setVisible(false);
 		_txtCostIndicator->setVisible(false);

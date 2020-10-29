@@ -197,6 +197,22 @@ void StatsForNerdsState::buildUI(bool debug, bool ids, bool defaults)
 	_btnNext->onMouseClick((ActionHandler)&StatsForNerdsState::btnNextClick);
 	_btnNext->onKeyboardPress((ActionHandler)&StatsForNerdsState::btnNextClick, Options::keyGeoRight);
 
+	if (Options::oxceDisableStatsForNerds)
+	{
+		_txtTitle->setHeight(_txtTitle->getHeight() * 9);
+		_txtTitle->setWordWrap(true);
+		_txtTitle->setText(tr("STR_THIS_FEATURE_IS_DISABLED_2"));
+		_txtArticle->setVisible(false);
+		_lstRawData->setVisible(false);
+		_btnIncludeDebug->setVisible(false);
+		_btnIncludeIds->setVisible(false);
+		_btnIncludeDefaults->setVisible(false);
+		_btnPrev->setVisible(false);
+		_btnNext->setVisible(false);
+		_cbxRelatedStuff->setVisible(false);
+		return;
+	}
+
 	if (!_mainArticle)
 	{
 		_btnPrev->setVisible(false);
@@ -223,7 +239,11 @@ StatsForNerdsState::~StatsForNerdsState()
 void StatsForNerdsState::init()
 {
 	State::init();
-	initLists();
+
+	if (!Options::oxceDisableStatsForNerds)
+	{
+		initLists();
+	}
 }
 /**
  * Opens the details for the selected ammo item.
