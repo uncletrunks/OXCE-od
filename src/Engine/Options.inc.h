@@ -89,6 +89,7 @@ OPT int oxceResearchScrollSpeedWithCtrl;
 OPT int oxceGeoSlowdownFactor;
 OPT bool oxceDisableTechTreeViewer;
 OPT bool oxceDisableStatsForNerds;
+OPT bool oxceDisableProductionDependencyTree;
 
 OPT bool oxceRecommendedOptionsWereSet;
 

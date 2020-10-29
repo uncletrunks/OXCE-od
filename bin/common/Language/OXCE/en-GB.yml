@@ -140,6 +140,7 @@ en-GB:
 #TechTreeViewerState.cpp
   STR_THIS_FEATURE_IS_DISABLED_1: "This feature is disabled."
   STR_THIS_FEATURE_IS_DISABLED_2: "This feature is disabled."
+  STR_THIS_FEATURE_IS_DISABLED_3: "This feature is disabled."
   STR_TECH_TREE_VIEWER: "Tech Tree Viewer"
   STR_SELECT_TOPIC: "Select Topic"
   STR_RESEARCH_PROGRESS: "Progress>{ALT} {0}%"
