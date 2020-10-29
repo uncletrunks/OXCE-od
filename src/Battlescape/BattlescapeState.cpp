@@ -2360,7 +2360,11 @@ inline void BattlescapeState::handle(Action *action)
 				{
 					if (_save->getSide() == FACTION_PLAYER)
 					{
-						if (altPressed)
+						if (Options::oxceDisableHitLog)
+						{
+							_game->pushState(new InfoboxState(tr("STR_THIS_FEATURE_IS_DISABLED_4")));
+						}
+						else if (altPressed)
 						{
 							// turn diary
 							_game->pushState(new TurnDiaryState(_save->getHitLog()));

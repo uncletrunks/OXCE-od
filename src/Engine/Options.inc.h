@@ -90,6 +90,7 @@ OPT int oxceGeoSlowdownFactor;
 OPT bool oxceDisableTechTreeViewer;
 OPT bool oxceDisableStatsForNerds;
 OPT bool oxceDisableProductionDependencyTree;
+OPT bool oxceDisableHitLog;
 
 OPT bool oxceRecommendedOptionsWereSet;
 
