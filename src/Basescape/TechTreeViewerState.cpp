@@ -975,7 +975,7 @@ void TechTreeViewerState::initLists()
 				}
 			}
 		}
-		bool showDetails = _game->getSavedGame()->getDebugMode();
+		bool showDetails = false;
 		if (Options::isPasswordCorrect() && (SDL_GetModState() & KMOD_ALT))
 		{
 			showDetails = true;
@@ -1033,11 +1033,11 @@ void TechTreeViewerState::initLists()
 			}
 			if (showDisclaimer > 0)
 			{
+				_lstRight->addRow(1, tr("STR_AFFECTS_GAME_PROGRESSION").c_str());
 				if (showDisclaimer == 1)
-					_lstRight->addRow(1, tr("STR_AFFECTS_GAME_PROGRESSION").c_str());
+					_lstRight->setRowColor(row, _gold);
 				else
-					_lstRight->addRow(1, ".");
-				_lstRight->setRowColor(row, _gold);
+					_lstRight->setRowColor(row, _white);
 				_rightTopics.push_back("-");
 				_rightFlags.push_back(TTV_NONE);
 				++row;
