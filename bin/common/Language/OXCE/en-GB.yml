@@ -312,6 +312,7 @@ en-GB:
   STR_NO_QUEUED: "+"
   STR_NO_DONE: "DONE"
 #BaseDefenseState.cpp
+  STR_NO_AMMO: "NO AMMO!"
   STR_START_FIRING: "Fire!"
   STR_SKIP_FIRING: "Let them in..."
 #BaseDestroyedState.cpp
