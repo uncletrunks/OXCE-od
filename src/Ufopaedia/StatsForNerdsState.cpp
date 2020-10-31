@@ -2696,6 +2696,8 @@ void StatsForNerdsState::initFacilityList()
 	addIntegerPercent(ss, facilityRule->getRadarChance(), "radarChance");
 	addInteger(ss, facilityRule->getDefenseValue(), "defense");
 	addIntegerPercent(ss, facilityRule->getHitRatio(), "hitRatio");
+	addInteger(ss, facilityRule->getAmmoNeeded(), "ammoNeeded", 1);
+	addRule(ss, facilityRule->getAmmoItem(), "ammoItem");
 
 	addInteger(ss, facilityRule->getMaxAllowedPerBase(), "maxAllowedPerBase");
 	addInteger(ss, facilityRule->getManaRecoveryPerDay(), "manaRecoveryPerDay");

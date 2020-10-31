@@ -360,6 +360,8 @@ en-US:
   radarChance: "Radar chance"
   defense: "Defense value"
   hitRatio: "Hit chance"
+  ammoNeeded: "Ammo needed"
+  ammoItem: "Ammo item"
   maxAllowedPerBase: "Max allowed per base"
   manaRecoveryPerDay: "Mana per day"
   healthRecoveryPerDay: "Health per day"
