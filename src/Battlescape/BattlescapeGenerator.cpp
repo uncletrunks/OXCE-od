@@ -2617,6 +2617,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 
 	if (craftMap)
 	{
+		_craftRules->getBattlescapeTerrainData()->refreshMapDataSets(_craft->getSkinIndex(), _game->getMod()); // change skin if needed
 		for (std::vector<MapDataSet*>::iterator i = _craftRules->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craftRules->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			(*i)->loadData(_game->getMod()->getMCDPatch((*i)->getName()));

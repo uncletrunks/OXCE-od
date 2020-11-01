@@ -36,6 +36,7 @@ en-GB:
 #CraftInfoState.cpp
   STR_PILOTS: "PILOTS"
   STR_SHIELD: "SHIELD>{ALT}{0}"
+  STR_CRAFT_SKIN_ID: "[{0}]"
 #CraftPilotSelectState.cpp
   STR_SELECT_PILOT: "Select Pilot"
 #CraftPilotsState.cpp

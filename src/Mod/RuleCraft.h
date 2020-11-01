@@ -151,12 +151,14 @@ private:
 	std::vector<std::string> _requires;
 	RuleBaseFacilityFunctions _requiresBuyBaseFunc;
 	int _sprite, _marker;
+	std::vector<int> _skinSprites;
 	int _weapons, _soldiers, _pilots, _vehicles, _costBuy, _costRent, _costSell;
 	char _weaponTypes[WeaponMax][WeaponTypeMax];
 	std::string _refuelItem;
 	std::string _weaponStrings[WeaponMax];
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
+	int _maxSkinIndex;
 	bool _keepCraftAfterFailedMission, _allowLanding, _spacecraft, _notifyWhenRefueled, _autoPatrol;
 	int _listOrder, _maxItems, _maxAltitude;
 	double _maxStorageSpace;
@@ -179,7 +181,8 @@ public:
 	/// Gets the base functions required to buy craft.
 	RuleBaseFacilityFunctions getRequiresBuyBaseFunc() const { return _requiresBuyBaseFunc; }
 	/// Gets the craft's sprite.
-	int getSprite() const;
+	int getSprite(int skinIndex) const;
+	const std::vector<int> &getSkinSpritesRaw() const { return _skinSprites; }
 	/// Gets the craft's globe marker.
 	int getMarker() const;
 	/// Gets the craft's maximum fuel.
@@ -222,6 +225,8 @@ public:
 	int getScore() const;
 	/// Gets the craft's terrain data.
 	RuleTerrain *getBattlescapeTerrainData() const;
+	/// Gets the craft's maximum skin index.
+	int getMaxSkinIndex() const { return _maxSkinIndex; }
 	/// Checks if this craft is lost after a failed mission or not.
 	bool keepCraftAfterFailedMission() const;
 	/// Checks if this craft is capable of landing (on missions).

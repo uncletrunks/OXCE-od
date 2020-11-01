@@ -490,7 +490,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	SurfaceSet *set = _game->getMod()->getSurfaceSet("INTICON.PCK");
 
 	// Create the minimized dogfight icon.
-	Surface *frame = set->getFrame(_craft->getRules()->getSprite());
+	Surface *frame = set->getFrame(_craft->getSkinSprite());
 	frame->blitNShade(_btnMinimizedIcon, 0, 0);
 	_btnMinimizedIcon->onMouseClick((ActionHandler)&DogfightState::btnMinimizedIconClick);
 	_btnMinimizedIcon->setVisible(false);
@@ -620,7 +620,7 @@ DogfightState::DogfightState(GeoscapeState *state, Craft *craft, Ufo *ufo, bool 
 	}
 
 	// Draw damage indicator.
-	frame = set->getFrame(_craft->getRules()->getSprite() + 11);
+	frame = set->getFrame(_craft->getSkinSprite() + 11);
 	frame->blitNShade(_craftSprite, 0, 0);
 
 	_craftDamageAnimTimer->onTimer((StateHandler)&DogfightState::animateCraftDamage);

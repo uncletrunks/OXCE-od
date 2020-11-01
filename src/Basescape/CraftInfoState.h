@@ -47,10 +47,10 @@ private:
 	TextButton *_btnOk, *_btnW[RuleCraft::WeaponMax], *_btnCrew, *_btnEquip, *_btnArmor, *_btnPilots;
 	Window *_window;
 	TextEdit *_edtCraft;
-	Text *_txtDamage, *_txtShield, *_txtFuel;
+	Text *_txtDamage, *_txtShield, *_txtFuel, *_txtSkin;
 	Text *_txtWName[RuleCraft::WeaponMax], *_txtWAmmo[RuleCraft::WeaponMax];
-	InteractiveSurface *_weapon[RuleCraft::WeaponMax];
-	Surface *_sprite, *_crew, *_equip;
+	InteractiveSurface *_sprite, *_weapon[RuleCraft::WeaponMax];
+	Surface *_crew, *_equip;
 	/// Formats an amount of time.
 	std::string formatTime(int time);
 public:
@@ -68,6 +68,8 @@ public:
 	void btnWClick(Action *action);
 	/// Handler for clicking one of the weapon icons.
 	void btnWIconClick(Action *action);
+	/// Handler for clicking one of the craft icon.
+	void btnCraftIconClick(Action *action);
 	/// Handler for clicking the Crew button.
 	void btnCrewClick(Action *action);
 	/// Handler for clicking the Equipment button.

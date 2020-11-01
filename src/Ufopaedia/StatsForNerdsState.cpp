@@ -2909,14 +2909,16 @@ void StatsForNerdsState::initCraftList()
 		addInteger(ss, craftRule->getListOrder(), "listOrder");
 
 		addSection("{Geoscape}", "", _white);
-		addInteger(ss, craftRule->getSprite(), "sprite (Minimized)", -1);
-		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftRule->getSprite());
-		addInteger(ss, craftRule->getSprite() + 11, "_sprite (Dogfight)", 10);
-		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftRule->getSprite() + 11);
-		addInteger(ss, craftRule->getSprite() + 33, "_sprite (Base)", 32);
-		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", craftRule->getSprite() + 33);
+		addInteger(ss, craftRule->getSprite(0), "sprite (Minimized)", -1);
+		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftRule->getSprite(0));
+		addInteger(ss, craftRule->getSprite(0) + 11, "_sprite (Dogfight)", 10);
+		addSpriteResourcePath(ss, mod, "INTICON.PCK", craftRule->getSprite(0) + 11);
+		addInteger(ss, craftRule->getSprite(0) + 33, "_sprite (Base)", 32);
+		addSpriteResourcePath(ss, mod, "BASEBITS.PCK", craftRule->getSprite(0) + 33);
 		addInteger(ss, craftRule->getMarker(), "marker", -1);
 		addInteger(ss, craftRule->getScore(), "score");
+		addInteger(ss, craftRule->getMaxSkinIndex(), "maxSkinIndex");
+		addBoolean(ss, !craftRule->getSkinSpritesRaw().empty(), "skinSprites", false); // just say if there is any or not
 
 		addSection("{Battlescape}", "", _white);
 		addBoolean(ss, craftRule->getBattlescapeTerrainData() != 0, "battlescapeTerrainData", false); // just say if there is any or not

@@ -549,7 +549,7 @@ void BaseView::draw()
 			{
 				if ((*craft)->getStatus() != "STR_OUT")
 				{
-					Surface *frame = _texture->getFrame((*craft)->getRules()->getSprite() + 33);
+					Surface *frame = _texture->getFrame((*craft)->getSkinSprite() + 33);
 					auto fx = ((*i)->getX() * GRID_SIZE + ((*i)->getRules()->getSize() - 1) * GRID_SIZE / 2 + 2);
 					auto fy = ((*i)->getY() * GRID_SIZE + ((*i)->getRules()->getSize() - 1) * GRID_SIZE / 2 - 4);
 					frame->blitNShade(this, fx, fy);

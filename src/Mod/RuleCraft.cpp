@@ -33,7 +33,7 @@ namespace OpenXcom
 RuleCraft::RuleCraft(const std::string &type) :
 	_type(type), _sprite(-1), _marker(-1), _weapons(0), _soldiers(0), _pilots(0), _vehicles(0),
 	_costBuy(0), _costRent(0), _costSell(0), _repairRate(1), _refuelRate(1),
-	_transferTime(24), _score(0), _battlescapeTerrainData(0),
+	_transferTime(24), _score(0), _battlescapeTerrainData(0), _maxSkinIndex(0),
 	_keepCraftAfterFailedMission(false), _allowLanding(true), _spacecraft(false), _notifyWhenRefueled(false), _autoPatrol(false),
 	_listOrder(0), _maxItems(0), _maxAltitude(-1), _maxStorageSpace(0.0), _stats(),
 	_shieldRechargeAtBase(1000),
@@ -89,6 +89,15 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 		// Final index in surfaceset is `baseOffset + sprite + (sprite > 4 ? modOffset : 0)`
 		_sprite = mod->getOffset(node["sprite"].as<int>(_sprite), 4);
 	}
+	if (const YAML::Node &skinSprites = node["skinSprites"])
+	{
+		_skinSprites.clear();
+		for (int i = 0; (size_t)i < skinSprites.size(); ++i)
+		{
+			int tmp = mod->getOffset(skinSprites[i].as<int>(), 4);
+			_skinSprites.push_back(tmp);
+		}
+	}
 	_stats.load(node);
 	if (node["marker"])
 	{
@@ -116,6 +125,7 @@ void RuleCraft::load(const YAML::Node &node, Mod *mod, int listOrder)
 			_craftInventoryTile = craftInventoryTile.as<std::vector<int> >(_craftInventoryTile);
 		}
 	}
+	_maxSkinIndex = node["maxSkinIndex"].as<int>(_maxSkinIndex);
 	_deployment = node["deployment"].as< std::vector< std::vector<int> > >(_deployment);
 	_keepCraftAfterFailedMission = node["keepCraftAfterFailedMission"].as<bool>(_keepCraftAfterFailedMission);
 	_allowLanding = node["allowLanding"].as<bool>(_allowLanding);
@@ -189,8 +199,16 @@ const std::vector<std::string> &RuleCraft::getRequirements() const
  * in the Basescape and Equip Craft screens.
  * @return The Sprite ID.
  */
-int RuleCraft::getSprite() const
+int RuleCraft::getSprite(int skinIndex) const
 {
+	if (skinIndex > 0)
+	{
+		size_t vectorIndex = skinIndex - 1;
+		if (vectorIndex < _skinSprites.size())
+		{
+			return _skinSprites[vectorIndex];
+		}
+	}
 	return _sprite;
 }
 

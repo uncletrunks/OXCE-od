@@ -63,6 +63,7 @@ private:
 	bool _isAutoPatrolling;
 	double _lonAuto, _latAuto;
 	std::vector<int> _pilots;
+	int _skinIndex;
 
 	void recalcSpeedMaxRadian();
 
@@ -254,6 +255,12 @@ public:
 	void reuseItem(const RuleItem* item);
 	/// Gets the attraction value of the craft for alien hunter-killers.
 	int getHunterKillerAttraction(int huntMode) const;
+	/// Gets the craft's skin index.
+	int getSkinIndex() const { return _skinIndex; }
+	/// Sets the craft's skin index.
+	void setSkinIndex(int skinIndex) { _skinIndex = skinIndex; }
+	/// Gets the craft's skin sprite ID.
+	int getSkinSprite() const;
 };
 
 }

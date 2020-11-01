@@ -59,7 +59,8 @@ Craft::Craft(const RuleCraft *rules, Base *base, int id) : MovingTarget(),
 	_interceptionOrder(0), _takeoff(0), _weapons(),
 	_status("STR_READY"), _lowFuel(false), _mission(false),
 	_inBattlescape(false), _inDogfight(false), _stats(),
-	_isAutoPatrolling(false), _lonAuto(0.0), _latAuto(0.0)
+	_isAutoPatrolling(false), _lonAuto(0.0), _latAuto(0.0),
+	_skinIndex(0)
 {
 	_stats = rules->getStats();
 	_items = new ItemContainer();
@@ -243,6 +244,7 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	_lonAuto = node["lonAuto"].as<double>(_lonAuto);
 	_latAuto = node["latAuto"].as<double>(_latAuto);
 	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
+	_skinIndex = node["skinIndex"].as<int>(_skinIndex);
 	if (_inBattlescape)
 		setSpeed(0);
 
@@ -324,6 +326,8 @@ YAML::Node Craft::save() const
 	{
 		node["pilots"].push_back((*i));
 	}
+	if (_skinIndex != 0)
+		node["skinIndex"] = _skinIndex;
 	return node;
 }
 
@@ -1732,6 +1736,15 @@ int Craft::getHunterKillerAttraction(int huntMode) const
 
 	// the higher the number the less attractive the target is for UFO hunter-killers
 	return attraction;
+}
+
+/**
+ * Gets the craft's skin sprite ID.
+ * @return Sprite ID.
+ */
+int Craft::getSkinSprite() const
+{
+	return getRules()->getSprite(_skinIndex);
 }
 
 }
