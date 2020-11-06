@@ -245,6 +245,10 @@ void Craft::load(const YAML::Node &node, const Mod *mod, SavedGame *save)
 	_latAuto = node["latAuto"].as<double>(_latAuto);
 	_pilots = node["pilots"].as< std::vector<int> >(_pilots);
 	_skinIndex = node["skinIndex"].as<int>(_skinIndex);
+	if (_skinIndex > _rules->getMaxSkinIndex())
+	{
+		_skinIndex = 0;
+	}
 	if (_inBattlescape)
 		setSpeed(0);
 
