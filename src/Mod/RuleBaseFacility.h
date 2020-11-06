@@ -49,6 +49,7 @@ private:
 	RuleBaseFacilityFunctions _provideBaseFunc = 0;
 	RuleBaseFacilityFunctions _forbiddenBaseFunc = 0;
 	int _spriteShape, _spriteFacility;
+	bool _connectorsDisabled;
 	int _missileAttraction;
 	int _fakeUnderwater;
 	bool _lift, _hyper, _mind, _grav;
@@ -105,6 +106,8 @@ public:
 	int getSpriteShape() const;
 	/// Gets the facility's content sprite.
 	int getSpriteFacility() const;
+	/// Should there be connectors leading to this facility?
+	bool connectorsDisabled() const { return _connectorsDisabled; }
 	/// Gets the facility's size.
 	int getSize() const;
 	/// Gets the facility's missile attraction.
