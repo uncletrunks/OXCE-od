@@ -127,8 +127,7 @@ namespace YAML
 			node["executionOdds"] = rhs.executionOdds;
 			node["maxRuns"] = rhs.maxRuns;
 			node["useSpawnNodes"] = rhs.useSpawnNodes;
-			node["spawnBlocksFromMapScript"] = rhs.spawnBlocksFromMapScript;
-			node["combineSpawnBlocks"] = rhs.combineSpawnBlocks;
+			node["mapBlockFilterType"] = (int)(rhs.mapBlockFilterType);
 			node["spawnBlocks"] = rhs.spawnBlocks;
 			node["spawnBlockGroups"] = rhs.spawnBlockGroups;
 			node["spawnNodeRanks"] = rhs.spawnNodeRanks;
@@ -157,8 +156,7 @@ namespace YAML
 			rhs.executionOdds = node["executionOdds"].as<int>(rhs.executionOdds);
 			rhs.maxRuns = node["maxRuns"].as<int>(rhs.maxRuns);
 			rhs.useSpawnNodes = node["useSpawnNodes"].as<bool>(rhs.useSpawnNodes);
-			rhs.spawnBlocksFromMapScript = node["spawnBlocksFromMapScript"].as<bool>(rhs.spawnBlocksFromMapScript);
-			rhs.combineSpawnBlocks = node["combineSpawnBlocks"].as<bool>(rhs.combineSpawnBlocks);
+			rhs.mapBlockFilterType = (OpenXcom::MapBlockFilterType)(node["mapBlockFilterType"].as<int>(rhs.mapBlockFilterType));
 			rhs.spawnBlocks = node["spawnBlocks"].as< std::vector<std::string> >(rhs.spawnBlocks);
 			rhs.spawnBlockGroups = node["spawnBlockGroups"].as< std::vector<int> >(rhs.spawnBlockGroups);
 			rhs.spawnNodeRanks = node["spawnNodeRanks"].as< std::vector<int> >(rhs.spawnNodeRanks);

@@ -569,20 +569,20 @@ bool NextTurnState::determineReinforcements()
 			int sizeX = _battleGame->getMapSizeX() / 10;
 			int sizeY = _battleGame->getMapSizeY() / 10;
 
-			if (wave.spawnBlocksFromMapScript)
+			if (wave.mapBlockFilterType == MFT_BY_MAPSCRIPT)
 			{
-				_compliantBlocksMap = _battleGame->getReinforcementsBlocks(); // start pre-filled
+				_compliantBlocksMap = _battleGame->getReinforcementsBlocks(); // we're done
 			}
-			else if (!wave.spawnBlocks.empty())
+			else if (wave.mapBlockFilterType == MFT_BY_REINFORCEMENTS || wave.mapBlockFilterType == MFT_BY_BOTH_UNION || wave.mapBlockFilterType == MFT_BY_BOTH_INTERSECTION)
 			{
 				_compliantBlocksMap.resize((sizeX), std::vector<bool>((sizeY), false)); // start with all false
 			}
-			else
+			else //if (wave.mapBlockFilterType == MFT_NONE)
 			{
-				_compliantBlocksMap.resize((sizeX), std::vector<bool>((sizeY), true)); // start with all true
+				_compliantBlocksMap.resize((sizeX), std::vector<bool>((sizeY), true)); // all true (and we're done)
 			}
 
-			if (!wave.spawnBlocksFromMapScript || wave.combineSpawnBlocks)
+			if (wave.mapBlockFilterType == MFT_BY_REINFORCEMENTS || wave.mapBlockFilterType == MFT_BY_BOTH_UNION || wave.mapBlockFilterType == MFT_BY_BOTH_INTERSECTION)
 			{
 				if (!wave.spawnBlocks.empty())
 				{
@@ -605,6 +605,21 @@ bool NextTurnState::determineReinforcements()
 						else if (dir == "SE")
 							_compliantBlocksMap[sizeX - 1][sizeY - 1] = true;
 					}
+				}
+
+				if (wave.mapBlockFilterType == MFT_BY_BOTH_UNION)
+				{
+					auto& toMerge = _battleGame->getReinforcementsBlocks();
+					for (int x = 0; x < sizeX; ++x)
+						for (int y = 0; y < sizeY; ++y)
+							_compliantBlocksMap[x][y] = _compliantBlocksMap[x][y] || toMerge[x][y];
+				}
+				else if (wave.mapBlockFilterType == MFT_BY_BOTH_INTERSECTION)
+				{
+					auto& toMerge = _battleGame->getReinforcementsBlocks();
+					for (int x = 0; x < sizeX; ++x)
+						for (int y = 0; y < sizeY; ++y)
+							_compliantBlocksMap[x][y] = _compliantBlocksMap[x][y] && toMerge[x][y];
 				}
 			}
 
@@ -668,7 +683,7 @@ bool NextTurnState::determineReinforcements()
 		_compliantNodesList.clear();
 		if (wave.useSpawnNodes)
 		{
-			bool checkBlocks = wave.spawnBlocksFromMapScript || !wave.spawnBlocks.empty();
+			bool checkBlocks = wave.mapBlockFilterType != MFT_NONE;
 			bool checkNodeRanks = !wave.spawnNodeRanks.empty();
 			bool checkZLevels = !wave.spawnZLevels.empty();
 

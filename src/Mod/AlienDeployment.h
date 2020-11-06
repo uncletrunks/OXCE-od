@@ -50,6 +50,7 @@ struct BriefingData
 	bool showCraft, showTarget;
 	BriefingData() : palette(0), textOffset(0), music("GMDEFEND"), background("BACK16.SCR"), showCraft(true), showTarget(true) { /*Empty by Design*/ };
 };
+enum MapBlockFilterType : int { MFT_NONE, MFT_BY_MAPSCRIPT, MFT_BY_REINFORCEMENTS, MFT_BY_BOTH_UNION, MFT_BY_BOTH_INTERSECTION };
 struct ReinforcementsData
 {
 	std::string type;
@@ -63,8 +64,7 @@ struct ReinforcementsData
 	int executionOdds = 100;
 	int maxRuns = -1;
 	bool useSpawnNodes = true;
-	bool spawnBlocksFromMapScript = true;
-	bool combineSpawnBlocks = true;
+	MapBlockFilterType mapBlockFilterType = MFT_BY_BOTH_UNION;
 	std::vector<std::string> spawnBlocks;
 	std::vector<int> spawnBlockGroups;
 	std::vector<int> spawnNodeRanks;
