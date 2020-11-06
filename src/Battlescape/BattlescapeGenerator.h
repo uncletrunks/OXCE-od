@@ -79,6 +79,7 @@ private:
 	SDL_Rect _craftPos;
 	std::vector<SDL_Rect> _ufoPos;
 	std::vector<int> _ufoZ;
+	bool _markAsReinforcementsBlock;
 	int _blocksToDo;
 	std::vector< std::vector<MapBlock*> > _blocks;
 	std::vector< std::vector<bool> > _landingzone;

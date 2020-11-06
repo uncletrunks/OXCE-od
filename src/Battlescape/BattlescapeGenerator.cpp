@@ -75,7 +75,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0), _globeTerrain(0), _alternateTerrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _missionTexture(0), _globeTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0), _ufoDamagePercentage(0),
-	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _blocksToDo(0), _dummy(0)
+	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _markAsReinforcementsBlock(false), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
 	if (_game->getSavedGame()->getDisableSoldierEquipment())
@@ -105,6 +105,15 @@ void BattlescapeGenerator::init(bool resetTerrain)
 	_verticalLevels.clear();
 	_loadedTerrains.clear();
 	_verticalLevelSegments.clear();
+
+	_markAsReinforcementsBlock = false;
+	_save->getReinforcementsBlocks().clear();
+	_save->getReinforcementsBlocks().resize((_mapsize_x / 10), std::vector<bool>((_mapsize_y / 10), false));
+
+	_save->getFlattenedMapTerrainNames().clear();
+	_save->getFlattenedMapTerrainNames().resize((_mapsize_x / 10), std::vector<std::string>((_mapsize_y / 10), ""));
+	_save->getFlattenedMapBlockNames().clear();
+	_save->getFlattenedMapBlockNames().resize((_mapsize_x / 10), std::vector<std::string>((_mapsize_y / 10), ""));
 
 	_blocks.resize((_mapsize_x / 10), std::vector<MapBlock*>((_mapsize_y / 10)));
 	_landingzone.resize((_mapsize_x / 10), std::vector<bool>((_mapsize_y / 10),false));
@@ -1330,6 +1339,14 @@ void BattlescapeGenerator::deployAliens(const AlienDeployment *deployment)
 	{
 		month = _alienItemLevel;
 	}
+
+	// save for later use
+	_save->setReinforcementsDeployment(deployment->getType());
+	_save->setReinforcementsRace(race->getId());
+	_save->setReinforcementsItemLevel(month);
+	// and reset memory at each stage
+	_save->getReinforcementsMemory().clear();
+
 	for (std::vector<DeploymentData>::const_iterator d = deployment->getDeploymentData()->begin(); d != deployment->getDeploymentData()->end(); ++d)
 	{
 		int quantity;
@@ -2162,6 +2179,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 	_loadedTerrains[_terrain] = 0;
 
 	RuleTerrain* ufoTerrain = 0;
+	std::string consolidatedUfoType;
 	// lets generate the map now and store it inside the tile objects
 
 	// determine globe terrain from globe texture
@@ -2303,6 +2321,8 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 					terrain = currentLevel->levelTerrain == "" ? terrain : pickTerrain(currentLevel->levelTerrain);
 				}
 
+				_markAsReinforcementsBlock = command->markAsReinforcementsBlock();
+
 				switch (command->getType())
 				{
 				case MSC_ADDBLOCK:
@@ -2408,15 +2428,18 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 					if (_game->getMod()->getUfo(command->getUFOName()))
 					{
 						ufoTerrain = _game->getMod()->getUfo(command->getUFOName())->getBattlescapeTerrainData();
+						consolidatedUfoType = command->getUFOName();
 					}
 					else if (_ufo)
 					{
 						ufoTerrain = _ufo->getRules()->getBattlescapeTerrainData();
+						consolidatedUfoType = _ufo->getRules()->getType();
 					}
 					else if (!customUfoName.empty())
 					{
 						auto customUfoRule = _game->getMod()->getUfo(customUfoName, true); // crash if it doesn't exist, let the modder know what's going on
 						ufoTerrain = customUfoRule->getBattlescapeTerrainData();
+						consolidatedUfoType = customUfoName;
 					}
 
 					if (ufoTerrain)
@@ -2609,6 +2632,8 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 			{
 				for (int k = 0; k < ufoMaps[i]->getSizeY() / 10; k++)
 				{
+					_save->getFlattenedMapTerrainNames()[_ufoPos[i].x + j][_ufoPos[i].y + k] = consolidatedUfoType; // UFO name, not terrain name
+					_save->getFlattenedMapBlockNames()[_ufoPos[i].x + j][_ufoPos[i].y + k] = ufoMaps[i]->getName();
 					_segments[_ufoPos[i].x + j][_ufoPos[i].y + k] = Node::UFOSEGMENT;
 				}
 			}
@@ -2629,6 +2654,8 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 		{
 			for (int j = 0; j < craftMap->getSizeY() / 10; j++)
 			{
+				_save->getFlattenedMapTerrainNames()[_craftPos.x + i][_craftPos.y + j] = _craftRules->getType(); // craft name, not terrain name
+				_save->getFlattenedMapBlockNames()[_craftPos.x + i][_craftPos.y + j] = craftMap->getName();
 				_segments[_craftPos.x + i][_craftPos.y + j] = Node::CRAFTSEGMENT;
 			}
 		}
@@ -3599,6 +3626,9 @@ bool BattlescapeGenerator::addCraft(MapBlock *craftMap, MapScript *command, SDL_
 				MapBlock *block = command->getNextBlock(terrain);
 				if (block && !_blocks[craftPos.x + x][craftPos.y + y])
 				{
+					_save->getReinforcementsBlocks()[craftPos.x + x][craftPos.y + y] = _markAsReinforcementsBlock;
+					_save->getFlattenedMapTerrainNames()[craftPos.x + x][craftPos.y + y] = terrain->getName();
+					_save->getFlattenedMapBlockNames()[craftPos.x + x][craftPos.y + y] = block->getName();
 					_blocks[craftPos.x + x][craftPos.y + y] = block;
 					_blocksToDo--;
 				}
@@ -3730,6 +3760,9 @@ bool BattlescapeGenerator::addBlock(int x, int y, MapBlock *block, RuleTerrain* 
 	{
 		for (int yd = 0; yd <= ySize; ++yd)
 		{
+			_save->getReinforcementsBlocks()[x + xd][y + yd] = _markAsReinforcementsBlock;
+			_save->getFlattenedMapTerrainNames()[x + xd][y + yd] = terrain->getName();
+			_save->getFlattenedMapBlockNames()[x + xd][y + yd] = block->getName();
 			_blocks[x + xd][y + yd] = _dummy;
 			_blocksToDo--;
 		}
@@ -3965,6 +3998,9 @@ bool BattlescapeGenerator::removeBlocks(MapScript *command)
 		{
 			for (int dy = y; dy != y + dely; ++dy)
 			{
+				_save->getReinforcementsBlocks()[dx][dy] = false;
+				_save->getFlattenedMapTerrainNames()[dx][dy] = "";
+				_save->getFlattenedMapBlockNames()[dx][dy] = "";
 				_blocks[dx][dy] = 0;
 				_blocksToDo++;
 

@@ -50,6 +50,31 @@ struct BriefingData
 	bool showCraft, showTarget;
 	BriefingData() : palette(0), textOffset(0), music("GMDEFEND"), background("BACK16.SCR"), showCraft(true), showTarget(true) { /*Empty by Design*/ };
 };
+struct ReinforcementsData
+{
+	std::string type;
+	BriefingData briefing;
+	int minDifficulty = 0;
+	int maxDifficulty = 4;
+	bool objectiveDestroyed = false;
+	std::vector<int> turns;
+	int minTurn = 0;
+	int maxTurn = -1;
+	int executionOdds = 100;
+	int maxRuns = -1;
+	bool useSpawnNodes = true;
+	bool spawnBlocksFromMapScript = true;
+	bool combineSpawnBlocks = true;
+	std::vector<std::string> spawnBlocks;
+	std::vector<int> spawnBlockGroups;
+	std::vector<int> spawnNodeRanks;
+	std::vector<int> spawnZLevels;
+	bool randomizeZLevels = true;
+	int minDistanceFromXcomUnits = 0;
+	int maxDistanceFromBorders = 0;
+	bool forceSpawnNearFriend = true;
+	std::vector<DeploymentData> data;
+};
 enum ChronoTrigger { FORCE_LOSE, FORCE_ABORT, FORCE_WIN, FORCE_WIN_SURRENDER };
 enum EscapeType { ESCAPE_NONE, ESCAPE_EXIT, ESCAPE_ENTRY, ESCAPE_EITHER };
 /**
@@ -71,6 +96,7 @@ private:
 	std::string _unlockedResearch, _missionBountyItem;
 	int _bughuntMinTurn;
 	std::vector<DeploymentData> _data;
+	std::vector<ReinforcementsData> _reinforcements;
 	int _width, _length, _height, _civilians;
 	int _civilianSpawnNodeRank;
 	std::map<std::string, int> _civiliansByType;
@@ -120,6 +146,8 @@ public:
 	const std::vector<DeploymentData>* getDeploymentData() const;
 	/// Gets the highest used alien rank.
 	int getMaxAlienRank() const;
+	/// Gets a pointer to the reinforcements data.
+	const std::vector<ReinforcementsData>* getReinforcementsData() const;
 	/// Gets dimensions.
 	void getDimensions(int *width, int *length, int *height) const;
 	/// Gets civilians.

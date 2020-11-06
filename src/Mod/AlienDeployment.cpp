@@ -110,6 +110,67 @@ namespace YAML
 			return true;
 		}
 	};
+	template<>
+	struct convert<OpenXcom::ReinforcementsData>
+	{
+		static Node encode(const OpenXcom::ReinforcementsData& rhs)
+		{
+			Node node;
+			node["type"] = rhs.type;
+			node["briefing"] = rhs.briefing;
+			node["minDifficulty"] = rhs.minDifficulty;
+			node["maxDifficulty"] = rhs.maxDifficulty;
+			node["objectiveDestroyed"] = rhs.objectiveDestroyed;
+			node["turns"] = rhs.turns;
+			node["minTurn"] = rhs.minTurn;
+			node["maxTurn"] = rhs.maxTurn;
+			node["executionOdds"] = rhs.executionOdds;
+			node["maxRuns"] = rhs.maxRuns;
+			node["useSpawnNodes"] = rhs.useSpawnNodes;
+			node["spawnBlocksFromMapScript"] = rhs.spawnBlocksFromMapScript;
+			node["combineSpawnBlocks"] = rhs.combineSpawnBlocks;
+			node["spawnBlocks"] = rhs.spawnBlocks;
+			node["spawnBlockGroups"] = rhs.spawnBlockGroups;
+			node["spawnNodeRanks"] = rhs.spawnNodeRanks;
+			node["spawnZLevels"] = rhs.spawnZLevels;
+			node["randomizeZLevels"] = rhs.randomizeZLevels;
+			node["minDistanceFromXcomUnits"] = rhs.minDistanceFromXcomUnits;
+			node["maxDistanceFromBorders"] = rhs.maxDistanceFromBorders;
+			node["forceSpawnNearFriend"] = rhs.forceSpawnNearFriend;
+			node["data"] = rhs.data;
+			return node;
+		}
+
+		static bool decode(const Node& node, OpenXcom::ReinforcementsData& rhs)
+		{
+			if (!node.IsMap())
+				return false;
+
+			rhs.type = node["type"].as<std::string>(rhs.type);
+			rhs.briefing = node["briefing"].as< OpenXcom::BriefingData >(rhs.briefing);
+			rhs.minDifficulty = node["minDifficulty"].as<int>(rhs.minDifficulty);
+			rhs.maxDifficulty = node["maxDifficulty"].as<int>(rhs.maxDifficulty);
+			rhs.objectiveDestroyed = node["objectiveDestroyed"].as<bool>(rhs.objectiveDestroyed);
+			rhs.turns = node["turns"].as< std::vector<int> >(rhs.turns);
+			rhs.minTurn = node["minTurn"].as<int>(rhs.minTurn);
+			rhs.maxTurn = node["maxTurn"].as<int>(rhs.maxTurn);
+			rhs.executionOdds = node["executionOdds"].as<int>(rhs.executionOdds);
+			rhs.maxRuns = node["maxRuns"].as<int>(rhs.maxRuns);
+			rhs.useSpawnNodes = node["useSpawnNodes"].as<bool>(rhs.useSpawnNodes);
+			rhs.spawnBlocksFromMapScript = node["spawnBlocksFromMapScript"].as<bool>(rhs.spawnBlocksFromMapScript);
+			rhs.combineSpawnBlocks = node["combineSpawnBlocks"].as<bool>(rhs.combineSpawnBlocks);
+			rhs.spawnBlocks = node["spawnBlocks"].as< std::vector<std::string> >(rhs.spawnBlocks);
+			rhs.spawnBlockGroups = node["spawnBlockGroups"].as< std::vector<int> >(rhs.spawnBlockGroups);
+			rhs.spawnNodeRanks = node["spawnNodeRanks"].as< std::vector<int> >(rhs.spawnNodeRanks);
+			rhs.spawnZLevels = node["spawnZLevels"].as< std::vector<int> >(rhs.spawnZLevels);
+			rhs.randomizeZLevels = node["randomizeZLevels"].as<bool>(rhs.randomizeZLevels);
+			rhs.minDistanceFromXcomUnits = node["minDistanceFromXcomUnits"].as<int>(rhs.minDistanceFromXcomUnits);
+			rhs.maxDistanceFromBorders = node["maxDistanceFromBorders"].as<int>(rhs.maxDistanceFromBorders);
+			rhs.forceSpawnNearFriend = node["forceSpawnNearFriend"].as<bool>(rhs.forceSpawnNearFriend);
+			rhs.data = node["data"].as< std::vector<OpenXcom::DeploymentData> >(rhs.data);
+			return true;
+		}
+	};
 }
 
 namespace OpenXcom
@@ -166,6 +227,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_missionBountyItem = node["missionBountyItem"].as<std::string>(_missionBountyItem);
 	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_data = node["data"].as< std::vector<DeploymentData> >(_data);
+	_reinforcements = node["reinforcements"].as< std::vector<ReinforcementsData> >(_reinforcements);
 	_width = node["width"].as<int>(_width);
 	_length = node["length"].as<int>(_length);
 	_height = node["height"].as<int>(_height);
@@ -339,6 +401,15 @@ int AlienDeployment::getMaxAlienRank() const
 			max = dd.alienRank;
 	}
 	return max;
+}
+
+/**
+ * Gets a pointer to the reinforcements data.
+ * @return Pointer to the reinforcements data.
+ */
+const std::vector<ReinforcementsData>* AlienDeployment::getReinforcementsData() const
+{
+	return &_reinforcements;
 }
 
 /**
