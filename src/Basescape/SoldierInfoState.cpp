@@ -296,6 +296,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	_btnDiary->setText(tr("STR_DIARY"));
 	_btnDiary->onMouseClick((ActionHandler)&SoldierInfoState::btnDiaryClick);
+	_btnDiary->setVisible(Options::soldierDiaries);
 
 	_txtPsionic->setText(tr("STR_IN_PSIONIC_TRAINING"));
 
