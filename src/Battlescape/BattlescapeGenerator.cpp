@@ -609,14 +609,15 @@ void BattlescapeGenerator::nextStage()
 	}
 
 	int civilianSpawnNodeRank = ruleDeploy->getCivilianSpawnNodeRank();
+	bool markCiviliansAsVIP = ruleDeploy->getMarkCiviliansAsVIP();
 
 	// Special case: deploy civilians before aliens
 	if (civilianSpawnNodeRank > 0)
 	{
-		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, ruleDeploy->getCivilians());
 		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
 		{
-			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+			deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, i->second, true, i->first);
 		}
 	}
 
@@ -632,10 +633,10 @@ void BattlescapeGenerator::nextStage()
 	// Normal case: deploy civilians after aliens
 	if (civilianSpawnNodeRank == 0)
 	{
-		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, ruleDeploy->getCivilians());
 		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
 		{
-			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+			deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, i->second, true, i->first);
 		}
 	}
 
@@ -735,14 +736,15 @@ void BattlescapeGenerator::run()
 	deployXCOM(startingCondition, enviro);
 
 	int civilianSpawnNodeRank = ruleDeploy->getCivilianSpawnNodeRank();
+	bool markCiviliansAsVIP = ruleDeploy->getMarkCiviliansAsVIP();
 
 	// Special case: deploy civilians before aliens
 	if (civilianSpawnNodeRank > 0)
 	{
-		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, ruleDeploy->getCivilians());
 		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
 		{
-			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+			deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, i->second, true, i->first);
 		}
 	}
 
@@ -758,10 +760,10 @@ void BattlescapeGenerator::run()
 	// Normal case: deploy civilians after aliens
 	if (civilianSpawnNodeRank == 0)
 	{
-		deployCivilians(civilianSpawnNodeRank, ruleDeploy->getCivilians());
+		deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, ruleDeploy->getCivilians());
 		for (std::map<std::string, int>::const_iterator i = ruleDeploy->getCiviliansByType().begin(); i != ruleDeploy->getCiviliansByType().end(); ++i)
 		{
-			deployCivilians(civilianSpawnNodeRank, i->second, true, i->first);
+			deployCivilians(markCiviliansAsVIP, civilianSpawnNodeRank, i->second, true, i->first);
 		}
 	}
 
@@ -1988,7 +1990,7 @@ void BattlescapeGenerator::explodePowerSources()
  * Spawns civilians on a terror mission.
  * @param max Maximum number of civilians to spawn.
  */
-void BattlescapeGenerator::deployCivilians(int nodeRank, int max, bool roundUp, const std::string &civilianType)
+void BattlescapeGenerator::deployCivilians(bool markAsVIP, int nodeRank, int max, bool roundUp, const std::string &civilianType)
 {
 	if (max)
 	{
@@ -2027,6 +2029,7 @@ void BattlescapeGenerator::deployCivilians(int nodeRank, int max, bool roundUp, 
 				BattleUnit* civ = addCivilian(rule, nodeRank);
 				if (civ)
 				{
+					if (markAsVIP) civ->markAsVIP();
 					size_t itemLevel = (size_t)(_game->getMod()->getAlienItemLevels().at(month).at(RNG::generate(0,9)));
 					// Built in weapons: civilians may have levelled item lists with randomized distribution
 					// following the same basic rules as the alien item levels.
@@ -4050,6 +4053,10 @@ void BattlescapeGenerator::setupObjectives(const AlienDeployment *ruleDeploy)
 	{
 		_save->setBughuntMinTurn(ruleDeploy->getBughuntMinTurn());
 	}
+
+	// used for "escort the VIPs" and "protect the VIPs" missions
+	_save->setVIPSurvivalPercentage(ruleDeploy->getVIPSurvivalPercentage());
+	_save->setVIPEscapeType(ruleDeploy->getEscapeType());
 
 	int targetType = ruleDeploy->getObjectiveType();
 

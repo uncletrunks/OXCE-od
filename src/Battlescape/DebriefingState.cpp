@@ -1031,6 +1031,14 @@ void DebriefingState::prepareDebriefing()
 			addStat("STR_MISSION_ABORTED", 1, -ruleDeploy->getAbortPenalty());
 		}
 	}
+	if (battle->getVIPSurvivalPercentage() > 0 && battle->getVIPEscapeType() != ESCAPE_NONE)
+	{
+		_stats.push_back(new DebriefingStat("STR_VIPS_SAVED", false));
+		addStat("STR_VIPS_SAVED", battle->getSavedVIPs(), battle->getSavedVIPsScore());
+
+		_stats.push_back(new DebriefingStat("STR_VIPS_LOST", false));
+		addStat("STR_VIPS_LOST", battle->getLostVIPs(), battle->getLostVIPsScore());
+	}
 
 	_stats.push_back(new DebriefingStat("STR_CIVILIANS_KILLED_BY_ALIENS", false));
 	_stats.push_back(new DebriefingStat("STR_CIVILIANS_KILLED_BY_XCOM_OPERATIVES", false));
@@ -1315,6 +1323,22 @@ void DebriefingState::prepareDebriefing()
 			success = success || playersInExitArea > 0;
 		}
 	}
+	if (battle->getVIPSurvivalPercentage() > 0)
+	{
+		int total = battle->getSavedVIPs() + battle->getLostVIPs();
+		if (total > 0)
+		{
+			int ratio = battle->getSavedVIPs() * 100 / total;
+			if (ratio < battle->getVIPSurvivalPercentage())
+			{
+				success = false; // didn't save enough VIPs
+			}
+		}
+		else
+		{
+			success = false; // nobody to save?
+		}
+	}
 
 	playersInExitArea = 0;
 
@@ -1590,7 +1614,7 @@ void DebriefingState::prepareDebriefing()
 			else if (oldFaction == FACTION_NEUTRAL)
 			{
 				// if mission fails, all civilians die
-				if (aborted || playersSurvived == 0)
+				if ((aborted && !success) || playersSurvived == 0)
 				{
 					addStat("STR_CIVILIANS_KILLED_BY_ALIENS", 1, -(*j)->getValue());
 				}
@@ -1655,7 +1679,15 @@ void DebriefingState::prepareDebriefing()
 		else
 		{
 			_txtTitle->setText(tr("STR_ALIENS_DEFEATED"));
-			if (!objectiveCompleteText.empty())
+			if (!aborted && !success)
+			{
+				// Special case: mission was NOT aborted, all enemies were neutralized, but we couldn't save enough VIPs...
+				if (!objectiveFailedText.empty())
+				{
+					addStat(objectiveFailedText, 1, objectiveFailedScore);
+				}
+			}
+			else if (!objectiveCompleteText.empty())
 			{
 				int victoryStat = 0;
 				if (ruleDeploy->getEscapeType() != ESCAPE_NONE)
@@ -1673,11 +1705,27 @@ void DebriefingState::prepareDebriefing()
 				{
 					victoryStat = 1;
 				}
+				if (battle->getVIPSurvivalPercentage() > 0)
+				{
+					victoryStat = 1; // TODO: maybe show battle->getSavedVIPs() instead? need feedback...
+				}
 
 				addStat(objectiveCompleteText, victoryStat, objectiveCompleteScore);
 			}
 		}
-		if (!missionCompleteText.empty())
+		if (!aborted && !success)
+		{
+			// Special case: mission was NOT aborted, all enemies were neutralized, but we couldn't save enough VIPs...
+			if (!missionFailedText.empty())
+			{
+				_txtTitle->setText(tr(missionFailedText));
+			}
+			else
+			{
+				_txtTitle->setText(tr("STR_TERROR_CONTINUES"));
+			}
+		}
+		else if (!missionCompleteText.empty())
 		{
 			_txtTitle->setText(tr(missionCompleteText));
 		}
@@ -2346,6 +2394,10 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 void DebriefingState::recoverCivilian(BattleUnit *from, Base *base)
 {
 	std::string type = from->getUnitRules()->getCivilianRecoveryType();
+	if (type.empty())
+	{
+		return;
+	}
 	if (type == "STR_SCIENTIST")
 	{
 		Transfer *t = new Transfer(24);
@@ -2365,6 +2417,11 @@ void DebriefingState::recoverCivilian(BattleUnit *from, Base *base)
 		{
 			Transfer *t = new Transfer(24);
 			Soldier *s = _game->getMod()->genSoldier(_game->getSavedGame(), ruleSoldier->getType());
+			if (!from->getUnitRules()->getSpawnedPersonName().empty())
+			{
+				s->setName(tr(from->getUnitRules()->getSpawnedPersonName()));
+			}
+			s->load(from->getUnitRules()->getSpawnedSoldierTemplate(), _game->getMod(), _game->getSavedGame(), _game->getMod()->getScriptGlobal(), true); // load from soldier template
 			t->setSoldier(s);
 			base->getTransfers()->push_back(t);
 		}

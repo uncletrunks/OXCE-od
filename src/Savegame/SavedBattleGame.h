@@ -88,6 +88,8 @@ private:
 	bool _aborted;
 	bool _baseCraftInventory = false;
 	int _itemId;
+	EscapeType _vipEscapeType;
+	int _vipSurvivalPercentage, _vipsSaved, _vipsLost, _vipsSavedScore, _vipsLostScore;
 	int _objectiveType, _objectivesDestroyed, _objectivesNeeded;
 	std::vector<BattleUnit*> _exposedUnits;
 	std::list<BattleUnit*> _fallingUnits;
@@ -505,6 +507,28 @@ public:
 	const std::string &getMusic() const;
 	/// Set the name of the music track.
 	void setMusic(const std::string &track);
+
+	/// Sets the VIP escape type.
+	void setVIPEscapeType(EscapeType vipEscapeType);
+	/// Gets the VIP escape type.
+	EscapeType getVIPEscapeType() const;
+	/// Sets the percentage of VIPs that must survive in order to accomplish the mission.
+	void setVIPSurvivalPercentage(int vipSurvivalPercentage);
+	/// Gets the percentage of VIPs that must survive in order to accomplish the mission.
+	int getVIPSurvivalPercentage() const;
+	/// Increase the saved VIPs counter.
+	void addSavedVIP(int score);
+	/// Gets the saved VIPs counter.
+	int getSavedVIPs() const;
+	/// Gets the saved VIPs total score.
+	int getSavedVIPsScore() const;
+	/// Increase the lost VIPs counter.
+	void addLostVIP(int score);
+	/// Gets the lost VIPs counter.
+	int getLostVIPs() const;
+	/// Gets the lost VIPs total score.
+	int getLostVIPsScore() const;
+
 	/// Sets the objective type for this mission.
 	void setObjectiveType(int type);
 	/// Gets the objective type of this mission.

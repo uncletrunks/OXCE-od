@@ -62,8 +62,9 @@ SavedBattleGame::SavedBattleGame(Mod *rule, Language *lang) :
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0),
 	_reinforcementsItemLevel(0), _enviroEffects(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
 	_globalShade(0), _side(FACTION_PLAYER), _turn(0), _bughuntMinTurn(20), _animFrame(0), _nameDisplay(false),
-	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0), _unitsFalling(false),
-	_cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0),
+	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0),
+	_vipEscapeType(ESCAPE_NONE), _vipSurvivalPercentage(0), _vipsSaved(0), _vipsLost(0), _vipsSavedScore(0), _vipsLostScore(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0),
+	_unitsFalling(false), _cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0),
 	_ambience(-1), _ambientVolume(0.5), _minAmbienceRandomDelay(20), _maxAmbienceRandomDelay(60), _currentAmbienceDelay(0),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
 {
@@ -382,6 +383,12 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 			++weaponi;
 		}
 	}
+	_vipEscapeType = (EscapeType)(node["vipEscapeType"].as<int>(_vipEscapeType));
+	_vipSurvivalPercentage = node["vipSurvivalPercentage"].as<int>(_vipSurvivalPercentage);
+	_vipsSaved = node["vipsSaved"].as<int>(_vipsSaved);
+	_vipsLost = node["vipsLost"].as<int>(_vipsLost);
+	_vipsSavedScore = node["vipsSavedScore"].as<int>(_vipsSavedScore);
+	_vipsLostScore = node["vipsLostScore"].as<int>(_vipsLostScore);
 	_objectiveType = node["objectiveType"].as<int>(_objectiveType);
 	_objectivesDestroyed = node["objectivesDestroyed"].as<int>(_objectivesDestroyed);
 	_objectivesNeeded = node["objectivesNeeded"].as<int>(_objectivesNeeded);
@@ -445,6 +452,15 @@ void SavedBattleGame::loadMapResources(Mod *mod)
 YAML::Node SavedBattleGame::save() const
 {
 	YAML::Node node;
+	if (_vipSurvivalPercentage > 0)
+	{
+		node["vipEscapeType"] = (int)_vipEscapeType;
+		node["vipSurvivalPercentage"] = _vipSurvivalPercentage;
+		node["vipsSaved"] = _vipsSaved;
+		node["vipsLost"] = _vipsLost;
+		node["vipsSavedScore"] = _vipsSavedScore;
+		node["vipsLostScore"] = _vipsLostScore;
+	}
 	if (_objectivesNeeded)
 	{
 		node["objectivesDestroyed"] = _objectivesDestroyed;
@@ -2611,6 +2627,89 @@ const std::string &SavedBattleGame::getMusic() const
 void SavedBattleGame::setMusic(const std::string &track)
 {
 	_music = track;
+}
+
+/**
+ * Sets the VIP escape type.
+ */
+void SavedBattleGame::setVIPEscapeType(EscapeType vipEscapeType)
+{
+	_vipEscapeType = vipEscapeType;
+}
+
+/**
+ * Gets the VIP escape type.
+ */
+EscapeType SavedBattleGame::getVIPEscapeType() const
+{
+	return _vipEscapeType;
+}
+
+/**
+ * Sets the percentage of VIPs that must survive in order to accomplish the mission.
+ * If the mission has multiple stages, the biggest setting is used at the end.
+ */
+void SavedBattleGame::setVIPSurvivalPercentage(int vipSurvivalPercentage)
+{
+	_vipSurvivalPercentage = std::max(_vipSurvivalPercentage, vipSurvivalPercentage);
+}
+
+/**
+ * Gets the percentage of VIPs that must survive in order to accomplish the mission.
+ */
+int SavedBattleGame::getVIPSurvivalPercentage() const
+{
+	return _vipSurvivalPercentage;
+}
+
+/**
+ * Increase the saved VIPs counter and score.
+ */
+void SavedBattleGame::addSavedVIP(int score)
+{
+	_vipsSaved++;
+	_vipsSavedScore += score;
+}
+
+/**
+ * Gets the saved VIPs counter.
+ */
+int SavedBattleGame::getSavedVIPs() const
+{
+	return _vipsSaved;
+}
+
+/**
+ * Gets the saved VIPs total score.
+ */
+int SavedBattleGame::getSavedVIPsScore() const
+{
+	return _vipsSavedScore;
+}
+
+/**
+ * Increase the lost VIPs counter and score.
+ */
+void SavedBattleGame::addLostVIP(int score)
+{
+	_vipsLost++;
+	_vipsLostScore -= score;
+}
+
+/**
+ * Gets the lost VIPs counter.
+ */
+int SavedBattleGame::getLostVIPs() const
+{
+	return _vipsLost;
+}
+
+/**
+ * Gets the lost VIPs total score.
+ */
+int SavedBattleGame::getLostVIPsScore() const
+{
+	return _vipsLostScore;
 }
 
 /**

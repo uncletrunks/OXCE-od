@@ -358,7 +358,9 @@ struct StatAdjustment
 class Unit
 {
 private:
-	std::string _type, _civilianRecoveryType;
+	std::string _type;
+	std::string _civilianRecoveryType, _spawnedPersonName;
+	YAML::Node _spawnedSoldier;
 	std::string _race;
 	int _showFullNameInAlienInventory;
 	std::string _rank;
@@ -382,6 +384,7 @@ private:
 	bool _isLeeroyJenkins;
 	bool _waitIfOutsideWeaponRange;
 	int _pickUpWeaponsMoreActively;
+	bool _vip;
 
 public:
 	/// Creates a blank unit ruleset.
@@ -396,7 +399,11 @@ public:
 	/// Gets the unit's type.
 	const std::string& getType() const;
 	/// Gets the type of staff (soldier/engineer/scientists) or type of item to be recovered when a civilian is saved.
-	std::string getCivilianRecoveryType() const;
+	const std::string &getCivilianRecoveryType() const { return _civilianRecoveryType; }
+	/// Gets the custom name of the "spawned person".
+	const std::string &getSpawnedPersonName() const { return _spawnedPersonName; }
+	/// Gets the spawned soldier template.
+	const YAML::Node &getSpawnedSoldierTemplate() const { return _spawnedSoldier; }
 	/// Gets the unit's stats.
 	UnitStats *getStats();
 	/// Gets the unit's height when standing.
@@ -468,6 +475,8 @@ public:
 	int getPickUpWeaponsMoreActively() const { return _pickUpWeaponsMoreActively; }
 	/// Should alien inventory show full name (e.g. Sectoid Leader) or just the race (e.g. Sectoid)?
 	bool getShowFullNameInAlienInventory(Mod *mod) const;
+	/// Is this a VIP unit?
+	bool isVIP() const { return _vip; }
 
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleUnit";

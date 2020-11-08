@@ -113,20 +113,20 @@ AbortMissionState::AbortMissionState(SavedBattleGame *battleGame, BattlescapeSta
 	_txtInEntrance->setHighContrast(true);
 	if (craft)
 	{
-		_txtInEntrance->setText(tr("STR_UNITS_IN_CRAFT", _inEntrance));
+		_txtInEntrance->setText(tr("STR_UNITS_IN_CRAFT", _inEntrance + tally.vipInEntrance));
 	}
 	else
 	{
-		_txtInEntrance->setText(tr("STR_UNITS_IN_ENTRANCE", _inEntrance));
+		_txtInEntrance->setText(tr("STR_UNITS_IN_ENTRANCE", _inEntrance + tally.vipInEntrance));
 	}
 
 	_txtInExit->setBig();
 	_txtInExit->setHighContrast(true);
-	_txtInExit->setText(tr("STR_UNITS_IN_EXIT", _inExit));
+	_txtInExit->setText(tr("STR_UNITS_IN_EXIT", _inExit + tally.vipInExit));
 
 	_txtOutside->setBig();
 	_txtOutside->setHighContrast(true);
-	_txtOutside->setText(tr("STR_UNITS_OUTSIDE", _outside));
+	_txtOutside->setText(tr("STR_UNITS_OUTSIDE", _outside + tally.vipInField));
 
 
 	if (_battleGame->getMissionType() == "STR_BASE_DEFENSE")

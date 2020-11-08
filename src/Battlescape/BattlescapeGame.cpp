@@ -643,7 +643,11 @@ void BattlescapeGame::endTurn()
 		}
 	}
 
-	bool battleComplete = tally.liveAliens == 0 || tally.liveSoldiers == 0;
+	// "escort the VIPs" missions don't end when all aliens are neutralized
+	// objective type MUST_DESTROY was already handled above
+	bool killingAllAliensIsNotEnough = (_save->getVIPSurvivalPercentage() > 0 && _save->getVIPEscapeType() != ESCAPE_NONE); 
+
+	bool battleComplete = (!killingAllAliensIsNotEnough && tally.liveAliens == 0) || tally.liveSoldiers == 0;
 
 	if ((_save->getSide() != FACTION_NEUTRAL || battleComplete)
 		&& _endTurnRequested)
@@ -2296,6 +2300,52 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 }
 
 /**
+ * Counts VIPs so that we don't have to do it in the Debriefing.
+ */
+void BattlescapeGame::tallyVIPs(EscapeType escapeType)
+{
+	for (auto unit : *_save->getUnits())
+	{
+		// count all VIPs (player-controlled VIPs and civilian VIPs)
+		if (unit->isVIP() && unit->getStatus() != STATUS_IGNORE_ME)
+		{
+			if (unit->getStatus() == STATUS_DEAD)
+			{
+				if (escapeType != ESCAPE_NONE)
+					_save->addLostVIP(unit->getValue());
+				else
+					_save->addLostVIP(0); // you didn't need to escort the VIPs, just keep them alive and kill the rest
+			}
+			else if (escapeType == ESCAPE_EXIT)
+			{
+				if (unit->isInExitArea(END_POINT))
+					_save->addSavedVIP(unit->getValue());
+				else
+					_save->addLostVIP(unit->getValue());
+			}
+			else if (escapeType == ESCAPE_ENTRY)
+			{
+				if (unit->isInExitArea(START_POINT))
+					_save->addSavedVIP(unit->getValue());
+				else
+					_save->addLostVIP(unit->getValue());
+			}
+			else if (escapeType == ESCAPE_EITHER)
+			{
+				if (unit->isInExitArea(START_POINT) || unit->isInExitArea(END_POINT))
+					_save->addSavedVIP(unit->getValue());
+				else
+					_save->addLostVIP(unit->getValue());
+			}
+			else //if (escapeType == ESCAPE_NONE)
+			{
+				_save->addSavedVIP(0); // you didn't need to escort the VIPs, just keep them alive and kill the rest
+			}
+		}
+	}
+}
+
+/**
  * Gets the map.
  * @return map.
  */
@@ -2761,7 +2811,26 @@ BattlescapeTally BattlescapeGame::tallyUnits()
 			else if ((*j)->getOriginalFaction() == FACTION_PLAYER)
 			{
 				if ((*j)->isSummonedPlayerUnit())
+				{
+					if ((*j)->isVIP())
+					{
+						// used only for display purposes in AbortMissionState
+						// count only player-controlled VIPs, not civilian VIPs!
+						if ((*j)->isInExitArea(START_POINT))
+						{
+							tally.vipInEntrance++;
+						}
+						else if ((*j)->isInExitArea(END_POINT))
+						{
+							tally.vipInExit++;
+						}
+						else
+						{
+							tally.vipInField++;
+						}
+					}
 					continue;
+				}
 
 				if ((*j)->isInExitArea(START_POINT))
 				{
@@ -3048,6 +3117,10 @@ void BattlescapeGame::autoEndBattle()
 {
 	if (Options::battleAutoEnd)
 	{
+		if (_save->getVIPSurvivalPercentage() > 0 && _save->getVIPEscapeType() != ESCAPE_NONE)
+		{
+			return; // "escort the VIPs" missions don't end when all aliens are neutralized
+		}
 		bool end = false;
 		bool askForConfirmation = false;
 		if (_save->getObjectiveType() == MUST_DESTROY)

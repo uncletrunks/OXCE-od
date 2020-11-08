@@ -39,6 +39,7 @@ class Mod;
 class InfoboxOKState;
 class SoldierDiary;
 class RuleSkill;
+enum EscapeType : int;
 
 enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
 
@@ -114,6 +115,13 @@ struct BattlescapeTally
 	int inExit = 0;
 	/// number of live soldiers in the middle of the battlefield.
 	int inField = 0;
+
+	/// number of live VIPs on entrance tiles
+	int vipInEntrance = 0;
+	/// number of live VIPs on exit tiles.
+	int vipInExit = 0;
+	/// number of live VIPs in the middle of the battlefield.
+	int vipInField = 0;
 };
 
 /**
@@ -222,6 +230,8 @@ public:
 	void spawnFromPrimedItems();
 	/// Removes spawned units that belong to the player to avoid dealing with recovery
 	void removeSummonedPlayerUnits();
+	/// Counts VIPs so that we don't have to do it in the Debriefing.
+	void tallyVIPs(EscapeType escapeType);
 	/// Handles kneeling action.
 	bool kneel(BattleUnit *bu);
 	/// Cancels the current action.

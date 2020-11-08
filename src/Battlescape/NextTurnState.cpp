@@ -473,7 +473,9 @@ void NextTurnState::close()
 		_battleGame->getBattleGame()->resetAllEnemiesNeutralized();
 	}
 
-	if ((_battleGame->getObjectiveType() != MUST_DESTROY && tally.liveAliens == 0) || tally.liveSoldiers == 0)		// not the final mission and all aliens dead.
+	// not "escort the VIPs" missions, not the final mission and all aliens dead.
+	bool killingAllAliensIsNotEnough = _battleGame->getObjectiveType() == MUST_DESTROY || (_battleGame->getVIPSurvivalPercentage() > 0 && _battleGame->getVIPEscapeType() != ESCAPE_NONE);
+	if ((!killingAllAliensIsNotEnough && tally.liveAliens == 0) || tally.liveSoldiers == 0)
 	{
 		_state->finishBattle(false, tally.liveSoldiers);
 	}
