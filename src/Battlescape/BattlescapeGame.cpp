@@ -2291,10 +2291,11 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 			nullptr,
 			getDepth());
 
-		// just bare minimum, this unit will never be used for anything except recovery
+		// just bare minimum, this unit will never be used for anything except recovery (not even for scoring)
 		newUnit->setTile(nullptr, _save);
 		newUnit->setPosition(TileEngine::invalid);
 		newUnit->setAIModule(new AIModule(_save, newUnit, 0));
+		newUnit->markAsResummonedFakeCivilian();
 		_save->getUnits()->push_back(newUnit);
 	}
 }

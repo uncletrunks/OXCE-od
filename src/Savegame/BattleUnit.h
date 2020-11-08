@@ -159,7 +159,7 @@ private:
 	bool _breathing;
 	bool _hidingForTurn, _floorAbove, _respawn, _alreadyRespawned;
 	bool _isLeeroyJenkins;	// always charges enemy, never retreats.
-	bool _summonedPlayerUnit;
+	bool _summonedPlayerUnit, _resummonedFakeCivilian;
 	bool _pickUpWeaponsMoreActively;
 	bool _disableIndicators;
 	MovementType _movementType;
@@ -720,6 +720,10 @@ public:
 	void setSummonedPlayerUnit(bool summonedPlayerUnit);
 	/// Was this unit summoned by an item?
 	bool isSummonedPlayerUnit() const;
+	/// Marks this unit as resummoned fake civilian and therefore won't count for civilian scoring in the Debriefing.
+	void markAsResummonedFakeCivilian() { _resummonedFakeCivilian = true; }
+	/// Is this unit a resummoned fake civilian?
+	bool isResummonedFakeCivilian() const { return _resummonedFakeCivilian; }
 	/// Marks this unit as VIP.
 	void markAsVIP() { _vip = true; }
 	/// Is this a VIP unit?

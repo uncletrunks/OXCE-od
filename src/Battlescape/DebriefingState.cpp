@@ -1616,11 +1616,17 @@ void DebriefingState::prepareDebriefing()
 				// if mission fails, all civilians die
 				if ((aborted && !success) || playersSurvived == 0)
 				{
-					addStat("STR_CIVILIANS_KILLED_BY_ALIENS", 1, -(*j)->getValue());
+					if (!(*j)->isResummonedFakeCivilian())
+					{
+						addStat("STR_CIVILIANS_KILLED_BY_ALIENS", 1, -(*j)->getValue());
+					}
 				}
 				else
 				{
-					addStat("STR_CIVILIANS_SAVED", 1, (*j)->getValue());
+					if (!(*j)->isResummonedFakeCivilian())
+					{
+						addStat("STR_CIVILIANS_SAVED", 1, (*j)->getValue());
+					}
 					recoverCivilian(*j, base);
 				}
 			}
