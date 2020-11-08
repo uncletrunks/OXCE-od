@@ -279,6 +279,8 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 		_objectiveFailedText = node["objectiveFailed"][0].as<std::string>(_objectiveFailedText);
 		_objectiveFailedScore = node["objectiveFailed"][1].as<int>(_objectiveFailedScore);
 	}
+	_missionCompleteText = node["missionCompleteText"].as<std::string>(_missionCompleteText);
+	_missionFailedText = node["missionFailedText"].as<std::string>(_missionFailedText);
 	_despawnPenalty = node["despawnPenalty"].as<int>(_despawnPenalty);
 	_abortPenalty = node["abortPenalty"].as<int>(_abortPenalty);
 	_points = node["points"].as<int>(_points);
@@ -683,12 +685,14 @@ const std::string &AlienDeployment::getObjectivePopup() const
  * Fills out the variables associated with mission success, and returns if those variables actually contain anything.
  * @param &text a reference to the text we wish to alter.
  * @param &score a reference to the score we wish to alter.
+ * @param &missionText a reference to the custom mission text we wish to alter.
  * @return if there is anything worthwhile processing.
  */
-bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score) const
+bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score, std::string &missionText) const
 {
 	text = _objectiveCompleteText;
 	score = _objectiveCompleteScore;
+	missionText = _missionCompleteText;
 	return !text.empty();
 }
 
@@ -696,12 +700,14 @@ bool AlienDeployment::getObjectiveCompleteInfo(std::string &text, int &score) co
  * Fills out the variables associated with mission failure, and returns if those variables actually contain anything.
  * @param &text a reference to the text we wish to alter.
  * @param &score a reference to the score we wish to alter.
+ * @param &missionText a reference to the custom mission text we wish to alter.
  * @return if there is anything worthwhile processing.
  */
-bool AlienDeployment::getObjectiveFailedInfo(std::string &text, int &score) const
+bool AlienDeployment::getObjectiveFailedInfo(std::string &text, int &score, std::string &missionText) const
 {
 	text = _objectiveFailedText;
 	score = _objectiveFailedScore;
+	missionText = _missionFailedText;
 	return !text.empty();
 }
 

@@ -111,6 +111,7 @@ private:
 	int _alertSound;
 	BriefingData _briefingData;
 	std::string _markerName, _objectivePopup, _objectiveCompleteText, _objectiveFailedText;
+	std::string _missionCompleteText, _missionFailedText;
 	WeightedOptions _genMission;
 	int _markerIcon, _durationMin, _durationMax, _minDepth, _maxDepth, _genMissionFrequency, _genMissionLimit;
 	int _objectiveType, _objectivesRequired, _objectiveCompleteScore, _objectiveFailedScore, _despawnPenalty, _abortPenalty, _points, _turnLimit, _cheatTurn;
@@ -209,9 +210,9 @@ public:
 	/// Gets the string to pop up when the mission objectives are complete.
 	const std::string &getObjectivePopup() const;
 	/// Fills out the objective complete info.
-	bool getObjectiveCompleteInfo(std::string &text, int &score) const;
+	bool getObjectiveCompleteInfo(std::string &text, int &score, std::string &missionText) const;
 	/// Fills out the objective failed info.
-	bool getObjectiveFailedInfo(std::string &text, int &score) const;
+	bool getObjectiveFailedInfo(std::string &text, int &score, std::string &missionText) const;
 	/// Gets the score penalty XCom receives for ignoring this site.
 	int getDespawnPenalty() const;
 	/// Gets the score penalty XCom receives for aborting this mission.

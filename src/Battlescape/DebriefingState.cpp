@@ -1012,15 +1012,16 @@ void DebriefingState::prepareDebriefing()
 	_stats.push_back(new DebriefingStat("STR_LIVE_ALIENS_SURRENDERED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_ARTIFACTS_RECOVERED", false));
 
+	std::string missionCompleteText, missionFailedText;
 	std::string objectiveCompleteText, objectiveFailedText;
 	int objectiveCompleteScore = 0, objectiveFailedScore = 0;
 	if (ruleDeploy)
 	{
-		if (ruleDeploy->getObjectiveCompleteInfo(objectiveCompleteText, objectiveCompleteScore))
+		if (ruleDeploy->getObjectiveCompleteInfo(objectiveCompleteText, objectiveCompleteScore, missionCompleteText))
 		{
 			_stats.push_back(new DebriefingStat(objectiveCompleteText, false));
 		}
-		if (ruleDeploy->getObjectiveFailedInfo(objectiveFailedText, objectiveFailedScore))
+		if (ruleDeploy->getObjectiveFailedInfo(objectiveFailedText, objectiveFailedScore, missionFailedText))
 		{
 			_stats.push_back(new DebriefingStat(objectiveFailedText, false));
 		}
@@ -1676,6 +1677,10 @@ void DebriefingState::prepareDebriefing()
 				addStat(objectiveCompleteText, victoryStat, objectiveCompleteScore);
 			}
 		}
+		if (!missionCompleteText.empty())
+		{
+			_txtTitle->setText(tr(missionCompleteText));
+		}
 
 		if (!aborted)
 		{
@@ -1741,6 +1746,10 @@ void DebriefingState::prepareDebriefing()
 			{
 				addStat(objectiveFailedText, 1, objectiveFailedScore);
 			}
+		}
+		if (!missionFailedText.empty())
+		{
+			_txtTitle->setText(tr(missionFailedText));
 		}
 
 		if (playersSurvived > 0 && !_destroyBase)
