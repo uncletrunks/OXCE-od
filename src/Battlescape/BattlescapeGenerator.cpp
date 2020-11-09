@@ -2726,7 +2726,7 @@ void BattlescapeGenerator::generateBaseMap()
 				// Get the vertical levels from the facility ruleset and create a list according to map size
 				_verticalLevels.clear();
 				_verticalLevels = (*i)->getRules()->getVerticalLevels();
-				command.setVerticalLevels(_verticalLevels);
+				command.setVerticalLevels(_verticalLevels, (*i)->getRules()->getSize());
 				populateVerticalLevels(&command);
 
 				std::vector<VerticalLevel>::iterator currentLevel = _verticalLevels.begin();
