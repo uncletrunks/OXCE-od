@@ -3810,6 +3810,10 @@ bool GeoscapeState::processCommand(RuleMissionScript *command)
 						{
 							validAreas.push_back(std::make_pair(region->getType(), counter));
 						}
+						else if (!(*j).isPoint())
+						{
+							validAreas.push_back(std::make_pair(region->getType(), counter));
+						}
 						counter++;
 					}
 				}
