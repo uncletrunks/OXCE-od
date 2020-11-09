@@ -54,7 +54,7 @@ private:
 	int _currentTurn;
 	bool _showBriefing;
 	BriefingData _customBriefing;
-	std::vector< std::vector<bool> > _compliantBlocksMap;
+	std::vector< std::vector<int> > _compliantBlocksMap;
 	std::vector<Node*> _compliantNodesList;
 	std::vector<Position> _compliantBlocksList;
 

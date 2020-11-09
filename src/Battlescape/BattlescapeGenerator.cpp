@@ -75,7 +75,7 @@ BattlescapeGenerator::BattlescapeGenerator(Game *game) :
 	_craft(0), _craftRules(0), _ufo(0), _base(0), _mission(0), _alienBase(0), _terrain(0), _baseTerrain(0), _globeTerrain(0), _alternateTerrain(0),
 	_mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _missionTexture(0), _globeTexture(0), _worldShade(0),
 	_unitSequence(0), _craftInventoryTile(0), _alienCustomDeploy(0), _alienCustomMission(0), _alienItemLevel(0), _ufoDamagePercentage(0),
-	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _markAsReinforcementsBlock(false), _blocksToDo(0), _dummy(0)
+	_baseInventory(false), _generateFuel(true), _craftDeployed(false), _ufoDeployed(false), _craftZ(0), _craftPos(), _markAsReinforcementsBlock(0), _blocksToDo(0), _dummy(0)
 {
 	_allowAutoLoadout = !Options::disableAutoEquip;
 	if (_game->getSavedGame()->getDisableSoldierEquipment())
@@ -106,9 +106,9 @@ void BattlescapeGenerator::init(bool resetTerrain)
 	_loadedTerrains.clear();
 	_verticalLevelSegments.clear();
 
-	_markAsReinforcementsBlock = false;
+	_markAsReinforcementsBlock = 0;
 	_save->getReinforcementsBlocks().clear();
-	_save->getReinforcementsBlocks().resize((_mapsize_x / 10), std::vector<bool>((_mapsize_y / 10), false));
+	_save->getReinforcementsBlocks().resize((_mapsize_x / 10), std::vector<int>((_mapsize_y / 10), 0));
 
 	_save->getFlattenedMapTerrainNames().clear();
 	_save->getFlattenedMapTerrainNames().resize((_mapsize_x / 10), std::vector<std::string>((_mapsize_y / 10), ""));
@@ -2324,7 +2324,7 @@ void BattlescapeGenerator::generateMap(const std::vector<MapScript*> *script, co
 					terrain = currentLevel->levelTerrain == "" ? terrain : pickTerrain(currentLevel->levelTerrain);
 				}
 
-				_markAsReinforcementsBlock = command->markAsReinforcementsBlock();
+				_markAsReinforcementsBlock = command->markAsReinforcementsBlock() ? 1 : 0;
 
 				switch (command->getType())
 				{
@@ -4001,7 +4001,7 @@ bool BattlescapeGenerator::removeBlocks(MapScript *command)
 		{
 			for (int dy = y; dy != y + dely; ++dy)
 			{
-				_save->getReinforcementsBlocks()[dx][dy] = false;
+				_save->getReinforcementsBlocks()[dx][dy] = 0;
 				_save->getFlattenedMapTerrainNames()[dx][dy] = "";
 				_save->getFlattenedMapBlockNames()[dx][dy] = "";
 				_blocks[dx][dy] = 0;

@@ -154,7 +154,7 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_reinforcementsRace = node["reinforcementsRace"].as<std::string>(_reinforcementsRace);
 	_reinforcementsItemLevel = node["reinforcementsItemLevel"].as<int>(_reinforcementsItemLevel);
 	_reinforcementsMemory = node["reinforcementsMemory"].as< std::map<std::string, int> >(_reinforcementsMemory);
-	_reinforcementsBlocks = node["reinforcementsBlocks"].as< std::vector< std::vector<bool> > >(_reinforcementsBlocks);
+	_reinforcementsBlocks = node["reinforcementsBlocks"].as< std::vector< std::vector<int> > >(_reinforcementsBlocks);
 	_flattenedMapTerrainNames = node["flattenedMapTerrainNames"].as< std::vector< std::vector<std::string> > >(_flattenedMapTerrainNames);
 	_flattenedMapBlockNames = node["flattenedMapBlockNames"].as< std::vector< std::vector<std::string> > >(_flattenedMapBlockNames);
 	_globalShade = node["globalshade"].as<int>(_globalShade);
