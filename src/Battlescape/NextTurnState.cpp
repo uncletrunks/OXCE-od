@@ -590,6 +590,14 @@ bool NextTurnState::determineReinforcements()
 				{
 					for (auto& dir : wave.spawnBlocks)
 					{
+						if (dir == "EDGES")
+						{
+							for (int x = 0; x < sizeX; ++x) _compliantBlocksMap[x][0] = 1;
+							for (int y = 0; y < sizeY; ++y) _compliantBlocksMap[0][y] = 1;
+							for (int x = 0; x < sizeX; ++x) _compliantBlocksMap[x][sizeY - 1] = 1;
+							for (int y = 0; y < sizeY; ++y) _compliantBlocksMap[sizeX - 1][y] = 1;
+							break;
+						}
 						if (dir == "NORTH")
 							for (int x = 0; x < sizeX; ++x) _compliantBlocksMap[x][0] = 1;
 						else if (dir == "WEST")
