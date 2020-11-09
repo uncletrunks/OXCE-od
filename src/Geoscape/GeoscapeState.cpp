@@ -2330,50 +2330,12 @@ void GeoscapeState::time1Day()
 				saveGame->addGeneratedEvent(spawnedEventRule);
 			}
 			// 3c. handle getonefrees (topic+lookup)
-			if (!research->getGetOneFree().empty() || !research->getGetOneFreeProtected().empty())
+			if (bonus = saveGame->selectGetOneFree(research))
 			{
-				std::vector<const RuleResearch *> possibilities;
-				for (auto& free : research->getGetOneFree())
+				saveGame->addFinishedResearch(bonus, mod, base);
+				if (!bonus->getLookup().empty())
 				{
-					if (saveGame->isResearchRuleStatusDisabled(free->getName()))
-					{
-						continue; // skip disabled topics
-					}
-					if (!saveGame->isResearched(free, false))
-					{
-						possibilities.push_back(free);
-					}
-				}
-				for (auto& itMap : research->getGetOneFreeProtected())
-				{
-					if (saveGame->isResearched(itMap.first, false))
-					{
-						for (auto& itVector : itMap.second)
-						{
-							if (saveGame->isResearchRuleStatusDisabled(itVector->getName()))
-							{
-								continue; // skip disabled topics
-							}
-							if (!saveGame->isResearched(itVector, false))
-							{
-								possibilities.push_back(itVector);
-							}
-						}
-					}
-				}
-				if (!possibilities.empty())
-				{
-					size_t pick = 0;
-					if (!research->sequentialGetOneFree())
-					{
-						pick = RNG::generate(0, possibilities.size() - 1);
-					}
-					bonus = possibilities.at(pick);
-					saveGame->addFinishedResearch(bonus, mod, base);
-					if (!bonus->getLookup().empty())
-					{
-						saveGame->addFinishedResearch(mod->getResearch(bonus->getLookup(), true), mod, base);
-					}
+					saveGame->addFinishedResearch(mod->getResearch(bonus->getLookup(), true), mod, base);
 				}
 			}
 			// 3d. determine and remember if the ufopedia article should pop up again or not

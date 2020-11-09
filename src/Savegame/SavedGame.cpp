@@ -1416,6 +1416,58 @@ const std::map<std::string, bool> &SavedGame::getHiddenPurchaseItems()
 }
 
 /*
+ * Selects a "getOneFree" topic for the given research rule.
+ * @param research Pointer to the given research rule.
+ * @return Pointer to the selected getOneFree topic. Nullptr, if nothing was selected.
+ */
+const RuleResearch* SavedGame::selectGetOneFree(const RuleResearch* research)
+{
+	if (!research->getGetOneFree().empty() || !research->getGetOneFreeProtected().empty())
+	{
+		std::vector<const RuleResearch*> possibilities;
+		for (auto& free : research->getGetOneFree())
+		{
+			if (isResearchRuleStatusDisabled(free->getName()))
+			{
+				continue; // skip disabled topics
+			}
+			if (!isResearched(free, false))
+			{
+				possibilities.push_back(free);
+			}
+		}
+		for (auto& itMap : research->getGetOneFreeProtected())
+		{
+			if (isResearched(itMap.first, false))
+			{
+				for (auto& itVector : itMap.second)
+				{
+					if (isResearchRuleStatusDisabled(itVector->getName()))
+					{
+						continue; // skip disabled topics
+					}
+					if (!isResearched(itVector, false))
+					{
+						possibilities.push_back(itVector);
+					}
+				}
+			}
+		}
+		if (!possibilities.empty())
+		{
+			size_t pick = 0;
+			if (!research->sequentialGetOneFree())
+			{
+				pick = RNG::generate(0, possibilities.size() - 1);
+			}
+			auto ret = possibilities.at(pick);
+			return ret;
+		}
+	}
+	return nullptr;
+}
+
+/*
  * Checks for and removes a research project from the "already discovered" list
  * @param research is the project we are checking for and removing, if necessary.
  */
