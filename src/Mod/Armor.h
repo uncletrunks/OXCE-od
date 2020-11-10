@@ -89,7 +89,7 @@ private:
 	std::vector<int> _loftempsSet;
 	UnitStats _stats;
 	int _deathFrames;
-	bool _constantAnimation, _canHoldWeapon, _hasInventory;
+	bool _constantAnimation, _hasInventory;
 	ForcedTorso _forcedTorso;
 	int _faceColorGroup, _hairColorGroup, _utileColorGroup, _rankColorGroup;
 	std::vector<int> _faceColor, _hairColor, _utileColor, _rankColor;
@@ -237,8 +237,6 @@ public:
 	int getDeathFrames() const;
 	/// Gets if armor uses constant animation.
 	bool getConstantAnimation() const;
-	/// Gets if armor can hold weapon.
-	bool getCanHoldWeapon() const;
 	/// Checks if this armor ignores gender (power suit/flying suit).
 	ForcedTorso getForcedTorso() const;
 	/// Gets built-in weapons of armor.

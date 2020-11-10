@@ -409,8 +409,6 @@ public:
 	void setLastSelectedArmor(const std::string &value);
 	/// Gets the last selected armor
 	std::string getLastSelectedArmor() const;
-	/// Returns the craft corresponding to the specified unique id.
-	Craft *findCraftByUniqueId(const CraftId& craftId) const;
 	/// Gets the name of a global equipment layout at specified index.
 	const std::string &getGlobalEquipmentLayoutName(int index) const;
 	/// Sets the name of a global equipment layout at specified index.

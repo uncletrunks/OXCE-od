@@ -120,7 +120,6 @@ private:
 	int _fireMaxHit;
 	int _smokeMaxHit;
 	int _moraleRestored;
-	int _coverReserve;
 	BattleUnit *_charging;
 	int _turnsSinceSpotted, _turnsLeftSpottedForSnipers, _turnsSinceStunned = 255;
 	const Unit *_spawnUnit = nullptr;
@@ -626,8 +625,6 @@ public:
 	bool tookFireDamage() const;
 	/// switch the state of the fire damage tracker.
 	void toggleFireDamage();
-	void setCoverReserve(int reserve);
-	int getCoverReserve() const;
 	/// Is this unit selectable?
 	bool isSelectable(UnitFaction faction, bool checkReselect, bool checkInventory) const;
 	/// Does this unit have an inventory?

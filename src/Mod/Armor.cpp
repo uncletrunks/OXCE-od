@@ -65,7 +65,7 @@ Armor::Armor(const std::string &type) :
 	_drawingRoutine(0), _drawBubbles(false), _movementType(MT_WALK), _turnBeforeFirstStep(false), _turnCost(1), _moveSound(-1), _size(1), _weight(0),
 	_visibilityAtDark(0), _visibilityAtDay(0), _personalLight(15),
 	_camouflageAtDay(0), _camouflageAtDark(0), _antiCamouflageAtDay(0), _antiCamouflageAtDark(0), _heatVision(0), _psiVision(0), _psiCamouflage(0),
-	_deathFrames(3), _constantAnimation(false), _canHoldWeapon(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
+	_deathFrames(3), _constantAnimation(false), _hasInventory(true), _forcedTorso(TORSO_USE_GENDER),
 	_faceColorGroup(0), _hairColorGroup(0), _utileColorGroup(0), _rankColorGroup(0),
 	_fearImmune(defTriBool), _bleedImmune(defTriBool), _painImmune(defTriBool), _zombiImmune(defTriBool),
 	_ignoresMeleeThreat(defTriBool), _createsMeleeThreat(defTriBool),
@@ -179,17 +179,6 @@ void Armor::load(const YAML::Node &node, const ModScript &parsers, Mod *mod)
 	_deathFrames = node["deathFrames"].as<int>(_deathFrames);
 	_constantAnimation = node["constantAnimation"].as<bool>(_constantAnimation);
 	_forcedTorso = (ForcedTorso)node["forcedTorso"].as<int>(_forcedTorso);
-	_canHoldWeapon =
-		(_drawingRoutine == 0 ||
-		_drawingRoutine == 1 ||
-		_drawingRoutine == 4 ||
-		_drawingRoutine == 6 ||
-		_drawingRoutine == 10 ||
-		_drawingRoutine == 13 ||
-		_drawingRoutine == 14 ||
-		_drawingRoutine == 15 ||
-		_drawingRoutine == 17 ||
-		_drawingRoutine == 18);
 
 	if (const YAML::Node &size = node["size"])
 	{
@@ -645,15 +634,6 @@ bool Armor::getConstantAnimation() const
 }
 
 /**
- * Gets if armor can hold weapon.
- * @return if it can hold weapon
- */
-bool Armor::getCanHoldWeapon() const
-{
-	return _canHoldWeapon;
-}
-
-/*
  * Checks if this armor ignores gender (power suit/flying suit).
  * @return which torso to force on the sprite.
  */
