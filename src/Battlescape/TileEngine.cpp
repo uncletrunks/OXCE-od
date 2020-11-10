@@ -3675,7 +3675,7 @@ int TileEngine::calculateParabolaVoxel(Position origin, Position target, bool st
 			//remove end point of previus trajectory part, becasue next one will add this point again
 			trajectory->pop_back();
 		}
-		result = calculateLineVoxel(lastPosition, nextPosition, storeTrajectory, storeTrajectory ? trajectory : 0, excludeUnit);
+		result = calculateLineVoxel(lastPosition, nextPosition, storeTrajectory, storeTrajectory ? trajectory : nullptr, excludeUnit);
 		if (result != V_EMPTY)
 		{
 			if (!storeTrajectory && trajectory)
@@ -4771,7 +4771,7 @@ bool TileEngine::validateThrow(BattleAction &action, Position originVoxel, Posit
 		//position that item hit
 		Position hitPos = (trajectory.back() + Position(0,0,1)).toTile();
 		//position where item will land
-		Position tilePos = ((trajectory.at(trajectory.size() + Projectile::ItemDropVoxelOffset - 1)).toTile());
+		Position tilePos = Projectile::getPositionFromEnd(trajectory, Projectile::ItemDropVoxelOffset).toTile();
 		if (forced || (test != V_OUTOFBOUNDS && tilePos == targetPos))
 		{
 			if (voxelType)
