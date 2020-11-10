@@ -231,7 +231,7 @@ void GeoscapeEventState::eventLogic()
 	for (auto rName : rule.getResearchList())
 	{
 		const RuleResearch *rRule = mod->getResearch(rName, true);
-		if (!save->isResearched(rRule, false))
+		if (!save->isResearched(rRule, false) || save->hasUndiscoveredGetOneFree(rRule, true))
 		{
 			possibilities.push_back(rRule);
 		}
@@ -241,14 +241,35 @@ void GeoscapeEventState::eventLogic()
 	{
 		size_t pickResearch = RNG::generate(0, possibilities.size() - 1);
 		const RuleResearch *eventResearch = possibilities.at(pickResearch);
+
+		bool alreadyResearched = false;
+		std::string name = eventResearch->getLookup().empty() ? eventResearch->getName() : eventResearch->getLookup();
+		if (save->isResearched(name, false))
+		{
+			alreadyResearched = true; // we have seen the pedia article already, don't show it again
+		}
+
 		save->addFinishedResearch(eventResearch, mod, hq, true);
-		_researchName = eventResearch->getName();
+		_researchName = alreadyResearched ? "" : eventResearch->getName();
 
 		if (!eventResearch->getLookup().empty())
 		{
 			const RuleResearch *lookupResearch = mod->getResearch(eventResearch->getLookup(), true);
 			save->addFinishedResearch(lookupResearch, mod, hq, true);
-			_researchName = lookupResearch->getName();
+			_researchName = alreadyResearched ? "" : lookupResearch->getName();
+		}
+
+		if (auto bonus = save->selectGetOneFree(eventResearch))
+		{
+			save->addFinishedResearch(bonus, mod, hq, true);
+			_bonusResearchName = bonus->getName();
+
+			if (!bonus->getLookup().empty())
+			{
+				const RuleResearch *bonusLookup = mod->getResearch(bonus->getLookup(), true);
+				save->addFinishedResearch(bonusLookup, mod, hq, true);
+				_bonusResearchName = bonusLookup->getName();
+			}
 		}
 	}
 }
@@ -289,6 +310,10 @@ void GeoscapeEventState::btnOkClick(Action *)
 		_game->pushState(new ErrorMessageState(tr("STR_STORAGE_EXCEEDED").arg(base->getName()), _palette, _game->getMod()->getInterface("debriefing")->getElement("errorMessage")->color, "BACK01.SCR", _game->getMod()->getInterface("debriefing")->getElement("errorPalette")->color));
 	}
 
+	if (!_bonusResearchName.empty())
+	{
+		Ufopaedia::openArticle(_game, _bonusResearchName);
+	}
 	if (!_researchName.empty())
 	{
 		Ufopaedia::openArticle(_game, _researchName);

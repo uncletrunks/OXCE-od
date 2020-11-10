@@ -2021,6 +2021,19 @@ void DebriefingState::prepareDebriefing()
 		if (research)
 		{
 			_game->getSavedGame()->addFinishedResearch(research, _game->getMod(), base, true);
+			if (!research->getLookup().empty())
+			{
+				_game->getSavedGame()->addFinishedResearch(_game->getMod()->getResearch(research->getLookup(), true), _game->getMod(), base, true);
+			}
+
+			if (auto bonus = _game->getSavedGame()->selectGetOneFree(research))
+			{
+				_game->getSavedGame()->addFinishedResearch(bonus, _game->getMod(), base, true);
+				if (!bonus->getLookup().empty())
+				{
+					_game->getSavedGame()->addFinishedResearch(_game->getMod()->getResearch(bonus->getLookup(), true), _game->getMod(), base, true);
+				}
+			}
 
 			// check and interrupt alien missions if necessary (based on unlocked research)
 			for (auto am : _game->getSavedGame()->getAlienMissions())

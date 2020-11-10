@@ -39,6 +39,7 @@ private:
 	TextButton *_btnOk;
 
 	std::string _researchName;
+	std::string _bonusResearchName;
 	const RuleEvent &_eventRule;
 
 	/// Helper performing event logic.
