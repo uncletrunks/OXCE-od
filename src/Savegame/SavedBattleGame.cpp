@@ -63,7 +63,8 @@ SavedBattleGame::SavedBattleGame(Mod *rule, Language *lang) :
 	_reinforcementsItemLevel(0), _enviroEffects(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
 	_globalShade(0), _side(FACTION_PLAYER), _turn(0), _bughuntMinTurn(20), _animFrame(0), _nameDisplay(false),
 	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0),
-	_vipEscapeType(ESCAPE_NONE), _vipSurvivalPercentage(0), _vipsSaved(0), _vipsLost(0), _vipsSavedScore(0), _vipsLostScore(0), _objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0),
+	_vipEscapeType(ESCAPE_NONE), _vipSurvivalPercentage(0), _vipsSaved(0), _vipsLost(0), _vipsWaitingOutside(0), _vipsSavedScore(0), _vipsLostScore(0), _vipsWaitingOutsideScore(0),
+	_objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0),
 	_unitsFalling(false), _cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0),
 	_ambience(-1), _ambientVolume(0.5), _minAmbienceRandomDelay(20), _maxAmbienceRandomDelay(60), _currentAmbienceDelay(0),
 	_turnLimit(0), _cheatTurn(20), _chronoTrigger(FORCE_LOSE), _beforeGame(true)
@@ -387,8 +388,10 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_vipSurvivalPercentage = node["vipSurvivalPercentage"].as<int>(_vipSurvivalPercentage);
 	_vipsSaved = node["vipsSaved"].as<int>(_vipsSaved);
 	_vipsLost = node["vipsLost"].as<int>(_vipsLost);
+	_vipsWaitingOutside = node["vipsWaitingOutside"].as<int>(_vipsWaitingOutside);
 	_vipsSavedScore = node["vipsSavedScore"].as<int>(_vipsSavedScore);
 	_vipsLostScore = node["vipsLostScore"].as<int>(_vipsLostScore);
+	_vipsWaitingOutsideScore = node["vipsWaitingOutsideScore"].as<int>(_vipsWaitingOutsideScore);
 	_objectiveType = node["objectiveType"].as<int>(_objectiveType);
 	_objectivesDestroyed = node["objectivesDestroyed"].as<int>(_objectivesDestroyed);
 	_objectivesNeeded = node["objectivesNeeded"].as<int>(_objectivesNeeded);
@@ -458,8 +461,10 @@ YAML::Node SavedBattleGame::save() const
 		node["vipSurvivalPercentage"] = _vipSurvivalPercentage;
 		node["vipsSaved"] = _vipsSaved;
 		node["vipsLost"] = _vipsLost;
+		node["vipsWaitingOutside"] = _vipsWaitingOutside;
 		node["vipsSavedScore"] = _vipsSavedScore;
 		node["vipsLostScore"] = _vipsLostScore;
+		node["vipsWaitingOutsideScore"] = _vipsWaitingOutsideScore;
 	}
 	if (_objectivesNeeded)
 	{
@@ -2710,6 +2715,54 @@ int SavedBattleGame::getLostVIPs() const
 int SavedBattleGame::getLostVIPsScore() const
 {
 	return _vipsLostScore;
+}
+
+/**
+ * Increase the waiting outside VIPs counter and score.
+ */
+void SavedBattleGame::addWaitingOutsideVIP(int score)
+{
+	_vipsWaitingOutside++;
+	_vipsWaitingOutsideScore += score;
+}
+
+/**
+ * Corrects the VIP stats based on the final mission outcome.
+ */
+void SavedBattleGame::correctVIPStats(bool success, bool retreated)
+{
+	if (success)
+	{
+		// if we won, all waiting VIPs are saved
+		_vipsSaved += _vipsWaitingOutside;
+		_vipsWaitingOutside = 0;
+
+		_vipsSavedScore += _vipsWaitingOutsideScore;
+		_vipsWaitingOutsideScore = 0;
+	}
+	else
+	{
+		// if we lost, all waiting VIPs are lost
+		_vipsLost += _vipsWaitingOutside;
+		_vipsWaitingOutside = 0;
+
+		_vipsLostScore -= _vipsWaitingOutsideScore;
+		_vipsWaitingOutsideScore = 0;
+
+		if (retreated)
+		{
+			// if we retreated, keep all VIPs waiting in the craft alive
+		}
+		else
+		{
+			// if nobody from xcom survived, all VIPs are lost too
+			_vipsLost += _vipsSaved;
+			_vipsSaved = 0;
+
+			_vipsLostScore -= _vipsSavedScore;
+			_vipsSavedScore = 0;
+		}
+	}
 }
 
 /**

@@ -2301,21 +2301,18 @@ void BattlescapeGame::removeSummonedPlayerUnits()
 }
 
 /**
- * Counts VIPs so that we don't have to do it in the Debriefing.
+ * Tally summoned player-controlled VIPs. We may still need to correct this in the Debriefing.
  */
-void BattlescapeGame::tallyVIPs(EscapeType escapeType)
+void BattlescapeGame::tallySummonedVIPs()
 {
+	EscapeType escapeType = _save->getVIPEscapeType();
 	for (auto unit : *_save->getUnits())
 	{
-		// count all VIPs (player-controlled VIPs and civilian VIPs)
-		if (unit->isVIP() && unit->getStatus() != STATUS_IGNORE_ME)
+		if (unit->isVIP() && unit->isSummonedPlayerUnit())
 		{
 			if (unit->getStatus() == STATUS_DEAD)
 			{
-				if (escapeType != ESCAPE_NONE)
-					_save->addLostVIP(unit->getValue());
-				else
-					_save->addLostVIP(0); // you didn't need to escort the VIPs, just keep them alive and kill the rest
+				_save->addLostVIP(unit->getValue());
 			}
 			else if (escapeType == ESCAPE_EXIT)
 			{
@@ -2340,7 +2337,10 @@ void BattlescapeGame::tallyVIPs(EscapeType escapeType)
 			}
 			else //if (escapeType == ESCAPE_NONE)
 			{
-				_save->addSavedVIP(0); // you didn't need to escort the VIPs, just keep them alive and kill the rest
+				if (unit->isInExitArea(START_POINT))
+					_save->addSavedVIP(unit->getValue()); // waiting in craft, saved even if aborted
+				else
+					_save->addWaitingOutsideVIP(unit->getValue()); // waiting outside, lost if aborted
 			}
 		}
 	}

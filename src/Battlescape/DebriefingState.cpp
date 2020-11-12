@@ -1031,13 +1031,10 @@ void DebriefingState::prepareDebriefing()
 			addStat("STR_MISSION_ABORTED", 1, -ruleDeploy->getAbortPenalty());
 		}
 	}
-	if (battle->getVIPSurvivalPercentage() > 0 && battle->getVIPEscapeType() != ESCAPE_NONE)
+	if (battle->getVIPSurvivalPercentage() > 0)
 	{
-		_stats.push_back(new DebriefingStat("STR_VIPS_SAVED", false));
-		addStat("STR_VIPS_SAVED", battle->getSavedVIPs(), battle->getSavedVIPsScore());
-
 		_stats.push_back(new DebriefingStat("STR_VIPS_LOST", false));
-		addStat("STR_VIPS_LOST", battle->getLostVIPs(), battle->getLostVIPsScore());
+		_stats.push_back(new DebriefingStat("STR_VIPS_SAVED", false));
 	}
 
 	_stats.push_back(new DebriefingStat("STR_CIVILIANS_KILLED_BY_ALIENS", false));
@@ -1321,22 +1318,6 @@ void DebriefingState::prepareDebriefing()
 		if (ruleDeploy->getEscapeType() != ESCAPE_ENTRY)
 		{
 			success = success || playersInExitArea > 0;
-		}
-	}
-	if (battle->getVIPSurvivalPercentage() > 0)
-	{
-		int total = battle->getSavedVIPs() + battle->getLostVIPs();
-		if (total > 0)
-		{
-			int ratio = battle->getSavedVIPs() * 100 / total;
-			if (ratio < battle->getVIPSurvivalPercentage())
-			{
-				success = false; // didn't save enough VIPs
-			}
-		}
-		else
-		{
-			success = false; // nobody to save?
 		}
 	}
 
@@ -1668,6 +1649,55 @@ void DebriefingState::prepareDebriefing()
 		playersSurvived = 0; // assuming you aborted and left everyone behind
 		success = false;
 	}
+
+	bool savedEnoughVIPs = true;
+	if (battle->getVIPSurvivalPercentage() > 0)
+	{
+		bool retreated = aborted && (playersSurvived > 0);
+
+		// 1. correct our initial assessment if necessary
+		battle->correctVIPStats(success, retreated);
+		int vipSubtotal = battle->getSavedVIPs() + battle->getLostVIPs();
+
+		// 2. add non-fake civilian VIPs, no scoring
+		for (auto unit : *battle->getUnits())
+		{
+			if (unit->isVIP() && unit->getOriginalFaction() == FACTION_NEUTRAL && !unit->isResummonedFakeCivilian())
+			{
+				if (unit->getStatus() == STATUS_DEAD)
+					battle->addLostVIP(0);
+				else if (success)
+					battle->addSavedVIP(0);
+				else
+					battle->addLostVIP(0);
+			}
+		}
+
+		// 3. check if we saved enough VIPs
+		int vipTotal = battle->getSavedVIPs() + battle->getLostVIPs();
+		if (vipTotal > 0)
+		{
+			int ratio = battle->getSavedVIPs() * 100 / vipTotal;
+			if (ratio < battle->getVIPSurvivalPercentage())
+			{
+				savedEnoughVIPs = false; // didn't save enough VIPs
+				success = false;
+			}
+		}
+		else
+		{
+			savedEnoughVIPs = false; // nobody to save?
+			success = false;
+		}
+
+		// 4. add stats
+		if (vipSubtotal > 0 || (vipTotal > 0 && !savedEnoughVIPs))
+		{
+			addStat("STR_VIPS_LOST", battle->getLostVIPs(), battle->getLostVIPsScore());
+			addStat("STR_VIPS_SAVED", battle->getSavedVIPs(), battle->getSavedVIPsScore());
+		}
+	}
+
 	if ((!aborted || success) && playersSurvived > 0) 	// RECOVER UFO : run through all tiles to recover UFO components and items
 	{
 		if (target == "STR_BASE")
@@ -1685,7 +1715,7 @@ void DebriefingState::prepareDebriefing()
 		else
 		{
 			_txtTitle->setText(tr("STR_ALIENS_DEFEATED"));
-			if (!aborted && !success)
+			if (!aborted && !savedEnoughVIPs)
 			{
 				// Special case: mission was NOT aborted, all enemies were neutralized, but we couldn't save enough VIPs...
 				if (!objectiveFailedText.empty())
@@ -1719,7 +1749,7 @@ void DebriefingState::prepareDebriefing()
 				addStat(objectiveCompleteText, victoryStat, objectiveCompleteScore);
 			}
 		}
-		if (!aborted && !success)
+		if (!aborted && !savedEnoughVIPs)
 		{
 			// Special case: mission was NOT aborted, all enemies were neutralized, but we couldn't save enough VIPs...
 			if (!missionFailedText.empty())

@@ -2971,8 +2971,8 @@ void BattlescapeState::finishBattle(bool abort, int inExitArea)
 		}
 	}
 
-	// let's count all the VIPs before we remove them :)
-	_battleGame->tallyVIPs(_save->getVIPEscapeType());
+	// let's count summoned player-controlled VIPs before we remove them :)
+	_battleGame->tallySummonedVIPs();
 	// this removes player-controlled VIPs (not civilian VIPs)
 	_battleGame->removeSummonedPlayerUnits();
 

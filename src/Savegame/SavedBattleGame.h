@@ -89,7 +89,7 @@ private:
 	bool _baseCraftInventory = false;
 	int _itemId;
 	EscapeType _vipEscapeType;
-	int _vipSurvivalPercentage, _vipsSaved, _vipsLost, _vipsSavedScore, _vipsLostScore;
+	int _vipSurvivalPercentage, _vipsSaved, _vipsLost, _vipsWaitingOutside, _vipsSavedScore, _vipsLostScore, _vipsWaitingOutsideScore;
 	int _objectiveType, _objectivesDestroyed, _objectivesNeeded;
 	std::vector<BattleUnit*> _exposedUnits;
 	std::list<BattleUnit*> _fallingUnits;
@@ -528,6 +528,10 @@ public:
 	int getLostVIPs() const;
 	/// Gets the lost VIPs total score.
 	int getLostVIPsScore() const;
+	/// Increase the waiting outside VIPs counter.
+	void addWaitingOutsideVIP(int score);
+	/// Corrects the VIP stats based on the final mission outcome.
+	void correctVIPStats(bool success, bool retreated);
 
 	/// Sets the objective type for this mission.
 	void setObjectiveType(int type);

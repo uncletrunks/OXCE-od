@@ -39,7 +39,6 @@ class Mod;
 class InfoboxOKState;
 class SoldierDiary;
 class RuleSkill;
-enum EscapeType : int;
 
 enum BattleActionMove { BAM_NORMAL = 0, BAM_RUN = 1, BAM_STRAFE = 2 };
 
@@ -230,8 +229,8 @@ public:
 	void spawnFromPrimedItems();
 	/// Removes spawned units that belong to the player to avoid dealing with recovery
 	void removeSummonedPlayerUnits();
-	/// Counts VIPs so that we don't have to do it in the Debriefing.
-	void tallyVIPs(EscapeType escapeType);
+	/// Tally summoned player-controlled VIPs. We may still need to correct this in the Debriefing.
+	void tallySummonedVIPs();
 	/// Handles kneeling action.
 	bool kneel(BattleUnit *bu);
 	/// Cancels the current action.
