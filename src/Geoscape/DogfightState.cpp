@@ -1386,7 +1386,11 @@ void DogfightState::update()
 			// Need to give the craft at least one step advantage over the hunter-killer (to be able to escape)
 			if (_ufoIsAttacking)
 			{
-				_craft->move();
+				bool returnedToBase = _craft->think();
+				if (returnedToBase)
+				{
+					_game->getSavedGame()->stopHuntingXcomCraft(_craft); // hiding in the base is good enough, obviously
+				}
 			}
 		}
 		if (_ufo->isCrashed())
