@@ -2330,7 +2330,7 @@ void GeoscapeState::time1Day()
 				saveGame->addGeneratedEvent(spawnedEventRule);
 			}
 			// 3c. handle getonefrees (topic+lookup)
-			if (bonus = saveGame->selectGetOneFree(research))
+			if ((bonus = saveGame->selectGetOneFree(research)))
 			{
 				saveGame->addFinishedResearch(bonus, mod, base);
 				if (!bonus->getLookup().empty())
