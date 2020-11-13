@@ -439,7 +439,7 @@ void AIModule::think(BattleAction *action)
 		action->finalFacing = _attackAction->finalFacing;
 		action->updateTU();
 		// if this is a "find fire point" action, don't increment the AI counter.
-		if (action->type == BA_WALK && _rifle
+		if (action->type == BA_WALK && _rifle && _unit->getArmor()->allowsMoving()
 			// so long as we can take a shot afterwards.
 			&& BattleActionCost(BA_SNAPSHOT, _unit, action->weapon).haveTU())
 		{
