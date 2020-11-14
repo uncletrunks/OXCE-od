@@ -3391,6 +3391,11 @@ void BattlescapeState::txtTooltipInEndTurn(Action *action)
 		ss << tr(_currentTooltip);
 		ss << " ";
 		ss << _save->getTurn();
+		if (_save->getTurnLimit() > 0)
+		{
+			ss << "/" << _save->getTurnLimit();
+		}
+
 		_txtTooltip->setText(ss.str().c_str());
 	}
 }
