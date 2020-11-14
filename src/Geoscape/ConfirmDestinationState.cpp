@@ -342,8 +342,8 @@ void ConfirmDestinationState::btnTransferClick(Action *)
 		currentBase->removeCraft(_craft, false);
 		targetBase->getCrafts()->push_back(_craft);
 		_craft->setBase(targetBase, false);
-		_craft->setStatus("STR_OUT");
 		_craft->returnToBase();
+		_craft->setStatus("STR_OUT");
 		if (_craft->getFuel() <= _craft->getFuelLimit(targetBase))
 		{
 			_craft->setLowFuel(true);
