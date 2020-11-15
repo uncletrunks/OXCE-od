@@ -2882,6 +2882,7 @@ void StatsForNerdsState::initCraftList()
 	addBoolean(ss, craftRule->getAllowLanding(), "allowLanding", true);
 	addBoolean(ss, craftRule->notifyWhenRefueled(), "notifyWhenRefueled");
 	addBoolean(ss, craftRule->canAutoPatrol(), "autoPatrol");
+	addBoolean(ss, craftRule->isUndetectable(), "undetectable");
 
 	addBoolean(ss, craftRule->keepCraftAfterFailedMission(), "keepCraftAfterFailedMission");
 

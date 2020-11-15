@@ -413,6 +413,7 @@ en-US:
   allowLanding: "Allow landing?"
   notifyWhenRefueled: "Notify when refueled?"
   autoPatrol: "Auto-patrol?"
+  undetectable: "Undetectable?"
   keepCraftAfterFailedMission: "Paratroopers?"
   _calculatedValues: "Calculated values"
   _maxRange: "Maximum range"

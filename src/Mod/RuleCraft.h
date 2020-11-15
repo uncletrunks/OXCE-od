@@ -159,7 +159,7 @@ private:
 	int _repairRate, _refuelRate, _transferTime, _score;
 	RuleTerrain *_battlescapeTerrainData;
 	int _maxSkinIndex;
-	bool _keepCraftAfterFailedMission, _allowLanding, _spacecraft, _notifyWhenRefueled, _autoPatrol;
+	bool _keepCraftAfterFailedMission, _allowLanding, _spacecraft, _notifyWhenRefueled, _autoPatrol, _undetectable;
 	int _listOrder, _maxItems, _maxAltitude;
 	double _maxStorageSpace;
 	std::vector<std::vector <int> > _deployment;
@@ -237,6 +237,8 @@ public:
 	bool notifyWhenRefueled() const;
 	/// Does this craft support auto patrol?
 	bool canAutoPatrol() const;
+	/// Is this craft immune to detection by HKs and alien bases?
+	bool isUndetectable() const { return _undetectable; }
 	/// Gets the list weight for this craft.
 	int getListOrder() const;
 	/// Gets the deployment priority for the craft.
