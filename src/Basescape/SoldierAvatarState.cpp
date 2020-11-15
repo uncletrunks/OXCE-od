@@ -167,7 +167,11 @@ void SoldierAvatarState::initPreview(Soldier *s)
 			ss.str("");
 			ss << look;
 			ss << ".SPK";
-			surf = _game->getMod()->getSurface(ss.str(), true);
+			surf = _game->getMod()->getSurface(ss.str(), false);
+		}
+		if (!surf)
+		{
+			surf = _game->getMod()->getSurface(look, true);
 		}
 		surf->blitNShade(_soldierSurface, 0, 0);
 	}
