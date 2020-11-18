@@ -55,7 +55,7 @@ static const char* SDL_VIDEO_WINDOW_POS_UNSET = "SDL_VIDEO_WINDOW_POS=";
  */
 void Screen::makeVideoFlags()
 {
-	_flags = SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_HWPALETTE;
+	_flags = SDL_HWSURFACE|SDL_TRIPLEBUF|SDL_HWPALETTE;
 	if (Options::asyncBlit)
 	{
 		_flags |= SDL_ASYNCBLIT;
