@@ -645,6 +645,16 @@ void Map::drawUnit(UnitSprite &unitSprite, Tile *unitTile, Tile *currTile, Posit
  */
 void Map::drawTerrain(Surface *surface)
 {
+	{ //joystick magic
+		int16_t joyx = SDL_JoystickGetAxis(_game->getJoystick(), 2);
+		int16_t joyy = SDL_JoystickGetAxis(_game->getJoystick(), 3);
+		//divide by magic numbers
+		int x = -joyx/3700;
+		int y = -joyy/3700;
+		//Log(LOG_INFO) << "x: " << (int) x << "y: " << (int) y;
+
+		_camera -> scrollXY(x, y, true);
+	}
 	_isAltPressed = (SDL_GetModState() & KMOD_ALT) != 0;
 	int frameNumber = 0;
 	SurfaceRaw<const Uint8> tmpSurface;

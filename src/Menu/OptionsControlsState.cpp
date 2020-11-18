@@ -153,9 +153,9 @@ void OptionsControlsState::addControls(const std::vector<OptionInfo> &keys)
 	{
 		std::string name = tr(i->description());
 		SDLKey *key = i->asKey();
-		std::string keyName = ucWords(SDL_GetKeyName(*key));
-		if (*key == SDLK_UNKNOWN)
-			keyName = "";
+		std::string keyName = keyToButton(*key);
+		/*if (*key == SDLK_UNKNOWN || *key == SDLK_WORLD_95)
+			keyName = "";*/
 		_lstControls->addRow(2, name.c_str(), keyName.c_str());
 	}
 }
@@ -229,7 +229,7 @@ void OptionsControlsState::lstControlsClick(Action *action)
 	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
 		_lstControls->setCellText(_selected, 1, "");
-		*_selKey->asKey() = SDLK_UNKNOWN;
+ 		*_selKey->asKey() = SDLK_WORLD_95;
 		_selected = -1;
 		_selKey = 0;
 	}
@@ -257,6 +257,63 @@ void OptionsControlsState::lstControlsKeyPress(Action *action)
 		_selected = -1;
 		_selKey = 0;
 	}
+}
+
+std::string OptionsControlsState::keyToButton(SDLKey key){
+	std::string keyName;
+	switch (key){
+		case SDLK_UP:
+			keyName = "Up";
+			break;
+		case SDLK_DOWN:
+			keyName = "Down";
+			break;
+		case SDLK_LEFT:
+			keyName = "Left";
+			break;
+		case SDLK_RIGHT:
+			keyName = "Right";
+			break;
+		case SDLK_LCTRL:
+			keyName = "A";
+			break;
+		case SDLK_LALT:
+			keyName = "B";
+			break;
+		case SDLK_LSHIFT:
+			keyName = "Y";
+			break;
+		case SDLK_SPACE:
+			keyName = "X";
+			break;
+		case SDLK_TAB:
+			keyName = "L";
+			break;
+		case SDLK_BACKSPACE:
+			keyName = "R";
+			break;
+		case SDLK_PAGEUP:
+			keyName = "L2";
+			break;
+		case SDLK_PAGEDOWN:
+			keyName = "R2";
+			break;
+		case SDLK_KP_DIVIDE:
+			keyName = "L3";
+			break;
+		case SDLK_KP_PERIOD:
+			keyName = "R3";
+			break;
+		case SDLK_RETURN:
+			keyName = "Start";
+			break;
+		case SDLK_ESCAPE:
+			keyName = "Select";
+			break;
+		default:
+			keyName = "";
+	}
+	return keyName;
 }
 
 }

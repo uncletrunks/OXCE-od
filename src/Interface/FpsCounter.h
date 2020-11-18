@@ -53,6 +53,8 @@ public:
 	void update();
 	/// Draws the FPS counter.
 	void draw() override;
+	/// Returns FPS as integer
+	int getFPS();
 	void addFrame();
 };
 

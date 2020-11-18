@@ -215,8 +215,25 @@ void Action::setSender(InteractiveSurface *sender)
  * Returns the details about this action.
  * @return Pointer to SDL_event.
  */
-SDL_Event *Action::getDetails() const
+SDL_Event *Action::getDetails() 
 {
+	if (_ev->type == SDL_KEYDOWN || _ev->type == SDL_KEYUP) //run only on keyboard events
+	{
+		if (_ev->key.keysym.sym == SDLK_LCTRL || _ev->key.keysym.sym == SDLK_LALT) //hardcoded controls, fix later
+		{
+			int x, y;
+			SDL_GetMouseState(&x, &y);
+
+			mouseevent.type = (_ev->type == SDL_KEYDOWN ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP);
+
+			mouseevent.button.x = x;
+			mouseevent.button.y = y;
+			mouseevent.button.type = (_ev->type == SDL_KEYDOWN ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP);
+			mouseevent.button.state = (_ev->key.state);
+			mouseevent.button.button = (_ev->key.keysym.sym == SDLK_LCTRL ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT);
+			return &mouseevent;
+		}
+	}
 	return _ev;
 }
 

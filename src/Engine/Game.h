@@ -55,6 +55,7 @@ private:
 	unsigned int _timeOfLastFrame;
 	int _timeUntilNextFrame;
 	static const double VOLUME_GRADIENT;
+	SDL_Joystick *_joy;
 
 public:
 	/// Creates a new game and initializes SDL.
@@ -72,7 +73,9 @@ public:
 	/// Gets the game's display screen.
 	Screen *getScreen() const { return _screen; }
 	/// Gets the game's cursor.
-	Cursor *getCursor() const { return _cursor; }
+	Cursor *getCursor() const { return _cursor; } 
+	/// Gets the game's joystick
+	SDL_Joystick *getJoystick() const;
 	/// Gets the FpsCounter.
 	FpsCounter *getFpsCounter() const { return _fpsCounter; }
 	/// Resets the state stack to a new state.

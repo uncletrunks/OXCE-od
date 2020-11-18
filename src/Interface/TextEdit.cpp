@@ -39,7 +39,7 @@ TextEdit::TextEdit(State *state, int width, int height, int x, int y) : Interact
 {
 	_isFocused = false;
 	_text = new Text(width, height, 0, 0);
-	_timer = new Timer(100);
+	_timer = new Timer(200);
 	_timer->onTimer((SurfaceHandler)&TextEdit::blink);
 	_caret = new Text(16, 17, 0, 0);
 	_caret->setText("|");
@@ -308,7 +308,7 @@ void TextEdit::draw()
 			newValue += _char;
 		}
 	}
-	_text->setText(Unicode::convUtf32ToUtf8(_value));
+ 	_text->setText(Unicode::convUtf32ToUtf8(newValue));
 	clear();
 
 	if (_enter)

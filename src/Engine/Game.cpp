@@ -60,13 +60,35 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 	Options::mute = false;
 
 	// Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
 	{
 		Log(LOG_ERROR) << SDL_GetError();
 		Log(LOG_WARNING) << "No video detected, quit.";
 		throw Exception(SDL_GetError());
 	}
 	Log(LOG_INFO) << "SDL initialized successfully.";
+
+	// Experimental joystick handling
+	Log(LOG_INFO) << "Joysticks " << SDL_NumJoysticks();
+
+	if (SDL_NumJoysticks() > 0)
+	{
+		int i = 0;
+		while (!_joy && i < SDL_NumJoysticks())
+		{
+			_joy = SDL_JoystickOpen(i);
+		}
+
+		if (!_joy)
+		{
+			Log(LOG_INFO) << "Could not open any joysticks.";
+		}
+		else 
+		{
+			Log(LOG_INFO) << "Joystick " << i << " initialized";
+			Log(LOG_INFO) << "Axes: " << SDL_JoystickNumAxes(_joy) << ", Buttons: " << SDL_JoystickNumButtons(_joy);
+		}
+	}
 
 	// Initialize SDL_mixer
 	initAudio();
@@ -118,6 +140,7 @@ Game::~Game()
 	}
 
 	SDL_FreeCursor(SDL_GetCursor());
+	SDL_JoystickClose(_joy);
 
 	delete _cursor;
 	delete _lang;
@@ -303,6 +326,20 @@ void Game::run()
 			}
 		}
 
+		//handle joystick stuff
+		{
+			//poll mouse state
+			int mousex, mousey;
+			SDL_GetMouseState(&mousex, &mousey);
+			//get axes
+			int16_t joyx = SDL_JoystickGetAxis(_joy, 0);
+			int16_t joyy = SDL_JoystickGetAxis(_joy, 1);
+			int fps = _fpsCounter -> getFPS();
+			int16_t x = 10 * ((double)Options::FPS/(double)fps) * ((double)joyx/32766.0);
+			int16_t y = 10 * ((double)Options::FPS/(double)fps) * ((double)joyy/32766.0);
+			SDL_WarpMouse(mousex + x, mousey + y);
+		}
+
 		// Process rendering
 		if (runningState != PAUSED)
 		{
@@ -416,6 +453,11 @@ void Game::setVolume(int sound, int music, int ui)
 double Game::volumeExponent(int volume)
 {
 	return (exp(log(Game::VOLUME_GRADIENT + 1.0) * volume / (double)SDL_MIX_MAXVOLUME) -1.0 ) / Game::VOLUME_GRADIENT;
+}
+
+SDL_Joystick *Game::getJoystick() const
+{
+	return _joy;
 }
 
 /**

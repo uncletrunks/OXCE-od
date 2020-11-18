@@ -36,6 +36,7 @@ private:
 	double _scaleX, _scaleY;
 	int _topBlackBand, _leftBlackBand, _mouseX, _mouseY, _surfaceX, _surfaceY;
 	InteractiveSurface *_sender;
+	SDL_Event mouseevent;	
 public:
 	/// Creates an action with given event data.
 	Action(SDL_Event *ev, double scaleX, double scaleY, int topBlackBand, int leftBlackBand);
@@ -74,7 +75,7 @@ public:
 	/// Sets the sender of the action.
 	void setSender(InteractiveSurface *sender);
 	/// Gets the details of the action.
-	SDL_Event *getDetails() const;
+	SDL_Event *getDetails();
 };
 
 }

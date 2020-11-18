@@ -107,6 +107,10 @@ void FpsCounter::update()
 	_redraw = true;
 }
 
+ int FpsCounter::getFPS() {
+	return (int)floor((double)_frames / _timer->getTime() * 1000);
+ }
+
 /**
  * Draws the FPS counter.
  */
