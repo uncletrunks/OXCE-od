@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=OXCE
+Comment=Open source port of Xcom
+Exec=openxcom
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=icon
+Categories=games;

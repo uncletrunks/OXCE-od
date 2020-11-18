@@ -102,7 +102,8 @@ void Screen::makeVideoFlags()
 		_flags |= SDL_NOFRAME;
 	}
 
-	_bpp = (use32bitScaler() || useOpenGL()) ? 32 : 8;
+	//_bpp = (use32bitScaler() || useOpenGL()) ? 32 : 8;
+	_bpp = 8; //required by opendingux
 	_baseWidth = Options::baseXResolution;
 	_baseHeight = Options::baseYResolution;
 }

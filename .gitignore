@@ -82,3 +82,4 @@ bin/user
 /makefile
 /.kdev4/
 /*.kdev4
+*.opk
