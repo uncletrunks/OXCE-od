@@ -245,11 +245,11 @@ void OptionsControlsState::lstControlsKeyPress(Action *action)
 	{
 		SDLKey key = action->getDetails()->key.keysym.sym;
 		if (key != 0 &&
-			key != SDLK_LSHIFT && key != SDLK_LALT && key != SDLK_LCTRL &&
 			key != SDLK_RSHIFT && key != SDLK_RALT && key != SDLK_RCTRL)
 		{
 			*_selKey->asKey() = key;
-			std::string name = ucWords(SDL_GetKeyName(*_selKey->asKey()));
+			std::string name = keyToButton(key);
+			//std::string name = ucWords(SDL_GetKeyName(*_selKey->asKey()));
 			_lstControls->setCellText(_selected, 1, name);
 		}
 		_lstControls->setCellColor(_selected, 0, _colorNormal);

@@ -69,12 +69,15 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 	Log(LOG_INFO) << "SDL initialized successfully.";
 
 	// Experimental joystick handling
-	Log(LOG_INFO) << "Joysticks " << SDL_NumJoysticks();
+	int numJoysticks = 0;
+	numJoysticks = SDL_NumJoysticks();
+	_joy = NULL;
+	Log(LOG_INFO) << "Joysticks " << numJoysticks;
 
-	if (SDL_NumJoysticks() > 0)
+	if (numJoysticks > 0)
 	{
 		int i = 0;
-		while (!_joy && i < SDL_NumJoysticks())
+		while (!_joy && i < numJoysticks)
 		{
 			_joy = SDL_JoystickOpen(i);
 		}
@@ -86,8 +89,12 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _save(0
 		else 
 		{
 			Log(LOG_INFO) << "Joystick " << i << " initialized";
-			Log(LOG_INFO) << "Axes: " << SDL_JoystickNumAxes(_joy) << ", Buttons: " << SDL_JoystickNumButtons(_joy);
+			//Log(LOG_INFO) << "Axes: " << SDL_JoystickNumAxes(_joy) << ", Buttons: " << SDL_JoystickNumButtons(_joy);
 		}
+	}
+	else
+	{
+		Log(LOG_INFO) << "No joysticks detected.";
 	}
 
 	// Initialize SDL_mixer

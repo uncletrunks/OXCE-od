@@ -49,8 +49,10 @@ std::locale utf8;
  */
 void getUtf8Locale()
 {
-	std::string loc;
+	std::string loc = "en_US.UTF-8";
 #ifndef _WIN32
+	//commenting this out, we don't have locale on opendingux
+	/*
 	// Find any UTF-8 locale
 	FILE *fp = popen("locale -a", "r");
 	if (fp != NULL)
@@ -71,7 +73,7 @@ void getUtf8Locale()
 			}
 		}
 		pclose(fp);
-	}
+	}*/
 #endif
 	// Try a UTF-8 locale (or default if none was found)
 	try

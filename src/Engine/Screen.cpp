@@ -374,7 +374,7 @@ void Screen::resetDisplay(bool resetVideo, bool noShaders)
 		{
 			Log(LOG_ERROR) << SDL_GetError();
 			Log(LOG_INFO) << "Attempting to set display to default resolution...";
-			_screen = SDL_SetVideoMode(640, 400, _bpp, _flags);
+			_screen = SDL_SetVideoMode(640, 480, _bpp, _flags);
 			if (_screen == 0)
 			{
 				if (_flags & SDL_OPENGL)

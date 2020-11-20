@@ -85,3 +85,7 @@ bin/user
 *.opk
 src/CMakeFiles/
 src/CMakeFiles/*
+CPackSourceConfig.cmake
+CPackConfig.cmake
+.vscode/c_cpp_properties.json
+src/CMakeFiles/openxcom.dir/CXX.includecache
