@@ -84,3 +84,4 @@ bin/user
 /*.kdev4
 *.opk
 src/CMakeFiles/
+src/CMakeFiles/*

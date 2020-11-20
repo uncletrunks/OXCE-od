@@ -334,9 +334,9 @@ void Game::run()
 			//get axes
 			int16_t joyx = SDL_JoystickGetAxis(_joy, 0);
 			int16_t joyy = SDL_JoystickGetAxis(_joy, 1);
-			int fps = _fpsCounter -> getFPS();
-			int16_t x = 10 * ((double)Options::FPS/(double)fps) * ((double)joyx/32766.0);
-			int16_t y = 10 * ((double)Options::FPS/(double)fps) * ((double)joyy/32766.0);
+			double fps = (double) (_fpsCounter -> getFPS());
+			int16_t x = 10 * (60.0/fps) * ((double)joyx/32766.0);
+			int16_t y = 10 * (60.0/fps) * ((double)joyy/32766.0);
 			SDL_WarpMouse(mousex + x, mousey + y);
 		}
 
