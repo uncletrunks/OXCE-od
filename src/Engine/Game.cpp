@@ -342,8 +342,10 @@ void Game::run()
 			int16_t joyx = SDL_JoystickGetAxis(_joy, 0);
 			int16_t joyy = SDL_JoystickGetAxis(_joy, 1);
 			double fps = (double) (_fpsCounter -> getFPS());
-			int16_t x = 10 * (60.0/fps) * ((double)joyx/32766.0);
-			int16_t y = 10 * (60.0/fps) * ((double)joyy/32766.0);
+			Uint8 *keystate = SDL_GetKeyState(NULL);
+			int multiplier = 8 - (6 * keystate[SDLK_PAGEDOWN]);
+			int16_t x = multiplier * (60.0/fps) * ((double)joyx/32766.0);
+			int16_t y = multiplier * (60.0/fps) * ((double)joyy/32766.0);
 			SDL_WarpMouse(mousex + x, mousey + y);
 		}
 

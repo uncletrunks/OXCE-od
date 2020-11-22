@@ -2575,13 +2575,13 @@ void TileEngine::explode(BattleActionAttack attack, Position center, int power, 
 
 	for (int fi = -90; fi <= 90; fi += 5)
 	{
+		double sin_fi = sin(Deg2Rad(fi));
+		double cos_fi = cos(Deg2Rad(fi));
 		// raytrace every 3 degrees makes sure we cover all tiles in a circle.
 		for (int te = 0; te <= 360; te += 3)
 		{
 			double cos_te = cos(Deg2Rad(te));
 			double sin_te = sin(Deg2Rad(te));
-			double sin_fi = sin(Deg2Rad(fi));
-			double cos_fi = cos(Deg2Rad(fi));
 
 			origin = _save->getTile(centetTile);
 			dest = origin;

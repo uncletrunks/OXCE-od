@@ -89,3 +89,4 @@ CPackSourceConfig.cmake
 CPackConfig.cmake
 .vscode/c_cpp_properties.json
 src/CMakeFiles/openxcom.dir/CXX.includecache
+src/CMakeFiles/openxcom.dir/CXX.includecache
