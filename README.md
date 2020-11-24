@@ -7,7 +7,10 @@
 
 OpenXcom is an open-source clone of the popular "UFO: Enemy Unknown" ("X-COM:
 UFO Defense" in the USA release) and "X-COM: Terror From the Deep" videogames
-by Microprose, licensed under the GPL and written in C++ / SDL.
+by Microprose, licensed under the GPL and written in C++ / SDL. 
+
+This repository is a port of the popular OpenXcom Extended to jz4770 devices 
+running OpenDingux. At present, it has only been tested at 640x480. 
 
 See more info at the [website](https://openxcom.org)
 and the [wiki](https://www.ufopaedia.org/index.php/OpenXcom).
@@ -27,9 +30,7 @@ at:
     TFTD: "Steam\SteamApps\common\X-COM Terror from the Deep\TFD"
 
 Do not use modded versions (e.g. with XcomUtil) as they may cause bugs and
-crashes.  Copy the UFO subfolders to the UFO subdirectory in OpenXcom's data
-or user folder and/or the TFTD subfolders to the TFTD subdirectory in OpenXcom's
-data or user folder (see below for folder locations).
+crashes.  Copy the UFO and/or the TFTD subfolders to `~/.openxcom/UFO`.
 
 ## Mods
 
@@ -56,6 +57,10 @@ and so on, just move everything up a level so it looks like:
     mods/LulzMod/Rulesets/
 
 and you're good to go!  Enable your new mod on the Options -> Mods page in-game.
+
+**Important note for OpenDingux:** performance of yaml-cpp, the library that 
+handles rulesets for OpenXcom mods, is pretty poor on OpenDingux. While large
+mods will load eventually, expect 
 
 ## Directory Locations
 
@@ -96,54 +101,11 @@ or, if you have a fully self-contained installation:
 
     openxcom -data "$HOME/games/openxcom/data" -user "$HOME/games/openxcom/user" -config "$HOME/games/openxcom/config"
 
-### Windows
+### OpenDingux
 
-User and Config folder:
-- C:\Documents and Settings\\\<user\>\My Documents\OpenXcom (Windows 2000/XP)
-- C:\Users\\\<user\>\Documents\OpenXcom (Windows Vista/7)
-- \<game directory\>\user
-- .\user
-
-Data folders:
-- C:\Documents and Settings\\\<user\>\My Documents\OpenXcom\data (Windows 2000/XP)
-- C:\Users\\\<user\>\Documents\OpenXcom\data (Windows Vista/7/8)
-- \<game directory\>
-- . (the current directory)
-
-### Mac OS X
-
-User and Config folder:
-- $XDG\_DATA\_HOME/openxcom (if $XDG\_DATA\_HOME is defined)
-- $HOME/Library/Application Support/OpenXcom
-- $HOME/.openxcom
-- ./user
-
-Data folders:
-- $XDG\_DATA\_HOME/openxcom (if $XDG\_DATA\_HOME is defined)
-- $HOME/Library/Application Support/OpenXcom (if $XDG\_DATA\_HOME is not defined)
-- $XDG\_DATA\_DIRS/openxcom (for each directory in $XDG\_DATA\_DIRS if $XDG\_DATA\_DIRS is defined)
-- /Users/Shared/OpenXcom
-- . (the current directory)
-
-### Linux
-
-User folder:
-- $XDG\_DATA\_HOME/openxcom (if $XDG\_DATA\_HOME is defined)
-- $HOME/.local/share/openxcom (if $XDG\_DATA\_HOME is not defined)
-- $HOME/.openxcom
-- ./user
-
-Config folder:
-- $XDG\_CONFIG\_HOME/openxcom (if $XDG\_CONFIG\_HOME is defined)
-- $HOME/.config/openxcom (if $XDG\_CONFIG\_HOME is not defined)
-
-Data folders:
-- $XDG\_DATA\_HOME/openxcom (if $XDG\_DATA\_HOME is defined)
-- $HOME/.local/share/openxcom (if $XDG\_DATA\_HOME is not defined)
-- $XDG\_DATA\_DIRS/openxcom (for each directory in $XDG\_DATA\_DIRS if $XDG\_DATA\_DIRS is defined)
-- /usr/local/share/openxcom
-- /usr/share/openxcom
-- . (the current directory)
+By default, all of these directories will be combined into `$HOME/.openxcom`.
+You should be able to modify the .desktop file while building if you would
+prefer otherwise or need multiple installations for some reason.
 
 ## Configuration
 
@@ -170,6 +132,11 @@ The source code includes files for the following build tools:
 - Makefile
 - CMake
 - Autotools
+
+Compiling for OpenDingux requires a working toolchain and a build of the 
+yaml-cpp libraries. Use of yaml-cpp 0.5.3 is recommended. Compilation with
+more recent builds is known to cause bugs relating to loading saves from
+the battlescape state.
 
 It's also been tested on a variety of other tools on Windows/Mac/Linux. More
 detailed compiling instructions are available at the
