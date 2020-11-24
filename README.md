@@ -60,7 +60,7 @@ and you're good to go!  Enable your new mod on the Options -> Mods page in-game.
 
 **Important note for OpenDingux:** performance of yaml-cpp, the library that 
 handles rulesets for OpenXcom mods, is pretty poor on OpenDingux. While large
-mods will load eventually, expect 
+mods will load eventually, expect loading times of multiple minutes.
 
 ## Directory Locations
 
